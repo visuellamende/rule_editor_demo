@@ -42,7 +42,7 @@ export function deleteMap(id: string): void {
 
 export function createNewMap(name?: string): { id: string; data: RulemapFile } {
   const id = crypto.randomUUID().slice(0, 8);
-  const mapName = name ?? 'Neue Rulemap';
+  const mapName = name ?? 'Neue Map';
 
   const data: RulemapFile = {
     version: '1.0.0',

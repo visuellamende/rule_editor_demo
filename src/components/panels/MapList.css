@@ -111,3 +111,16 @@
 .map-list__item--active .map-list__icon {
   color: var(--color-text-primary);
 }
+
+.map-list__edit-input {
+  flex: 1;
+  min-width: 0;
+  padding: 0 var(--space-xxs);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-bg-elevated);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-sm);
+  outline: none;
+}

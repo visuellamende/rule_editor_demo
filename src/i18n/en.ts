@@ -124,4 +124,23 @@ export const en: Record<TranslationKey, string> = {
   'export.jsonCopy': 'Copy JSON',
   'export.markdownFile': 'Save Markdown',
   'export.markdownCopy': 'Copy Markdown',
+
+  // Help
+  'help.whatIs': 'What is the Rule Editor?',
+  'help.whatIsText': 'A visual editor for mapping decision logic as a tree. You describe business rules — AI agents or developers implement them.',
+  'help.howTo': 'How do I start?',
+  'help.howToText': 'Click the "+" on the canvas, choose a node type and formulate your question. Use the "+" on a node to extend the tree.',
+  'help.nodeTypes': 'Node Types',
+  'help.nodeDecision': 'A business question with multiple outcomes.',
+  'help.nodeCondition': 'Checks a value or state.',
+  'help.nodeAction': 'Executes an action.',
+  'help.nodeConsequence': 'Endpoint — describes what happens at the end of the path.',
+  'help.export': 'Export',
+  'help.exportText': "Export your map as JSON (for AI agents) or Markdown (for documentation). You'll find the buttons in the right panel under \"General\".",
+  'help.shortcuts': 'Keyboard Shortcuts',
+  'help.undo': 'Undo',
+  'help.redo': 'Redo',
+  'help.doubleClick': 'Double-click on node/connection',
+  'help.inlineEdit': 'Edit text inline',
+  'help.delete': 'Delete selected element',
 };

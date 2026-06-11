@@ -122,6 +122,25 @@ export const de = {
   'export.jsonCopy': 'JSON kopieren',
   'export.markdownFile': 'Markdown speichern',
   'export.markdownCopy': 'Markdown kopieren',
+
+  // Help
+  'help.whatIs': 'Was ist der Rule Editor?',
+  'help.whatIsText': 'Ein visueller Editor, mit dem du Entscheidungslogik als Baum abbilden kannst. Du beschreibst fachliche Regeln — KI-Agenten oder Entwickler setzen sie um.',
+  'help.howTo': 'Wie starte ich?',
+  'help.howToText': 'Klicke auf das "+" im Canvas, wähle einen Knotentyp und formuliere deine Frage. Über das "+" am Knoten baust du den Baum weiter aus.',
+  'help.nodeTypes': 'Knotentypen',
+  'help.nodeDecision': 'Eine fachliche Frage mit mehreren Ausgängen.',
+  'help.nodeCondition': 'Prüft einen Wert oder Zustand.',
+  'help.nodeAction': 'Führt eine Aktion aus.',
+  'help.nodeConsequence': 'Endpunkt — beschreibt was am Ende des Pfades passiert.',
+  'help.export': 'Export',
+  'help.exportText': 'Exportiere deine Map als JSON (für KI-Agenten) oder Markdown (für Dokumentation). Du findest die Buttons im rechten Panel unter "Allgemein".',
+  'help.shortcuts': 'Tastenkürzel',
+  'help.undo': 'Rückgängig',
+  'help.redo': 'Wiederherstellen',
+  'help.doubleClick': 'Doppelklick auf Knoten/Verbindung',
+  'help.inlineEdit': 'Text direkt bearbeiten',
+  'help.delete': 'Ausgewähltes Element löschen',
 } as const;
 
 export type TranslationKey = keyof typeof de;

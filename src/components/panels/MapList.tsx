@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useI18n } from '../../i18n';
 import { useCanvasStore } from '../../store/useCanvasStore';
-import { getMapList, readMap, createNewMap, deleteMap } from '../../services/browserStorage';
+import { getMapList, readMap, writeMap, createNewMap, deleteMap } from '../../services/browserStorage';
 import './MapList.css';
 
 interface MapEntry {
@@ -12,7 +12,13 @@ interface MapEntry {
 export function MapList() {
   const { t } = useI18n();
   const { loadFromFile, filePath: currentMapId } = useCanvasStore();
+  const mapName = useCanvasStore((state) => state.mapMeta.name);
   const [maps, setMaps] = useState<MapEntry[]>([]);
+
+  // States für Inline-Editing
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState('');
+  const editInputRef = useRef<HTMLInputElement>(null);
 
   const refreshList = () => {
     const ids = getMapList();
@@ -27,9 +33,18 @@ export function MapList() {
 
   useEffect(() => {
     refreshList();
-  }, [currentMapId]);
+  }, [currentMapId, mapName]);
+
+  useEffect(() => {
+    if (editingId && editInputRef.current) {
+      editInputRef.current.focus();
+      editInputRef.current.select();
+    }
+  }, [editingId]);
 
   const handleOpen = (id: string) => {
+    // Wenn wir gerade editieren, blockieren wir das Öffnen, damit der blur-Event gehandelt wird
+    if (editingId) return;
     const data = readMap(id);
     if (data) {
       loadFromFile(data, id);
@@ -40,16 +55,54 @@ export function MapList() {
     const { id, data } = createNewMap();
     refreshList();
     loadFromFile(data, id);
+    // Sofort in den Edit-Modus
+    setEditingId(id);
+    setEditValue(data.meta.name);
   };
 
   const handleDelete = (id: string, name: string) => {
     if (!window.confirm(t('sidebar.deleteConfirm').replace('{name}', name))) return;
     deleteMap(id);
     if (id === currentMapId) {
-      // Canvas zurücksetzen
       useCanvasStore.getState().resetCanvas();
     }
     refreshList();
+  };
+
+  const handleDoubleClick = (entry: MapEntry) => {
+    setEditValue(entry.name);
+    setEditingId(entry.id);
+  };
+
+  const handleRenameConfirm = (entry: MapEntry) => {
+    const trimmed = editValue.trim();
+    if (!trimmed) {
+      setEditingId(null);
+      return;
+    }
+
+    if (entry.id === currentMapId) {
+      useCanvasStore.getState().updateMapMeta({ name: trimmed });
+    } else {
+      const data = readMap(entry.id);
+      if (data) {
+        data.meta.name = trimmed;
+        writeMap(entry.id, data);
+      }
+    }
+
+    setEditingId(null);
+    refreshList();
+  };
+
+  const handleRenameKeyDown = (entry: MapEntry, e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleRenameConfirm(entry);
+    }
+    if (e.key === 'Escape') {
+      setEditingId(null);
+    }
   };
 
   return (
@@ -78,7 +131,29 @@ export function MapList() {
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
               <polyline points="14 2 14 8 20 8" />
             </svg>
-            <span className="map-list__name">{entry.name}</span>
+            
+            {editingId === entry.id ? (
+              <input
+                ref={editInputRef}
+                className="map-list__edit-input"
+                value={editValue}
+                onChange={(e) => setEditValue(e.target.value)}
+                onBlur={() => handleRenameConfirm(entry)}
+                onKeyDown={(e) => handleRenameKeyDown(entry, e)}
+                onClick={(e) => e.stopPropagation()}
+              />
+            ) : (
+              <span
+                className="map-list__name"
+                onDoubleClick={(e) => {
+                  e.stopPropagation();
+                  handleDoubleClick(entry);
+                }}
+              >
+                {entry.name}
+              </span>
+            )}
+            
             <button
               className="map-list__delete"
               onClick={(e) => {
