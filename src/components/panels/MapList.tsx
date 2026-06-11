@@ -82,7 +82,12 @@ export function MapList() {
     }
 
     if (entry.id === currentMapId) {
+      // Store aktualisieren (für Header und Panel)
       useCanvasStore.getState().updateMapMeta({ name: trimmed });
+      
+      // Sofort in localStorage schreiben (nicht auf Autosave warten)
+      const data = useCanvasStore.getState().toFileData();
+      writeMap(entry.id, data);
     } else {
       const data = readMap(entry.id);
       if (data) {
