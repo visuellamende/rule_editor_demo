@@ -3,7 +3,7 @@
 A visual editor for decision logic. Product Owners describe business rules,
 AI agents use the exported JSON as implementation specs.
 
-🔗 **[Try it online](https://eriklolies.github.io/rule-editor-demo/)**
+🔗 **[Try it online](https://visuellamende.github.io/rule_editor_demo/)**
 
 ## Features
 
