@@ -1,0 +1,39 @@
+[data-theme="miami"] {
+  /* Brand */
+  --color-primary: #FF00CC;
+  --color-primary-hover: #FF33D6;
+  --color-primary-rgb: 255, 0, 204;
+
+  /* Hintergründe */
+  --color-bg-base: #1A1A2E;
+  --color-bg-surface: #16213E;
+  --color-bg-sidebar: #16213E;
+  --color-bg-elevated: #0F3460;
+
+  /* Ränder */
+  --color-border-subtle: #1E2A4A;
+  --color-border-default: #05D9E8;
+  --color-border-focus: #FF00CC;
+
+  /* Text */
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: rgba(255, 255, 255, 0.7);
+  --color-text-muted: rgba(255, 255, 255, 0.4);
+  --color-text-on-primary: #FFFFFF;
+
+  /* Funktional */
+  --color-error: #FF0055;
+  --color-success: #05D9E8;
+  --color-warning: #FFD700;
+
+  /* Knoten (Canvas) */
+  --color-node-decision: #05D9E8;
+  --color-node-consequence: #39FF14;
+  --color-node-condition: #FFD700;
+  --color-node-action: #FF00CC;
+
+  /* Schatten (Glow-Effekt für Neon) */
+  --shadow-sm: 0 1px 3px rgba(5, 217, 232, 0.15);
+  --shadow-md: 0 4px 12px rgba(5, 217, 232, 0.2);
+  --shadow-lg: 0 8px 24px rgba(255, 0, 204, 0.25);
+}

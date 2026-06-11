@@ -1,0 +1,39 @@
+[data-theme="retro"] {
+  /* Brand */
+  --color-primary: #2AA198;
+  --color-primary-hover: #35BBB2;
+  --color-primary-rgb: 42, 161, 152;
+
+  /* Hintergründe */
+  --color-bg-base: #FDF6E3;
+  --color-bg-surface: #EEE8D5;
+  --color-bg-sidebar: #EEE8D5;
+  --color-bg-elevated: #F6EFDC;
+
+  /* Ränder */
+  --color-border-subtle: #D6CBAE;
+  --color-border-default: #93A1A1;
+  --color-border-focus: #2AA198;
+
+  /* Text */
+  --color-text-primary: #586E75;
+  --color-text-secondary: #657B83;
+  --color-text-muted: #93A1A1;
+  --color-text-on-primary: #FDF6E3;
+
+  /* Funktional */
+  --color-error: #DC322F;
+  --color-success: #859900;
+  --color-warning: #B58900;
+
+  /* Knoten (Canvas) */
+  --color-node-decision: #268BD2;
+  --color-node-consequence: #2AA198;
+  --color-node-condition: #B58900;
+  --color-node-action: #D33682;
+
+  /* Schatten */
+  --shadow-sm: 0 1px 3px rgba(88, 110, 117, 0.1);
+  --shadow-md: 0 4px 12px rgba(88, 110, 117, 0.15);
+  --shadow-lg: 0 8px 24px rgba(88, 110, 117, 0.2);
+}

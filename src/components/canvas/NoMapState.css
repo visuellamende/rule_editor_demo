@@ -1,0 +1,18 @@
+.no-map-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: var(--space-xs);
+}
+
+.no-map-state__text {
+  font-size: var(--font-size-lg);
+  color: var(--color-text-muted);
+}
+
+.no-map-state__hint {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}

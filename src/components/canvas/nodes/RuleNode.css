@@ -1,0 +1,158 @@
+.rule-node {
+  width: 240px;             /* Feste Breite statt min/max */
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-surface);
+  border: 1.5px solid var(--color-border-default);
+  box-shadow: var(--shadow-sm);
+  font-family: var(--font-family-base);
+  overflow: hidden;          /* Header-Ecken sauber clippen */
+  transition: box-shadow var(--duration-fast) var(--easing-default),
+              border-color var(--duration-fast) var(--easing-default);
+}
+
+.rule-node:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.rule-node--selected {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-md);
+}
+
+/* Header-Streifen pro Knotentyp */
+.rule-node__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-sm);
+  /* Kein eigener border-radius — wird durch overflow: hidden am Parent geclippt */
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.rule-node--decision .rule-node__header {
+  background-color: var(--color-node-decision);
+  color: var(--color-text-on-primary);
+}
+
+.rule-node--consequence .rule-node__header {
+  background-color: var(--color-node-consequence);
+  color: var(--color-text-on-primary);
+}
+
+.rule-node--condition .rule-node__header {
+  background-color: var(--color-node-condition);
+  color: var(--color-text-on-primary);
+}
+
+.rule-node--action .rule-node__header {
+  background-color: var(--color-node-action);
+  color: var(--color-text-on-primary);
+}
+
+.rule-node__icon {
+  display: flex;
+  align-items: center;
+}
+
+.rule-node__type-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-label);
+}
+
+.rule-node__display-id {
+  margin-left: auto;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-normal);
+  opacity: 0.7;
+  font-family: var(--font-family-mono);
+}
+
+
+.rule-node__body {
+  padding: var(--space-sm) var(--space-md);
+  min-height: 40px;
+  cursor: text;
+}
+
+.rule-node__label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-normal);
+  word-wrap: break-word;
+}
+
+/* Inline-Edit Input: gleiche Breite wie der Body */
+.rule-node__edit-input {
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-text-primary);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+  resize: none;
+  outline: none;
+  /* Keine Breitenänderung: */
+  box-sizing: border-box;
+}
+
+/* Handles (Verbindungspunkte) */
+.rule-node__handle {
+  width: 8px;
+  height: 8px;
+  background-color: var(--color-border-default);
+  border: 2px solid var(--color-bg-surface);
+  border-radius: 50%;
+  transition: background-color var(--duration-fast) var(--easing-default);
+}
+
+.rule-node__handle:hover {
+  background-color: var(--color-primary);
+}
+
+/* Source-Bereich mit Handle und Plus-Button */
+.rule-node__source-area {
+  position: absolute;
+  right: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+}
+
+.rule-node__add-button {
+  position: absolute;
+  left: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-border-default);
+  background-color: var(--color-bg-surface);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--easing-default),
+              border-color var(--duration-fast) var(--easing-default),
+              color var(--duration-fast) var(--easing-default);
+}
+
+/* Sichtbar bei Hover auf den Knoten */
+.rule-node:hover .rule-node__add-button {
+  opacity: 1;
+}
+
+.rule-node__add-button:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background-color: var(--color-bg-elevated);
+}
+
+
+

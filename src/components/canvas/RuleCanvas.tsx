@@ -1,0 +1,225 @@
+import { useCallback } from 'react';
+import {
+  ReactFlow,
+  Background,
+  Controls,
+  addEdge,
+  applyNodeChanges,
+  applyEdgeChanges,
+  useReactFlow,
+  type Connection,
+  type Node,
+  type Edge,
+  type NodeChange,
+  type EdgeChange,
+  BackgroundVariant,
+  ReactFlowProvider,
+} from '@xyflow/react';
+import '@xyflow/react/dist/style.css';
+import { RuleNode } from './nodes/RuleNode';
+import { LabeledEdge } from './edges/LabeledEdge';
+import { CanvasHeader } from './CanvasHeader';
+import { EmptyState } from './EmptyState';
+import { NoMapState } from './NoMapState';
+import { useCanvasStore } from '../../store/useCanvasStore';
+import type { RuleNodeType, RuleNodeData } from '../../types/nodes';
+import { useI18n } from '../../i18n';
+import { getAutoLayout } from '../../utils/autoLayout';
+import './RuleCanvas.css';
+
+const nodeTypes = {
+  ruleNode: RuleNode,
+};
+
+const edgeTypes = {
+  labeled: LabeledEdge,
+};
+
+const defaultLabels: Record<RuleNodeType, string> = {
+  decision: 'Neue Entscheidung',
+  consequence: 'Neue Konsequenz',
+  condition: 'Neue Bedingung',
+  action: 'Neue Aktion',
+};
+
+let firstNodeCounter = 0;
+
+function RuleCanvasInner() {
+  const {
+    nodes,
+    edges,
+    setNodes,
+    setEdges,
+    setSelectedNodeId,
+    setSelectedEdgeId,
+    filePath,
+    applyAutoLayout,
+    getNextDisplayId,
+  } = useCanvasStore();
+  const { fitView } = useReactFlow();
+  const { t } = useI18n();
+
+  const hasOpenMap = filePath !== null;
+
+  const onNodesChange = useCallback(
+    (changes: NodeChange[]) => {
+      setNodes((nds) => applyNodeChanges(changes, nds));
+
+      const hasRemovals = changes.some((c) => c.type === 'remove');
+      if (hasRemovals) {
+        setTimeout(() => {
+          const { nodes: currentNodes, edges: currentEdges } = useCanvasStore.getState();
+          if (currentNodes.length > 0) {
+            const layouted = getAutoLayout(currentNodes, currentEdges);
+            setNodes(layouted);
+            fitView({ padding: 0.3, duration: 300 });
+          }
+        }, 50);
+      }
+    },
+    [setNodes, fitView],
+  );
+
+  const onEdgesChange = useCallback(
+    (changes: EdgeChange[]) => {
+      setEdges((eds) => applyEdgeChanges(changes, eds));
+    },
+    [setEdges],
+  );
+
+  const onConnect = useCallback(
+    (connection: Connection) => {
+      const sourceNode = nodes.find((n) => n.id === connection.source);
+      const isDecisionOrCondition =
+        sourceNode?.data?.nodeType === 'decision' ||
+        sourceNode?.data?.nodeType === 'condition';
+      setEdges((eds) =>
+        addEdge(
+          {
+            ...connection,
+            type: 'labeled',
+            label: isDecisionOrCondition ? '' : undefined,
+          },
+          eds,
+        ),
+      );
+    },
+    [setEdges, nodes],
+  );
+
+  const onNodeClick = useCallback(
+    (_event: React.MouseEvent, node: Node) => {
+      setSelectedNodeId(node.id);
+    },
+    [setSelectedNodeId],
+  );
+
+  const onEdgeClick = useCallback(
+    (_event: React.MouseEvent, edge: Edge) => {
+      setSelectedEdgeId(edge.id);
+    },
+    [setSelectedEdgeId],
+  );
+
+  const onPaneClick = useCallback(() => {
+    setSelectedNodeId(null);
+    setSelectedEdgeId(null);
+  }, [setSelectedNodeId, setSelectedEdgeId]);
+
+  const handleCreateFirst = (type: RuleNodeType) => {
+    firstNodeCounter += 1;
+    const newNode: Node = {
+      id: `n${firstNodeCounter}`,
+      type: 'ruleNode',
+      position: { x: 100, y: 200 },
+      data: {
+        label: defaultLabels[type],
+        nodeType: type,
+        displayId: getNextDisplayId(),
+      } satisfies RuleNodeData,
+    };
+    setNodes([newNode]);
+  };
+
+  const handleAutoLayout = useCallback(() => {
+    applyAutoLayout();
+    setTimeout(() => {
+      fitView({ padding: 0.3, duration: 300 });
+    }, 50);
+  }, [applyAutoLayout, fitView]);
+
+  return (
+    <div className="rule-canvas">
+      {hasOpenMap && <CanvasHeader />}
+      <div className="rule-canvas__flow" style={{ position: 'relative' }}>
+        {!hasOpenMap ? (
+          <NoMapState />
+        ) : nodes.length === 0 ? (
+          <EmptyState onCreateFirst={handleCreateFirst} />
+        ) : (
+          <>
+            <ReactFlow
+              nodes={nodes}
+              edges={edges}
+              onNodesChange={onNodesChange}
+              onEdgesChange={onEdgesChange}
+              onConnect={onConnect}
+              onNodeClick={onNodeClick}
+              onEdgeClick={onEdgeClick}
+              onPaneClick={onPaneClick}
+              nodeTypes={nodeTypes}
+              edgeTypes={edgeTypes}
+              fitView
+              fitViewOptions={{ padding: 0.3 }}
+              proOptions={{ hideAttribution: true }}
+              panOnScroll
+              zoomOnScroll={false}
+              zoomOnPinch
+              selectionOnDrag
+              deleteKeyCode={['Backspace', 'Delete']}
+              defaultEdgeOptions={{
+                type: 'labeled',
+                animated: false,
+                style: { strokeWidth: 1.5 },
+              }}
+            >
+              <Background
+                variant={BackgroundVariant.Dots}
+                gap={20}
+                size={1}
+                className="rule-canvas__background"
+              />
+              <Controls
+                className="rule-canvas__controls"
+                showInteractive={false}
+              />
+            </ReactFlow>
+            <div className="rule-canvas__auto-layout">
+              <button
+                className="rule-canvas__auto-layout-button"
+                onClick={handleAutoLayout}
+                title={t('canvas.autoLayout')}
+                aria-label={t('canvas.autoLayout')}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="7" height="7" />
+                  <rect x="14" y="3" width="7" height="7" />
+                  <rect x="3" y="14" width="7" height="7" />
+                  <rect x="14" y="14" width="7" height="7" />
+                </svg>
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export function RuleCanvas() {
+  return (
+    <ReactFlowProvider>
+      <RuleCanvasInner />
+    </ReactFlowProvider>
+  );
+}

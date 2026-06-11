@@ -1,0 +1,33 @@
+/* Basis-Styles für alle Formularelemente */
+input[type="text"],
+textarea,
+.custom-select__trigger {
+  padding: var(--space-xs) var(--space-sm);
+  background-color: var(--color-bg-base);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);       /* Weicher als radius-sm */
+  color: var(--color-text-primary);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+  transition: border-color var(--duration-fast) var(--easing-default),
+              box-shadow var(--duration-fast) var(--easing-default);
+}
+
+input[type="text"]:focus,
+textarea:focus,
+.custom-select__trigger:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb, 0, 122, 204), 0.15);
+}
+
+input[type="text"]::placeholder,
+textarea::placeholder {
+  color: var(--color-text-muted);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 60px;
+}

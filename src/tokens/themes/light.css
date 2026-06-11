@@ -1,0 +1,39 @@
+[data-theme="light"] {
+  /* Brand */
+  --color-primary: #335CFF;
+  --color-primary-hover: #254EDB;
+  --color-primary-rgb: 51, 92, 255;
+
+  /* Hintergründe */
+  --color-bg-base: #F8F9FA;
+  --color-bg-surface: #FFFFFF;
+  --color-bg-sidebar: #F1F3F5;
+  --color-bg-elevated: #F5F6F8;
+
+  /* Ränder */
+  --color-border-subtle: #DEE2E6;
+  --color-border-default: #CFD4DA;
+  --color-border-focus: #335CFF;
+
+  /* Text */
+  --color-text-primary: #111827;
+  --color-text-secondary: #6B7280;
+  --color-text-muted: #9CA3AF;
+  --color-text-on-primary: #FFFFFF;
+
+  /* Funktional */
+  --color-error: #EF4444;
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+
+  /* Knoten (Canvas) */
+  --color-node-decision: #335CFF;
+  --color-node-consequence: #10B981;
+  --color-node-condition: #F59E0B;
+  --color-node-action: #8B5CF6;
+
+  /* Schatten (leichtere Schatten für Light) */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
