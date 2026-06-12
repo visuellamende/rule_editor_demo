@@ -1,6 +1,6 @@
 export type RulemapCategory = 'validation' | 'permission' | 'state' | 'business-logic' | 'error-handling';
 
-export type RuleNodeType = 'decision' | 'consequence' | 'condition' | 'action';
+export type RuleNodeType = 'decision' | 'consequence' | 'condition' | 'action' | 'consequence-ref';
 
 export interface ConsequenceData {
   business: string;
@@ -17,5 +17,6 @@ export interface RuleNodeData {
   tags?: string[];
   technicalKey?: string;
   expectedType?: string;
+  refNodeId?: number;       // NEU: ID des referenzierten Consequence-Knotens
 }
 

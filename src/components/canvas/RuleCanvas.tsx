@@ -13,7 +13,6 @@ import {
   type NodeChange,
   type EdgeChange,
   BackgroundVariant,
-  ReactFlowProvider,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { RuleNode } from './nodes/RuleNode';
@@ -40,11 +39,12 @@ const defaultLabels: Record<RuleNodeType, string> = {
   consequence: 'Neue Konsequenz',
   condition: 'Neue Bedingung',
   action: 'Neue Aktion',
+  'consequence-ref': 'Referenz',
 };
 
 let firstNodeCounter = 0;
 
-function RuleCanvasInner() {
+export function RuleCanvas() {
   const {
     nodes,
     edges,
@@ -213,13 +213,5 @@ function RuleCanvasInner() {
         )}
       </div>
     </div>
-  );
-}
-
-export function RuleCanvas() {
-  return (
-    <ReactFlowProvider>
-      <RuleCanvasInner />
-    </ReactFlowProvider>
   );
 }

@@ -1,13 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import type { RuleNodeType } from '../../types/nodes';
+import type { RuleNodeType, RuleNodeData } from '../../types/nodes';
 import { useI18n } from '../../i18n';
+import { useCanvasStore } from '../../store/useCanvasStore';
 import './NodeTypeMenu.css';
 
 interface NodeTypeMenuProps {
   onSelect: (type: RuleNodeType) => void;
   onClose: () => void;
   anchorRef?: React.RefObject<HTMLElement | null>;
+  onSelectRef?: (refNodeId: number, label: string) => void;
 }
 
 interface MenuOption {
@@ -16,8 +18,18 @@ interface MenuOption {
   description: string;
 }
 
-export function NodeTypeMenu({ onSelect, onClose, anchorRef }: NodeTypeMenuProps) {
+export function NodeTypeMenu({ onSelect, onClose, anchorRef, onSelectRef }: NodeTypeMenuProps) {
   const { t } = useI18n();
+  const { nodes } = useCanvasStore();
+
+  const existingConsequences = anchorRef
+    ? nodes
+        .filter((n) => (n.data as unknown as RuleNodeData).nodeType === 'consequence')
+        .map((n) => ({
+          displayId: (n.data as unknown as RuleNodeData).displayId,
+          label: (n.data as unknown as RuleNodeData).label,
+        }))
+    : [];
 
   const options: MenuOption[] = [
     {
@@ -104,6 +116,37 @@ export function NodeTypeMenu({ onSelect, onClose, anchorRef }: NodeTypeMenuProps
           </div>
         </button>
       ))}
+
+      {onSelectRef && existingConsequences.length > 0 && (
+        <>
+          <div className="node-type-menu__divider" />
+          {existingConsequences.map((c) => (
+            <button
+              key={c.displayId}
+              className="node-type-menu__item"
+              onClick={() => onSelectRef(c.displayId, c.label)}
+            >
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                style={{ flexShrink: 0, color: 'var(--color-node-consequence)' }}
+              >
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+              </svg>
+              <div className="node-type-menu__text">
+                <span className="node-type-menu__label">→ #{c.displayId} {c.label}</span>
+                <span className="node-type-menu__description">{t('nodeType.consequenceRef.description')}</span>
+              </div>
+            </button>
+          ))}
+        </>
+      )}
     </div>
   );
 

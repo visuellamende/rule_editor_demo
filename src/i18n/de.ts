@@ -14,12 +14,14 @@ export const de = {
   'nodeType.condition': 'Condition',
   'nodeType.action': 'Action',
   'nodeType.consequence': 'Consequence',
+  'nodeType.consequenceRef': 'Referenz',
 
   // Node Type Descriptions
   'nodeType.decision.description': 'Eine fachliche Frage mit mehreren Ausgängen',
   'nodeType.condition.description': 'Prüft einen Wert oder Zustand',
   'nodeType.action.description': 'Führt eine Aktion aus',
   'nodeType.consequence.description': 'Endpunkt — was passiert am Ende des Pfades',
+  'nodeType.consequenceRef.description': 'Verweist auf eine bestehende Konsequenz',
 
   // Default Node Labels
   'nodeLabel.decision': 'Neue Entscheidung',
@@ -54,6 +56,9 @@ export const de = {
   'panel.hint': 'Knoten auswählen, um Attribute zu bearbeiten.',
   'panel.generalTitle': 'Allgemein',
   'panel.nodeTitle': 'Knoten',
+  'panel.refTitle': 'Referenz',
+  'panel.refTarget': 'Referenziert',
+  'panel.refGoto': 'Original anzeigen',
 
   // Attribut-Panel
   'panel.label': 'Bezeichnung',

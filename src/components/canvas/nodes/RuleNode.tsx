@@ -60,7 +60,30 @@ function getNextEdgeId(): string {
 
 export function RuleNode({ id, data, selected }: NodeProps) {
   const nodeData = data as unknown as RuleNodeData;
-  const Icon = iconMap[nodeData.nodeType];
+
+  // Referenz-Knoten: kompakte Darstellung
+  if (nodeData.nodeType === 'consequence-ref') {
+    const refId = nodeData.refNodeId;
+
+    return (
+      <div className={`rule-node rule-node--consequence-ref ${selected ? 'rule-node--selected' : ''}`}>
+        <Handle type="target" position={Position.Left} className="rule-node__handle" />
+        <div className="rule-node__ref-body">
+          <svg className="rule-node__ref-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+          </svg>
+          <span className="rule-node__ref-label">
+            {nodeData.label}
+          </span>
+          <span className="rule-node__ref-id">→ #{refId}</span>
+        </div>
+        {/* Kein Source-Handle — Endpunkt */}
+      </div>
+    );
+  }
+
+  const Icon = iconMap[nodeData.nodeType as keyof typeof iconMap];
   const [menuOpen, setMenuOpen] = useState(false);
   const { nodes, updateNodeData, addNodeWithLayout, getNextDisplayId } = useCanvasStore();
   const { fitView } = useReactFlow();
@@ -146,6 +169,48 @@ export function RuleNode({ id, data, selected }: NodeProps) {
     }, 50);
   };
 
+  const handleAddRefNode = (refNodeId: number, label: string) => {
+    const currentNode = nodes.find((n) => n.id === id);
+    if (!currentNode) return;
+
+    const newNodeId = getNextNodeId();
+    const newEdgeId = getNextEdgeId();
+
+    const newNode: Node = {
+      id: newNodeId,
+      type: 'ruleNode',
+      position: {
+        x: currentNode.position.x + 350,
+        y: currentNode.position.y,
+      },
+      data: {
+        label,
+        nodeType: 'consequence-ref',
+        displayId: getNextDisplayId(),
+        refNodeId,
+      } satisfies RuleNodeData,
+    };
+
+    const isDecisionOrCondition =
+      nodeData.nodeType === 'decision' ||
+      nodeData.nodeType === 'condition';
+
+    const newEdge = {
+      id: newEdgeId,
+      source: id,
+      target: newNodeId,
+      type: 'labeled',
+      label: isDecisionOrCondition ? '' : undefined,
+    };
+
+    addNodeWithLayout(newNode, newEdge);
+    setMenuOpen(false);
+
+    setTimeout(() => {
+      fitView({ padding: 0.3, duration: 300 });
+    }, 50);
+  };
+
   return (
     <div
       className={`rule-node rule-node--${nodeData.nodeType} ${selected ? 'rule-node--selected' : ''}`}
@@ -217,6 +282,7 @@ export function RuleNode({ id, data, selected }: NodeProps) {
             <NodeTypeMenu
               anchorRef={addButtonRef}
               onSelect={handleAddNode}
+              onSelectRef={handleAddRefNode}
               onClose={() => setMenuOpen(false)}
             />
           )}

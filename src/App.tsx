@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { ReactFlowProvider } from '@xyflow/react';
 import { useTheme } from './hooks/useTheme';
 import { useAutosave } from './hooks/useAutosave';
 import { useUndoRedo } from './hooks/useUndoRedo';
@@ -35,11 +36,13 @@ function App() {
   }, [loadFromFile, currentMapId]);
 
   return (
-    <AppShell
-      sidebar={<MapList />}
-      canvas={<RuleCanvas />}
-      panel={<AttributePanel />}
-    />
+    <ReactFlowProvider>
+      <AppShell
+        sidebar={<MapList />}
+        canvas={<RuleCanvas />}
+        panel={<AttributePanel />}
+      />
+    </ReactFlowProvider>
   );
 }
 

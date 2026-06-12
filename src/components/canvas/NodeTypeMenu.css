@@ -65,3 +65,9 @@
   font-size: var(--font-size-xs);
   color: var(--color-text-muted);
 }
+
+.node-type-menu__divider {
+  height: 1px;
+  background-color: var(--color-border-subtle);
+  margin: var(--space-xs) 0;
+}

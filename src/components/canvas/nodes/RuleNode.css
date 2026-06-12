@@ -154,5 +154,40 @@
   background-color: var(--color-bg-elevated);
 }
 
+.rule-node--consequence-ref {
+  width: 200px;
+  border: 1.5px dashed var(--color-node-consequence);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-surface);
+  opacity: 0.85;
+}
+
+.rule-node__ref-body {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
+}
+
+.rule-node__ref-icon {
+  color: var(--color-node-consequence);
+  flex-shrink: 0;
+}
+
+.rule-node__ref-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rule-node__ref-id {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  font-family: var(--font-family-mono);
+  flex-shrink: 0;
+}
+
 
 

@@ -69,14 +69,31 @@ export const useCanvasStore = create<CanvasStore>()(
       setSelectedEdgeId: (id) => set({ selectedEdgeId: id, selectedNodeId: null }),
 
       updateNodeData: (nodeId, newData) =>
-        set((state) => ({
-          nodes: state.nodes.map((node) =>
+        set((state) => {
+          const updatedNode = state.nodes.find((n) => n.id === nodeId);
+          const updatedData = updatedNode?.data as any;
+
+          let updatedNodes = state.nodes.map((node) =>
             node.id === nodeId
               ? { ...node, data: { ...node.data, ...newData } }
               : node,
-          ),
-          isDirty: true,
-        })),
+          );
+
+          // Wenn es ein Consequence-Knoten ist und das Label geändert wird: alle Referenzen updaten
+          const isConsequence = updatedData?.nodeType === 'consequence' || (newData.nodeType === 'consequence' && updatedData?.nodeType === 'consequence-ref');
+          if (isConsequence && newData.label !== undefined) {
+            const displayId = updatedData.displayId;
+            updatedNodes = updatedNodes.map((node) => {
+              const data = node.data as any;
+              if (data.nodeType === 'consequence-ref' && data.refNodeId === displayId) {
+                return { ...node, data: { ...data, label: newData.label } };
+              }
+              return node;
+            });
+          }
+
+          return { nodes: updatedNodes, isDirty: true };
+        }),
 
       updateEdgeData: (edgeId, newData) =>
         set((state) => ({

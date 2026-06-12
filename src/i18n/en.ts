@@ -16,12 +16,14 @@ export const en: Record<TranslationKey, string> = {
   'nodeType.condition': 'Condition',
   'nodeType.action': 'Action',
   'nodeType.consequence': 'Consequence',
+  'nodeType.consequenceRef': 'Reference',
 
   // Node Type Descriptions
   'nodeType.decision.description': 'A business question with multiple outcomes',
   'nodeType.condition.description': 'Checks a value or state',
   'nodeType.action.description': 'Executes an action',
   'nodeType.consequence.description': 'Endpoint — what happens at the end of the path',
+  'nodeType.consequenceRef.description': 'References an existing consequence',
 
   // Default Node Labels
   'nodeLabel.decision': 'New decision',
@@ -56,6 +58,9 @@ export const en: Record<TranslationKey, string> = {
   'panel.hint': 'Select a node to edit attributes.',
   'panel.generalTitle': 'General',
   'panel.nodeTitle': 'Node',
+  'panel.refTitle': 'Reference',
+  'panel.refTarget': 'References',
+  'panel.refGoto': 'Show original',
 
   // Attribute Panel
   'panel.label': 'Label',

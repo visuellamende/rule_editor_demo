@@ -79,6 +79,20 @@ export function exportAsJSON(
         technical: cleanText(data.consequence.technical),
         reference: cleanText(data.consequence.reference),
       };
+    } else if (data?.nodeType === 'consequence-ref') {
+      const refNode = nodes.find(
+        (n) => (n.data as unknown as RuleNodeData).displayId === data.refNodeId
+      );
+      const refData = refNode?.data as unknown as RuleNodeData | undefined;
+      exportNode.type = 'consequence';
+      exportNode.consequenceRef = data.refNodeId;
+      exportNode.consequence = refData?.consequence
+        ? {
+            business: cleanText(refData.consequence.business),
+            technical: cleanText(refData.consequence.technical),
+            reference: cleanText(refData.consequence.reference),
+          }
+        : null;
     }
 
     return exportNode;
@@ -109,7 +123,7 @@ export function exportAsJSON(
       if (!consequenceGroups.has(key)) {
         consequenceGroups.set(key, node.id);
       }
-      node.consequenceRef = consequenceGroups.get(key)!;
+      node.consequenceRef = node.consequenceRef ?? consequenceGroups.get(key)!;
     }
   }
 
@@ -178,10 +192,18 @@ export function exportAsMarkdown(
 
     const data = node.data as unknown as RuleNodeData;
     const indent = '  '.repeat(depth);
-    const typeTag = `[${data.nodeType.charAt(0).toUpperCase() + data.nodeType.slice(1)}]`;
+    
+    let typeTag = `[${data.nodeType.charAt(0).toUpperCase() + data.nodeType.slice(1)}]`;
+    if (data.nodeType === 'consequence-ref') {
+      typeTag = '[Reference]';
+    }
 
     // Knotenzeile
-    lines.push(`${indent}**#${data.displayId}** ${typeTag} ${data.label}`);
+    if (data.nodeType === 'consequence-ref') {
+      lines.push(`${indent}**#${data.displayId}** ${typeTag} ${data.label} *(→ #${data.refNodeId})*`);
+    } else {
+      lines.push(`${indent}**#${data.displayId}** ${typeTag} ${data.label}`);
+    }
 
     // Konsequenz-Details
     if (data.nodeType === 'consequence' && data.consequence) {

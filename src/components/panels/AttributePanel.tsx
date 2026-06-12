@@ -4,17 +4,12 @@ import { CustomSelect } from '../primitives/CustomSelect';
 import { MapInfoPanel } from './MapInfoPanel';
 import { EdgeLabelSuggestions } from './EdgeLabelSuggestions';
 import type { RuleNodeData, RuleNodeType, ConsequenceData } from '../../types/nodes';
+import { useReactFlow } from '@xyflow/react';
 import './AttributePanel.css';
-
-const nodeTypeOptions = [
-  { value: 'decision', label: 'Decision' },
-  { value: 'condition', label: 'Condition' },
-  { value: 'action', label: 'Action' },
-  { value: 'consequence', label: 'Consequence' },
-];
 
 export function AttributePanel() {
   const { t } = useI18n();
+  const { fitView } = useReactFlow();
   const {
     selectedNodeId,
     selectedEdgeId,
@@ -23,6 +18,7 @@ export function AttributePanel() {
     updateNodeData,
     updateEdgeData,
     filePath,
+    setSelectedNodeId,
   } = useCanvasStore();
 
   const hasOpenMap = filePath !== null;
@@ -38,12 +34,12 @@ export function AttributePanel() {
   }
 
   const selectedNode = nodes.find((n) => n.id === selectedNodeId);
-  const nodeData = selectedNode?.data as RuleNodeData | undefined;
+  const nodeData = selectedNode?.data as unknown as RuleNodeData | undefined;
   const selectedEdge = edges.find((e) => e.id === selectedEdgeId);
 
   if (selectedEdge) {
     const sourceNode = nodes.find((n) => n.id === selectedEdge.source);
-    const sourceType = (sourceNode?.data as RuleNodeData | undefined)?.nodeType ?? 'decision';
+    const sourceType = (sourceNode?.data as unknown as RuleNodeData | undefined)?.nodeType ?? 'decision';
 
     return (
       <div className="attribute-panel">
@@ -98,9 +94,22 @@ export function AttributePanel() {
   }
 
   const handleTypeChange = (value: string) => {
-    // When changing type, make sure we also update the node's other properties, or update nodeType in node data.
-    // Also, React Flow node needs to keep its `data.nodeType` updated.
-    updateNodeData(selectedNode.id, { nodeType: value as RuleNodeType });
+    const nextType = value as RuleNodeType;
+    const updates: Partial<RuleNodeData> = { nodeType: nextType };
+
+    if (nextType === 'consequence-ref') {
+      const firstConsequence = nodes.find(
+        (n) => (n.data as unknown as RuleNodeData).nodeType === 'consequence'
+      );
+      if (firstConsequence) {
+        updates.refNodeId = (firstConsequence.data as unknown as RuleNodeData).displayId;
+        updates.label = (firstConsequence.data as unknown as RuleNodeData).label;
+      }
+    } else if (nodeData.nodeType === 'consequence-ref') {
+      updates.refNodeId = undefined;
+    }
+
+    updateNodeData(selectedNode.id, updates);
   };
 
   const handleLabelChange = (value: string) => {
@@ -119,10 +128,136 @@ export function AttributePanel() {
   };
 
   // Typ-Optionen mit i18n Labels
-  const typeOptions = nodeTypeOptions.map((opt) => ({
-    value: opt.value,
-    label: t(`nodeType.${opt.value}` as any),
-  }));
+  const typeOptions = [
+    { value: 'decision', label: t('nodeType.decision') },
+    { value: 'condition', label: t('nodeType.condition') },
+    { value: 'action', label: t('nodeType.action') },
+    { value: 'consequence', label: t('nodeType.consequence') },
+  ];
+
+  if (nodeData.nodeType === 'consequence-ref' || nodes.some((n) => (n.data as unknown as RuleNodeData).nodeType === 'consequence')) {
+    typeOptions.push({ value: 'consequence-ref', label: t('nodeType.consequenceRef') });
+  }
+
+  if (nodeData.nodeType === 'consequence-ref') {
+    const refNode = nodes.find(
+      (n) => (n.data as unknown as RuleNodeData).nodeType === 'consequence' && (n.data as unknown as RuleNodeData).displayId === nodeData.refNodeId
+    );
+    const refData = refNode?.data as unknown as RuleNodeData | undefined;
+
+    const selectAndFocusNode = (targetNodeId: string | undefined) => {
+      if (!targetNodeId) return;
+      setSelectedNodeId(targetNodeId);
+      setTimeout(() => {
+        fitView({ nodes: [{ id: targetNodeId }], duration: 300 });
+      }, 50);
+    };
+
+    const otherConsequences = nodes
+      .filter((n) => (n.data as unknown as RuleNodeData).nodeType === 'consequence')
+      .map((n) => ({
+        value: String((n.data as unknown as RuleNodeData).displayId),
+        label: `#${(n.data as unknown as RuleNodeData).displayId} ${(n.data as unknown as RuleNodeData).label}`,
+      }));
+
+    return (
+      <div className="attribute-panel">
+        <div className="attribute-panel__header">
+          <h3 className="attribute-panel__title">
+            {t('panel.refTitle')} #{nodeData.displayId}
+          </h3>
+        </div>
+
+        <div className="attribute-panel__body">
+          {/* Typ */}
+          <div className="attribute-panel__field">
+            <label className="attribute-panel__label">{t('panel.nodeType')}</label>
+            <CustomSelect
+              options={typeOptions}
+              value={nodeData.nodeType}
+              onChange={handleTypeChange}
+            />
+          </div>
+
+          {/* Referenzierter Knoten */}
+          <div className="attribute-panel__field">
+            <label className="attribute-panel__label">{t('panel.refTarget')}</label>
+            <div style={{ display: 'flex', gap: 'var(--space-xs)', alignItems: 'center' }}>
+              <div style={{ flex: 1 }}>
+                <CustomSelect
+                  options={otherConsequences}
+                  value={String(nodeData.refNodeId ?? '')}
+                  onChange={(val) => {
+                    const targetDisplayId = Number(val);
+                    const targetNode = nodes.find(
+                      (n) => (n.data as unknown as RuleNodeData).nodeType === 'consequence' && (n.data as unknown as RuleNodeData).displayId === targetDisplayId
+                    );
+                    if (targetNode) {
+                      updateNodeData(selectedNode.id, {
+                        refNodeId: targetDisplayId,
+                        label: (targetNode.data as unknown as RuleNodeData).label,
+                      });
+                    }
+                  }}
+                />
+              </div>
+              <button
+                className="attribute-panel__ref-goto"
+                onClick={() => selectAndFocusNode(refNode?.id)}
+                disabled={!refNode}
+                style={{
+                  padding: 'var(--space-xs) var(--space-sm)',
+                  backgroundColor: 'var(--color-bg-elevated)',
+                  border: '1px solid var(--color-border-default)',
+                  borderRadius: 'var(--radius-sm)',
+                  fontSize: 'var(--font-size-xs)',
+                  cursor: 'pointer',
+                }}
+              >
+                {t('panel.refGoto')}
+              </button>
+            </div>
+          </div>
+
+          {/* Konsequenz-Details des Originals (read-only) */}
+          {refData?.consequence && (
+            <div className="attribute-panel__section" style={{ opacity: 0.8 }}>
+              <h4 className="attribute-panel__section-title" style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)' }}>
+                {t('panel.consequence')} ({t('nodeType.consequence')})
+              </h4>
+              <div style={{ padding: 'var(--space-xs)', backgroundColor: 'var(--color-bg-elevated)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border-subtle)', marginTop: 'var(--space-xs)' }}>
+                <p className="attribute-panel__readonly" style={{ fontSize: 'var(--font-size-sm)', margin: 0 }}>
+                  <strong>{t('panel.consequence.business')}:</strong> {refData.consequence.business}
+                </p>
+                {refData.consequence.technical && (
+                  <p className="attribute-panel__readonly-muted" style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)', margin: 'var(--space-xs) 0 0 0' }}>
+                    <strong>{t('panel.consequence.technical')}:</strong> {refData.consequence.technical}
+                  </p>
+                )}
+                {refData.consequence.reference && (
+                  <p className="attribute-panel__readonly-muted" style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)', margin: 'var(--space-xs) 0 0 0' }}>
+                    <strong>{t('panel.consequence.reference')}:</strong> {refData.consequence.reference}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Notizen */}
+          <div className="attribute-panel__field">
+            <label className="attribute-panel__label">{t('panel.notes')}</label>
+            <textarea
+              className="attribute-panel__textarea attribute-panel__textarea--tall"
+              value={nodeData.notes ?? ''}
+              onChange={(e) => handleNotesChange(e.target.value)}
+              placeholder={t('panel.notes.placeholder')}
+              rows={4}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="attribute-panel">
@@ -185,6 +320,41 @@ export function AttributePanel() {
         {nodeData.nodeType === 'consequence' && (
           <div className="attribute-panel__section">
             <h4 className="attribute-panel__section-title">{t('panel.consequence')}</h4>
+
+            {/* Referenzierte Konsequenz (Optional) */}
+            {nodes.some((n) => (n.data as unknown as RuleNodeData).nodeType === 'consequence' && n.id !== selectedNode.id) && (
+              <div className="attribute-panel__field" style={{ marginBottom: 'var(--space-md)' }}>
+                <label className="attribute-panel__label">{t('panel.refTarget')} (Optional)</label>
+                <CustomSelect
+                  options={[
+                    { value: '', label: 'Keine' },
+                    ...nodes
+                      .filter((n) => (n.data as unknown as RuleNodeData).nodeType === 'consequence' && n.id !== selectedNode.id)
+                      .map((n) => ({
+                        value: String((n.data as unknown as RuleNodeData).displayId),
+                        label: `#${(n.data as unknown as RuleNodeData).displayId} ${(n.data as unknown as RuleNodeData).label}`,
+                      }))
+                  ]}
+                  value=""
+                  onChange={(val) => {
+                    if (val) {
+                      const targetDisplayId = Number(val);
+                      const targetNode = nodes.find(
+                        (n) => (n.data as unknown as RuleNodeData).nodeType === 'consequence' && (n.data as unknown as RuleNodeData).displayId === targetDisplayId
+                      );
+                      if (targetNode) {
+                        updateNodeData(selectedNode.id, {
+                          nodeType: 'consequence-ref',
+                          refNodeId: targetDisplayId,
+                          label: (targetNode.data as unknown as RuleNodeData).label,
+                          consequence: undefined,
+                        });
+                      }
+                    }
+                  }}
+                />
+              </div>
+            )}
 
             <div className="attribute-panel__field">
               <label className="attribute-panel__label">
