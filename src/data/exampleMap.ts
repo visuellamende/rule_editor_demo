@@ -3,198 +3,224 @@ import type { RulemapFile } from '../types/rulemap';
 export const exampleMap: RulemapFile = {
   version: '1.0.0',
   meta: {
-    id: 'space-zugriff-default',
+    id: 'space-zugriff',
     name: 'Space Zugriff',
-    description: 'Beispiel-Entscheidungsbaum für den Zugriff auf geschützte Gruppenbereiche.',
+    description: 'Berechtigungslogik für den Zugriff auf geschützte Gruppenbereiche.',
     category: 'permission',
-    created: '2026-06-11T10:15:14.457Z',
-    modified: '2026-06-11T10:15:35.847Z'
+    created: '2026-06-11T12:15:00.000Z',
+    modified: '2026-06-12T12:00:00.000Z',
   },
   nodes: [
     {
       id: 'n1',
       type: 'ruleNode',
-      position: { x: 50, y: 330 },
+      position: { x: 0, y: 200 },
       data: {
         label: 'Wird dem Nutzer Zugriff auf den Space gewährt?',
         nodeType: 'decision',
-        displayId: 1
-      }
+        displayId: 1,
+        technicalKey: null,
+        expectedType: null,
+        notes: null,
+      },
     },
     {
-      id: 'n101',
+      id: 'n2',
       type: 'ruleNode',
-      position: { x: 390, y: 330 },
+      position: { x: 350, y: 200 },
       data: {
         label: 'Ist Nutzer Teil der Organisation?',
         nodeType: 'condition',
-        displayId: 2
-      }
+        displayId: 2,
+        technicalKey: 'isUserInOrganization',
+        expectedType: 'boolean',
+        notes: null,
+      },
     },
     {
-      id: 'n102',
+      id: 'n3',
       type: 'ruleNode',
-      position: { x: 730, y: 400 },
+      position: { x: 700, y: 50 },
       data: {
         label: 'Zugriff verweigert',
         nodeType: 'consequence',
-        displayId: 3
-      }
+        displayId: 3,
+        technicalKey: null,
+        expectedType: null,
+        notes: null,
+        consequence: {
+          business: 'Der Nutzer ist nicht Teil der Organisation. Der Zugriff auf den Space wird vollständig verweigert.',
+          technical: 'HTTP 403 Forbidden, frühzeitiger Abbruch vor jeder weiteren Prüfung.',
+          reference: 'space_service.py: _has_access()',
+        },
+      },
     },
     {
-      id: 'n103',
+      id: 'n4',
       type: 'ruleNode',
-      position: { x: 730, y: 260 },
+      position: { x: 700, y: 300 },
       data: {
         label: 'Hat der Space eine explizite Mitgliederliste?',
         nodeType: 'condition',
-        displayId: 4
-      }
+        displayId: 4,
+        technicalKey: 'hasExplicitMemberList',
+        expectedType: 'boolean',
+        notes: 'Public = keine expliziten internen Mitglieder (nur Gäste oder leer)',
+      },
     },
     {
-      id: 'n105',
+      id: 'n6',
       type: 'ruleNode',
-      position: { x: 1070, y: 120 },
+      position: { x: 1050, y: 150 },
       data: {
         label: 'Welche Rolle hat der Nutzer in der Organisation?',
         nodeType: 'condition',
-        displayId: 6
-      }
+        displayId: 6,
+        technicalKey: 'memberRole',
+        expectedType: 'enum',
+        notes: null,
+      },
     },
     {
-      id: 'n106',
+      id: 'n7',
       type: 'ruleNode',
-      position: { x: 1070, y: 400 },
+      position: { x: 1050, y: 400 },
       data: {
         label: 'Ist die User-ID in der Space-Mitgliederliste?',
         nodeType: 'condition',
-        displayId: 7
-      }
+        displayId: 7,
+        technicalKey: 'isUserIdInMemberList',
+        expectedType: 'boolean',
+        notes: null,
+      },
     },
     {
-      id: 'n107',
+      id: 'n8',
       type: 'ruleNode',
-      position: { x: 1410, y: 190 },
+      position: { x: 1400, y: 50 },
       data: {
         label: 'Zugriff verweigert',
-        nodeType: 'consequence',
+        nodeType: 'consequence-ref',
         displayId: 8,
-        consequence: {
-          business: 'Zugriff verweigert'
-        }
-      }
+        refNodeId: 3,
+        notes: null,
+      },
     },
     {
-      id: 'n108',
+      id: 'n9',
       type: 'ruleNode',
-      position: { x: 1410, y: 50 },
+      position: { x: 1400, y: 200 },
       data: {
         label: 'Zugriff erlaubt',
         nodeType: 'consequence',
         displayId: 9,
+        technicalKey: null,
+        expectedType: null,
+        notes: null,
         consequence: {
-          business: 'Zugriff erlaubt'
-        }
-      }
+          business: 'Der Nutzer erhält vollen Zugriff auf den Space. Einträge erstellen, Gesehen-Funktion nutzen, Sichtbarkeit bearbeiten und Space-Mitgliederliste verwalten.',
+          technical: 'Request wird verarbeitet, Daten werden zurückgegeben.',
+          reference: 'space_service.py: _has_access()',
+        },
+      },
     },
     {
-      id: 'n109',
+      id: 'n10',
       type: 'ruleNode',
-      position: { x: 1410, y: 470 },
+      position: { x: 1400, y: 350 },
       data: {
         label: 'Zugriff verweigert',
-        nodeType: 'consequence',
+        nodeType: 'consequence-ref',
         displayId: 10,
-        consequence: {
-          business: 'Zugriff verweigert'
-        }
-      }
+        refNodeId: 3,
+        notes: null,
+      },
     },
     {
-      id: 'n110',
+      id: 'n11',
       type: 'ruleNode',
-      position: { x: 1410, y: 330 },
+      position: { x: 1400, y: 500 },
       data: {
         label: 'Zugriff erlaubt',
-        nodeType: 'consequence',
+        nodeType: 'consequence-ref',
         displayId: 11,
-        consequence: {
-          business: 'Zugriff erlaubt'
-        }
-      }
-    }
+        refNodeId: 9,
+        notes: null,
+      },
+    },
   ],
   edges: [
     {
-      id: 'e101',
+      id: 'e1',
       source: 'n1',
-      target: 'n101',
+      target: 'n2',
       type: 'labeled',
-      label: ''
+      label: null,
+      data: { value: null },
     },
     {
-      id: 'e102',
-      source: 'n101',
-      target: 'n102',
+      id: 'e2',
+      source: 'n2',
+      target: 'n3',
       type: 'labeled',
       label: 'Nein',
-      data: { label: 'Nein' }
+      data: { value: 'false' },
     },
     {
-      id: 'e103',
-      source: 'n101',
-      target: 'n103',
+      id: 'e3',
+      source: 'n2',
+      target: 'n4',
       type: 'labeled',
       label: 'Ja',
-      data: { label: 'Ja' }
+      data: { value: 'true' },
     },
     {
-      id: 'e107',
-      source: 'n105',
-      target: 'n107',
+      id: 'e4',
+      source: 'n4',
+      target: 'n6',
+      type: 'labeled',
+      label: 'Nein',
+      data: { value: 'false' },
+    },
+    {
+      id: 'e5',
+      source: 'n4',
+      target: 'n7',
+      type: 'labeled',
+      label: 'Ja',
+      data: { value: 'true' },
+    },
+    {
+      id: 'e6',
+      source: 'n6',
+      target: 'n8',
       type: 'labeled',
       label: 'Gast',
-      data: { label: 'Gast' }
+      data: { value: 'GUEST' },
     },
     {
-      id: 'e108',
-      source: 'n105',
-      target: 'n108',
+      id: 'e7',
+      source: 'n6',
+      target: 'n9',
       type: 'labeled',
       label: 'Mitglied',
-      data: { label: 'Mitglied' }
+      data: { value: 'MEMBER' },
     },
     {
-      id: 'e109',
-      source: 'n106',
-      target: 'n109',
+      id: 'e8',
+      source: 'n7',
+      target: 'n10',
       type: 'labeled',
       label: 'Nein',
-      data: { label: 'Nein' }
+      data: { value: 'false' },
     },
     {
-      id: 'e110',
-      source: 'n106',
-      target: 'n110',
+      id: 'e9',
+      source: 'n7',
+      target: 'n11',
       type: 'labeled',
       label: 'Ja',
-      data: { label: 'Ja' }
+      data: { value: 'true' },
     },
-    {
-      type: 'labeled',
-      source: 'n103',
-      target: 'n106',
-      label: 'Ja',
-      id: 'xy-edge__n103-n106',
-      data: { label: 'Ja' }
-    },
-    {
-      type: 'labeled',
-      source: 'n103',
-      target: 'n105',
-      label: 'Nein',
-      id: 'xy-edge__n103-n105',
-      data: { label: 'Nein' }
-    }
-  ]
+  ],
 };

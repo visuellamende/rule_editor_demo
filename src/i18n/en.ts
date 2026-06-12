@@ -135,6 +135,7 @@ export const en: Record<TranslationKey, string> = {
   'export.jsonCopy': 'Copy JSON',
   'export.markdownFile': 'Save Markdown',
   'export.markdownCopy': 'Copy Markdown',
+  'export.svgFile': 'Save SVG',
 
   // Help
   'help.whatIs': 'What is the Rule Editor?',

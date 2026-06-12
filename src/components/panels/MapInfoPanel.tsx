@@ -4,6 +4,8 @@ import { CustomSelect } from '../primitives/CustomSelect';
 import type { RulemapCategory } from '../../types/nodes';
 import { exportAsJSON, exportAsMarkdown } from '../../utils/exportRulemap';
 import { downloadFile } from '../../services/browserStorage';
+import { useReactFlow } from '@xyflow/react';
+import { exportCanvasAsSvg } from '../../utils/exportSvg';
 import './MapInfoPanel.css';
 
 const categoryValues: RulemapCategory[] = [
@@ -17,6 +19,7 @@ const categoryValues: RulemapCategory[] = [
 export function MapInfoPanel() {
   const { t } = useI18n();
   const { mapMeta, updateMapMeta } = useCanvasStore();
+  const reactFlowInstance = useReactFlow();
 
   const categoryOptions = [
     { value: '', label: t('sidebar.mapCategory.none') },
@@ -62,6 +65,16 @@ export function MapInfoPanel() {
     const { mapMeta, nodes, edges } = useCanvasStore.getState();
     const content = exportAsMarkdown(mapMeta, nodes, edges);
     await navigator.clipboard.writeText(content);
+  };
+
+  const handleExportSvg = async () => {
+    reactFlowInstance.fitView({ padding: 0.2, duration: 0 });
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    const canvasElement = document.querySelector('.react-flow') as HTMLElement;
+    if (canvasElement) {
+      await exportCanvasAsSvg(canvasElement, mapMeta.name);
+    }
   };
 
   return (
@@ -140,6 +153,14 @@ export function MapInfoPanel() {
             {t('export.markdownCopy')}
           </button>
         </div>
+
+        <button
+          className="map-info-panel__export-button map-info-panel__export-button--full"
+          onClick={handleExportSvg}
+          title={t('export.svgFile')}
+        >
+          {t('export.svgFile')}
+        </button>
       </div>
     </div>
   );
