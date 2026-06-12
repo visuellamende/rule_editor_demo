@@ -19,7 +19,13 @@
   letter-spacing: var(--letter-spacing-label);
 }
 
-.map-list__new-button {
+.map-list__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xxs);
+}
+
+.map-list__action-button {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -34,7 +40,7 @@
               color var(--duration-fast) var(--easing-default);
 }
 
-.map-list__new-button:hover {
+.map-list__action-button:hover {
   background-color: var(--color-bg-elevated);
   color: var(--color-text-primary);
 }

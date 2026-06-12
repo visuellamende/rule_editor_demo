@@ -121,6 +121,9 @@ export const en: Record<TranslationKey, string> = {
   'sidebar.delete': 'Delete',
   'sidebar.deleteConfirm': 'Are you sure you want to delete "{name}"?',
   'sidebar.rename': 'Rename',
+  'import.button': 'Import JSON',
+  'import.invalidFormat': 'Invalid rulemap format. The file must contain meta, nodes and edges.',
+  'import.error': 'Import failed. Please check the file format.',
 
   // Canvas — No Map open
   'canvas.noMap': 'No rulemap open',

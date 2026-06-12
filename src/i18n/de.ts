@@ -119,6 +119,9 @@ export const de = {
   'sidebar.delete': 'Löschen',
   'sidebar.deleteConfirm': 'Möchtest du „{name}“ wirklich löschen?',
   'sidebar.rename': 'Umbenennen',
+  'import.button': 'JSON importieren',
+  'import.invalidFormat': 'Ungültiges Rulemap-Format. Die Datei muss meta, nodes und edges enthalten.',
+  'import.error': 'Import fehlgeschlagen. Bitte prüfe das Dateiformat.',
 
   // Canvas — Keine Map geöffnet
   'canvas.noMap': 'Keine Rulemap geöffnet',

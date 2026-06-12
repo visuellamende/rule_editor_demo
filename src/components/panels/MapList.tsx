@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useI18n } from '../../i18n';
 import { useCanvasStore } from '../../store/useCanvasStore';
 import { getMapList, readMap, writeMap, createNewMap, deleteMap } from '../../services/browserStorage';
+import type { RulemapFile } from '../../types/rulemap';
 import './MapList.css';
 
 interface MapEntry {
@@ -19,6 +20,39 @@ export function MapList() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
   const editInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImport = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text) as RulemapFile;
+
+      // Grundlegende Validierung
+      if (!data.meta || !data.nodes || !data.edges) {
+        alert(t('import.invalidFormat'));
+        return;
+      }
+
+      // Als neue Map im localStorage speichern
+      const id = data.meta.id || crypto.randomUUID().slice(0, 8);
+      writeMap(id, data);
+      refreshList();
+      loadFromFile(data, id);
+    } catch (error) {
+      console.error('Import failed:', error);
+      alert(t('import.error'));
+    }
+
+    // Input zurücksetzen damit dieselbe Datei erneut importiert werden kann
+    e.target.value = '';
+  };
 
   const refreshList = () => {
     const ids = getMapList();
@@ -114,16 +148,39 @@ export function MapList() {
     <div className="map-list">
       <div className="map-list__header">
         <h3 className="map-list__title">Rule Editor</h3>
-        <button
-          className="map-list__new-button"
-          onClick={handleCreate}
-          title={t('sidebar.newMap')}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-            <line x1="12" y1="5" x2="12" y2="19" />
-            <line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
-        </button>
+        <div className="map-list__actions">
+          <button
+            className="map-list__action-button"
+            onClick={handleImport}
+            title={t('import.button')}
+            aria-label={t('import.button')}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="17 8 12 3 7 8" />
+              <line x1="12" y1="3" x2="12" y2="15" />
+            </svg>
+          </button>
+          <button
+            className="map-list__action-button"
+            onClick={handleCreate}
+            title={t('sidebar.newMap')}
+            aria-label={t('sidebar.newMap')}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+          </button>
+        </div>
+        {/* Versteckter File Input */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".json"
+          onChange={handleFileChange}
+          style={{ display: 'none' }}
+        />
       </div>
       <div className="map-list__items">
         {maps.map((entry) => (
