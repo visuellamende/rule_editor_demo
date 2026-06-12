@@ -15,5 +15,7 @@ export interface RuleNodeData {
   consequence?: ConsequenceData;
   notes?: string;
   tags?: string[];
+  technicalKey?: string;
+  expectedType?: string;
 }
 

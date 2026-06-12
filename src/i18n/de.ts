@@ -68,6 +68,10 @@ export const de = {
   'panel.consequence.reference': 'Referenz (optional)',
   'panel.consequence.reference.placeholder': 'Service, Endpoint, Komponente...',
   'panel.nodeType': 'Knotentyp',
+  'panel.technicalKey': 'Technischer Key (optional)',
+  'panel.technicalKey.placeholder': 'z.B. isUserInOrganization',
+  'panel.expectedType': 'Erwarteter Typ (optional)',
+  'panel.expectedType.placeholder': 'z.B. boolean, string, enum',
 
   // Canvas Header
   'canvas.untitled': 'Unbenannte Map',
@@ -76,6 +80,8 @@ export const de = {
   // Edge / Verbindungen
   'edge.label': 'Verbindung',
   'edge.label.placeholder': 'z.B. Ja, Nein, Timeout...',
+  'edge.value': 'Technischer Wert (optional)',
+  'edge.value.placeholder': 'z.B. GUEST, true, > 100',
   'edge.hint': 'Verbindung auswählen, um das Label zu bearbeiten.',
   'edge.suggestion.yes': 'Ja',
   'edge.suggestion.no': 'Nein',

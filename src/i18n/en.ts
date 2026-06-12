@@ -70,6 +70,10 @@ export const en: Record<TranslationKey, string> = {
   'panel.consequence.reference': 'Reference (optional)',
   'panel.consequence.reference.placeholder': 'Service, endpoint, component...',
   'panel.nodeType': 'Node type',
+  'panel.technicalKey': 'Technical Key (optional)',
+  'panel.technicalKey.placeholder': 'e.g. isUserInOrganization',
+  'panel.expectedType': 'Expected Type (optional)',
+  'panel.expectedType.placeholder': 'e.g. boolean, string, enum',
 
   // Canvas Header
   'canvas.untitled': 'Untitled map',
@@ -78,6 +82,8 @@ export const en: Record<TranslationKey, string> = {
   // Edge / Connections
   'edge.label': 'Connection',
   'edge.label.placeholder': 'e.g. Yes, No, Timeout...',
+  'edge.value': 'Technical Value (optional)',
+  'edge.value.placeholder': 'e.g. GUEST, true, > 100',
   'edge.hint': 'Select a connection to edit its label.',
   'edge.suggestion.yes': 'Yes',
   'edge.suggestion.no': 'No',

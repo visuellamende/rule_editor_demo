@@ -7,18 +7,24 @@ import type { RulemapMeta } from '../types/rulemap';
 interface ExportNode {
   id: number;
   type: string;
-  label: string;
-  consequence?: {
-    business: string;
-    technical?: string;
-    reference?: string;
-  };
-  notes?: string;
-  outputs: ExportEdge[];
+  label: string | null;
+  technicalKey: string | null;      // NEU
+  expectedType: string | null;      // NEU
+  notes: string | null;             // Immer vorhanden, ggf. null
+  consequence: ExportConsequence | null;  // Immer vorhanden, ggf. null
+  outputs: ExportEdge[];            // Immer vorhanden, ggf. leeres Array
+  consequenceRef?: number;
+}
+
+interface ExportConsequence {
+  business: string | null;
+  technical: string | null;
+  reference: string | null;
 }
 
 interface ExportEdge {
-  label: string;
+  label: string | null;
+  value: string | null;             // NEU: maschinenlesbarer Wert
   targetNodeId: number;
 }
 
@@ -28,6 +34,12 @@ interface ExportRulemap {
   category: string | null;
   entryNodeId: number | null;
   nodes: ExportNode[];
+}
+
+function cleanText(text: string | undefined | null): string | null {
+  if (text === undefined || text === null) return null;
+  const trimmed = text.replace(/\n{2,}/g, '\n').trim();
+  return trimmed || null;
 }
 
 export function exportAsJSON(
@@ -42,8 +54,10 @@ export function exportAsJSON(
       .map((e) => {
         const targetNode = nodes.find((n) => n.id === e.target);
         const targetData = targetNode?.data as unknown as RuleNodeData | undefined;
+        const edgeData = e.data as any;
         return {
-          label: (e.label as string) || '',
+          label: cleanText(e.label as string),
+          value: cleanText(edgeData?.value as string),
           targetNodeId: targetData?.displayId ?? 0,
         };
       });
@@ -51,36 +65,65 @@ export function exportAsJSON(
     const exportNode: ExportNode = {
       id: data?.displayId ?? 0,
       type: data?.nodeType || 'ruleNode',
-      label: data?.label || '',
+      label: cleanText(data?.label),
+      technicalKey: cleanText(data?.technicalKey),
+      expectedType: cleanText(data?.expectedType),
+      notes: cleanText(data?.notes),
+      consequence: null,
       outputs: outgoingEdges,
     };
 
     if (data?.nodeType === 'consequence' && data.consequence) {
       exportNode.consequence = {
-        business: data.consequence.business,
-        ...(data.consequence.technical && { technical: data.consequence.technical }),
-        ...(data.consequence.reference && { reference: data.consequence.reference }),
+        business: cleanText(data.consequence.business),
+        technical: cleanText(data.consequence.technical),
+        reference: cleanText(data.consequence.reference),
       };
-    }
-
-    if (data?.notes) {
-      exportNode.notes = data.notes;
     }
 
     return exportNode;
   });
 
-  // Entry Node: der Knoten ohne eingehende Edges
-  const targetIds = new Set(edges.map((e) => e.target));
-  const entryNode = nodes.find((n) => !targetIds.has(n.id));
-  const entryData = entryNode?.data as unknown as RuleNodeData | undefined;
+  // Entry Node erkennen
+  const targetIds = new Set<number>();
+  for (const node of exportNodes) {
+    for (const output of node.outputs) {
+      targetIds.add(output.targetNodeId);
+    }
+  }
+
+  // Typ im Export überschreiben
+  for (const node of exportNodes) {
+    if (!targetIds.has(node.id)) {
+      node.type = 'entry';
+      break;
+    }
+  }
+
+  // Consequence-Knoten mit identischem Inhalt bekommen denselben consequenceRef
+  const consequenceGroups = new Map<string, number>();
+
+  for (const node of exportNodes) {
+    if (node.type === 'consequence' && node.consequence) {
+      const key = `${node.label ?? ''}|${node.consequence.business ?? ''}`;
+      if (!consequenceGroups.has(key)) {
+        consequenceGroups.set(key, node.id);
+      }
+      node.consequenceRef = consequenceGroups.get(key)!;
+    }
+  }
+
+  // Sort nodes
+  exportNodes.sort((a, b) => a.id - b.id);
+
+  const entryNode = exportNodes.find((n) => n.type === 'entry');
 
   const result: ExportRulemap = {
     name: meta.name,
     description: meta.description,
     category: meta.category,
-    entryNodeId: entryData?.displayId ?? null,
-    nodes: exportNodes.sort((a, b) => a.id - b.id),
+    entryNodeId: entryNode ? entryNode.id : (exportNodes.length > 0 ? exportNodes[0].id : null),
+    nodes: exportNodes,
   };
 
   return JSON.stringify(result, null, 2);

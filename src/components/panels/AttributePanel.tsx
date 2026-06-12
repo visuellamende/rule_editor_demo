@@ -69,6 +69,16 @@ export function AttributePanel() {
               autoFocus
             />
           </div>
+          <div className="attribute-panel__field">
+            <label className="attribute-panel__label">{t('edge.value')}</label>
+            <input
+              className="attribute-panel__input"
+              type="text"
+              value={(selectedEdge.data as any)?.value ?? ''}
+              onChange={(e) => updateEdgeData(selectedEdge.id, { value: e.target.value })}
+              placeholder={t('edge.value.placeholder')}
+            />
+          </div>
         </div>
       </div>
     );
@@ -144,6 +154,32 @@ export function AttributePanel() {
             rows={2}
           />
         </div>
+
+        {/* Technical Key & Expected Type for Condition and Decision nodes */}
+        {(nodeData.nodeType === 'condition' || nodeData.nodeType === 'decision') && (
+          <>
+            <div className="attribute-panel__field">
+              <label className="attribute-panel__label">{t('panel.technicalKey')}</label>
+              <input
+                className="attribute-panel__input"
+                type="text"
+                value={nodeData.technicalKey ?? ''}
+                onChange={(e) => updateNodeData(selectedNode.id, { technicalKey: e.target.value })}
+                placeholder={t('panel.technicalKey.placeholder')}
+              />
+            </div>
+            <div className="attribute-panel__field">
+              <label className="attribute-panel__label">{t('panel.expectedType')}</label>
+              <input
+                className="attribute-panel__input"
+                type="text"
+                value={nodeData.expectedType ?? ''}
+                onChange={(e) => updateNodeData(selectedNode.id, { expectedType: e.target.value })}
+                placeholder={t('panel.expectedType.placeholder')}
+              />
+            </div>
+          </>
+        )}
 
         {/* Konsequenz — nur bei Consequence-Knoten */}
         {nodeData.nodeType === 'consequence' && (
