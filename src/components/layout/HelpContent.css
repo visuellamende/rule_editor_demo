@@ -1,23 +1,29 @@
+.help-content {
+  padding: var(--space-md);
+}
+
 .help-content__header {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
-  padding-bottom: var(--space-md);
+  padding-bottom: var(--space-lg);
   border-bottom: 1px solid var(--color-border-subtle);
-  margin-bottom: var(--space-md);
+  margin-bottom: var(--space-lg);
 }
 
 .help-content__back {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border: none;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   background: transparent;
   color: var(--color-text-secondary);
   cursor: pointer;
+  transition: background-color var(--duration-fast) var(--easing-default),
+              color var(--duration-fast) var(--easing-default);
 }
 
 .help-content__back:hover {
@@ -34,23 +40,113 @@
 .help-content__body {
   display: flex;
   flex-direction: column;
-  gap: var(--space-lg);
+  gap: var(--space-xl);
+}
+
+.help-content__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
 }
 
 .help-content__section h3 {
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-md);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
-  margin-bottom: var(--space-xs);
+  padding-bottom: var(--space-xs);
+  border-bottom: 1px solid var(--color-border-subtle);
 }
 
 .help-content__section p {
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
   line-height: var(--line-height-normal);
-  margin-bottom: var(--space-xs);
 }
 
 .help-content__section p strong {
   color: var(--color-text-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Tastenkürzel als kompakte Liste */
+.help-content__shortcuts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.help-content__shortcut {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-xs) 0;
+}
+
+.help-content__shortcut-key {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  padding: var(--space-xxs) var(--space-sm);
+  background-color: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-primary);
+}
+
+.help-content__shortcut-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+/* Knotentyp-Liste mit Farbpunkten */
+.help-content__node-types {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.help-content__node-type {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+}
+
+.help-content__node-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+
+.help-content__node-dot--decision {
+  background-color: var(--color-node-decision);
+}
+
+.help-content__node-dot--condition {
+  background-color: var(--color-node-condition);
+}
+
+.help-content__node-dot--action {
+  background-color: var(--color-node-action);
+}
+
+.help-content__node-dot--consequence {
+  background-color: var(--color-node-consequence);
+}
+
+.help-content__node-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.help-content__node-name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.help-content__node-desc {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
 }

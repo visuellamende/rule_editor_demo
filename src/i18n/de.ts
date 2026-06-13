@@ -140,9 +140,9 @@ export const de = {
 
   // Help
   'help.whatIs': 'Was ist der Rule Editor?',
-  'help.whatIsText': 'Ein visueller Editor, mit dem du Entscheidungslogik als Baum abbilden kannst. Du beschreibst fachliche Regeln — KI-Agenten oder Entwickler setzen sie um.',
+  'help.whatIsText': 'Ein visueller Editor für Entscheidungslogik. Du baust Entscheidungsbäume aus fachlichen Fragen und Bedingungen. Das Ergebnis lässt sich als JSON (maschinenlesbar für KI-Agenten) oder Markdown (für Dokumentation) exportieren.',
   'help.howTo': 'Wie starte ich?',
-  'help.howToText': 'Klicke auf das "+" im Canvas, wähle einen Knotentyp und formuliere deine Frage. Über das "+" am Knoten baust du den Baum weiter aus.',
+  'help.howToText': 'Klicke auf das "+" im Canvas und wähle einen Knotentyp. Formuliere deine Frage oder Bedingung. Über das "+" am Knoten baust du den Baum weiter aus. Verbindungen werden automatisch beschriftet.',
   'help.nodeTypes': 'Knotentypen',
   'help.nodeDecision': 'Eine fachliche Frage mit mehreren Ausgängen.',
   'help.nodeCondition': 'Prüft einen Wert oder Zustand.',

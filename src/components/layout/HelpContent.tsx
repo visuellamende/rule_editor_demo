@@ -21,35 +21,80 @@ export function HelpContent({ onBack }: HelpContentProps) {
       </div>
 
       <div className="help-content__body">
+        {/* Was ist es */}
         <section className="help-content__section">
           <h3>{t('help.whatIs')}</h3>
           <p>{t('help.whatIsText')}</p>
         </section>
 
+        {/* Wie starte ich */}
         <section className="help-content__section">
           <h3>{t('help.howTo')}</h3>
           <p>{t('help.howToText')}</p>
         </section>
 
+        {/* Knotentypen mit Farbpunkten */}
         <section className="help-content__section">
           <h3>{t('help.nodeTypes')}</h3>
-          <p><strong>Decision</strong> — {t('help.nodeDecision')}</p>
-          <p><strong>Condition</strong> — {t('help.nodeCondition')}</p>
-          <p><strong>Action</strong> — {t('help.nodeAction')}</p>
-          <p><strong>Consequence</strong> — {t('help.nodeConsequence')}</p>
+          <div className="help-content__node-types">
+            <div className="help-content__node-type">
+              <span className="help-content__node-dot help-content__node-dot--decision" />
+              <div className="help-content__node-info">
+                <span className="help-content__node-name">Decision</span>
+                <span className="help-content__node-desc">{t('help.nodeDecision')}</span>
+              </div>
+            </div>
+            <div className="help-content__node-type">
+              <span className="help-content__node-dot help-content__node-dot--condition" />
+              <div className="help-content__node-info">
+                <span className="help-content__node-name">Condition</span>
+                <span className="help-content__node-desc">{t('help.nodeCondition')}</span>
+              </div>
+            </div>
+            <div className="help-content__node-type">
+              <span className="help-content__node-dot help-content__node-dot--action" />
+              <div className="help-content__node-info">
+                <span className="help-content__node-name">Action</span>
+                <span className="help-content__node-desc">{t('help.nodeAction')}</span>
+              </div>
+            </div>
+            <div className="help-content__node-type">
+              <span className="help-content__node-dot help-content__node-dot--consequence" />
+              <div className="help-content__node-info">
+                <span className="help-content__node-name">Consequence</span>
+                <span className="help-content__node-desc">{t('help.nodeConsequence')}</span>
+              </div>
+            </div>
+          </div>
         </section>
 
+        {/* Export */}
         <section className="help-content__section">
           <h3>{t('help.export')}</h3>
           <p>{t('help.exportText')}</p>
         </section>
 
+        {/* Tastenkürzel */}
         <section className="help-content__section">
           <h3>{t('help.shortcuts')}</h3>
-          <p><strong>Cmd/Ctrl + Z</strong> — {t('help.undo')}</p>
-          <p><strong>Cmd/Ctrl + Shift + Z</strong> — {t('help.redo')}</p>
-          <p><strong>{t('help.doubleClick')}</strong> — {t('help.inlineEdit')}</p>
-          <p><strong>Backspace / Delete</strong> — {t('help.delete')}</p>
+          <div className="help-content__shortcuts">
+            <div className="help-content__shortcut">
+              <span className="help-content__shortcut-label">{t('help.undo')}</span>
+              <span className="help-content__shortcut-key">⌘ Z</span>
+            </div>
+            <div className="help-content__shortcut">
+              <span className="help-content__shortcut-label">{t('help.redo')}</span>
+              <span className="help-content__shortcut-key">⌘ ⇧ Z</span>
+            </div>
+            <div className="help-content__shortcut">
+              <span className="help-content__shortcut-label">{t('help.inlineEdit')}</span>
+              <span className="help-content__shortcut-key">{t('help.doubleClick')}</span>
+            </div>
+            <div className="help-content__shortcut">
+              <span className="help-content__shortcut-label">{t('help.delete')}</span>
+              <span className="help-content__shortcut-key">⌫</span>
+            </div>
+          </div>
         </section>
       </div>
     </div>

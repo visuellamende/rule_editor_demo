@@ -142,9 +142,9 @@ export const en: Record<TranslationKey, string> = {
 
   // Help
   'help.whatIs': 'What is the Rule Editor?',
-  'help.whatIsText': 'A visual editor for mapping decision logic as a tree. You describe business rules — AI agents or developers implement them.',
+  'help.whatIsText': 'A visual editor for decision logic. You build decision trees from business questions and conditions. The result can be exported as JSON (machine-readable for AI agents) or Markdown (for documentation).',
   'help.howTo': 'How do I start?',
-  'help.howToText': 'Click the "+" on the canvas, choose a node type and formulate your question. Use the "+" on a node to extend the tree.',
+  'help.howToText': 'Click the "+" on the canvas and choose a node type. Formulate your question or condition. Use the "+" on a node to extend the tree. Connections are labeled automatically.',
   'help.nodeTypes': 'Node Types',
   'help.nodeDecision': 'A business question with multiple outcomes.',
   'help.nodeCondition': 'Checks a value or state.',
