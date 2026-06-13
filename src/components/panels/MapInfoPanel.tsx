@@ -68,13 +68,14 @@ export function MapInfoPanel() {
   };
 
   const handleExportSvg = async () => {
-    reactFlowInstance.fitView({ padding: 0.2, duration: 0 });
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    // FitView vor dem Export, damit alles sichtbar ist
+    try {
+      reactFlowInstance.fitView({ padding: 0.2, duration: 0 });
+      await new Promise((resolve) => setTimeout(resolve, 200));
+    } catch {}
 
-    const canvasElement = document.querySelector('.react-flow') as HTMLElement;
-    if (canvasElement) {
-      await exportCanvasAsSvg(canvasElement, mapMeta.name);
-    }
+    const mapName = useCanvasStore.getState().mapMeta.name;
+    await exportCanvasAsSvg(mapName);
   };
 
   return (
