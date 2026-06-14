@@ -1,14 +1,17 @@
+import { useState, useEffect } from 'react';
 import { useCanvasStore } from '../../store/useCanvasStore';
 import { useI18n } from '../../i18n';
 import { CustomSelect } from '../primitives/CustomSelect';
 import { MapInfoPanel } from './MapInfoPanel';
 import { EdgeLabelSuggestions } from './EdgeLabelSuggestions';
-import type { RuleNodeData, RuleNodeType, ConsequenceData } from '../../types/nodes';
+import type { RuleNodeData, RuleNodeType, ConsequenceData, InputDataSource } from '../../types/nodes';
 import { useReactFlow } from '@xyflow/react';
+import { KnowledgeSourceEditor } from './KnowledgeSourceEditor';
 import './AttributePanel.css';
 
 export function AttributePanel() {
   const { t } = useI18n();
+
   const { fitView } = useReactFlow();
   const {
     selectedNodeId,
@@ -36,6 +39,27 @@ export function AttributePanel() {
   const selectedNode = nodes.find((n) => n.id === selectedNodeId);
   const nodeData = selectedNode?.data as unknown as RuleNodeData | undefined;
   const selectedEdge = edges.find((e) => e.id === selectedEdgeId);
+
+  const [showInputSource, setShowInputSource] = useState(false);
+  const [showKnowledgeSources, setShowKnowledgeSources] = useState(false);
+
+  useEffect(() => {
+    if (nodeData && (nodeData.nodeType === 'condition' || nodeData.nodeType === 'decision')) {
+      setShowInputSource(!!nodeData.inputSource?.provider);
+    } else {
+      setShowInputSource(false);
+    }
+  }, [selectedNodeId, nodeData?.nodeType]);
+
+  useEffect(() => {
+    if (nodeData) {
+      setShowKnowledgeSources((nodeData.knowledgeSources?.length ?? 0) > 0);
+    } else {
+      setShowKnowledgeSources(false);
+    }
+  }, [selectedNodeId]);
+
+
 
   if (selectedEdge) {
     const sourceNode = nodes.find((n) => n.id === selectedEdge.source);
@@ -93,6 +117,10 @@ export function AttributePanel() {
     );
   }
 
+  const warnings = useCanvasStore((state) =>
+    state.validationWarnings.filter((w) => w.nodeId === selectedNode.id)
+  );
+
   const handleTypeChange = (value: string) => {
     const nextType = value as RuleNodeType;
     const updates: Partial<RuleNodeData> = { nodeType: nextType };
@@ -124,6 +152,20 @@ export function AttributePanel() {
     const current = nodeData.consequence ?? { business: '' };
     updateNodeData(selectedNode.id, {
       consequence: { ...current, [field]: value },
+    });
+  };
+
+  const updateInputSource = (partial: Partial<InputDataSource>) => {
+    if (!selectedNode || !nodeData) return;
+    const current = nodeData.inputSource ?? {
+      provider: 'system',
+      providerSubtype: null,
+      verfuegbarkeit: 'vorhanden',
+      kannScheitern: false,
+      referenziertEntscheidung: null,
+    };
+    updateNodeData(selectedNode.id, {
+      inputSource: { ...current, ...partial },
     });
   };
 
@@ -169,6 +211,24 @@ export function AttributePanel() {
         </div>
 
         <div className="attribute-panel__body">
+          {warnings.length > 0 && (
+            <div className="attribute-panel__warnings">
+              {warnings.map((w) => (
+                <div
+                  key={w.type}
+                  className={`attribute-panel__warning attribute-panel__warning--${w.severity}`}
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                    <line x1="12" y1="9" x2="12" y2="13" />
+                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                  </svg>
+                  <span>{w.message}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
           {/* Typ */}
           <div className="attribute-panel__field">
             <label className="attribute-panel__label">{t('panel.nodeType')}</label>
@@ -243,6 +303,32 @@ export function AttributePanel() {
             </div>
           )}
 
+          {/* Regelautorität — bei allen Knotentypen */}
+          <div className="attribute-panel__section">
+            <h4
+              className="attribute-panel__section-title attribute-panel__section-title--collapsible"
+              onClick={() => setShowKnowledgeSources(!showKnowledgeSources)}
+            >
+              <svg
+                className={`attribute-panel__collapse-icon ${showKnowledgeSources ? 'attribute-panel__collapse-icon--open' : ''}`}
+                width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+              >
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+              {t('panel.knowledgeSources')}
+              {(nodeData.knowledgeSources?.length ?? 0) > 0 && (
+                <span className="attribute-panel__badge">{nodeData.knowledgeSources!.length}</span>
+              )}
+            </h4>
+
+            {showKnowledgeSources && (
+              <KnowledgeSourceEditor
+                sources={nodeData.knowledgeSources ?? []}
+                onChange={(sources) => updateNodeData(selectedNode.id, { knowledgeSources: sources })}
+              />
+            )}
+          </div>
+
           {/* Notizen */}
           <div className="attribute-panel__field">
             <label className="attribute-panel__label">{t('panel.notes')}</label>
@@ -268,6 +354,24 @@ export function AttributePanel() {
       </div>
 
       <div className="attribute-panel__body">
+        {warnings.length > 0 && (
+          <div className="attribute-panel__warnings">
+            {warnings.map((w) => (
+              <div
+                key={w.type}
+                className={`attribute-panel__warning attribute-panel__warning--${w.severity}`}
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                  <line x1="12" y1="9" x2="12" y2="13" />
+                  <line x1="12" y1="17" x2="12.01" y2="17" />
+                </svg>
+                <span>{w.message}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* Typ */}
         <div className="attribute-panel__field">
           <label className="attribute-panel__label">{t('panel.nodeType')}</label>
@@ -315,6 +419,101 @@ export function AttributePanel() {
             </div>
           </>
         )}
+
+        {(nodeData.nodeType === 'condition' || nodeData.nodeType === 'decision') && (
+          <div className="attribute-panel__section">
+            <h4
+              className="attribute-panel__section-title attribute-panel__section-title--collapsible"
+              onClick={() => setShowInputSource(!showInputSource)}
+            >
+              <svg
+                className={`attribute-panel__collapse-icon ${showInputSource ? 'attribute-panel__collapse-icon--open' : ''}`}
+                width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+              >
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+              {t('panel.inputSource')}
+            </h4>
+
+            {showInputSource && (
+              <div className="attribute-panel__section-body">
+
+                {/* Provider */}
+                <div className="attribute-panel__field">
+                  <label className="attribute-panel__label">{t('panel.inputSource.provider')}</label>
+                  <select
+                    className="attribute-panel__select"
+                    value={nodeData.inputSource?.provider ?? ''}
+                    onChange={(e) => {
+                      const provider = e.target.value || undefined;
+                      updateInputSource({ provider: provider as any });
+                    }}
+                  >
+                    <option value="">{t('panel.inputSource.provider.none')}</option>
+                    <option value="system">{t('panel.inputSource.provider.system')}</option>
+                    <option value="manuell">{t('panel.inputSource.provider.manuell')}</option>
+                    <option value="komposition">{t('panel.inputSource.provider.komposition')}</option>
+                  </select>
+                </div>
+
+                {/* Subtyp Freitext */}
+                <div className="attribute-panel__field">
+                  <label className="attribute-panel__label">{t('panel.inputSource.subtype')}</label>
+                  <input
+                    className="attribute-panel__input"
+                    type="text"
+                    value={nodeData.inputSource?.providerSubtype ?? ''}
+                    onChange={(e) => updateInputSource({ providerSubtype: e.target.value || null })}
+                    placeholder={t('panel.inputSource.subtype.placeholder')}
+                  />
+                </div>
+
+                {/* Verfügbarkeit */}
+                <div className="attribute-panel__field">
+                  <label className="attribute-panel__label">{t('panel.inputSource.verfuegbarkeit')}</label>
+                  <select
+                    className="attribute-panel__select"
+                    value={nodeData.inputSource?.verfuegbarkeit ?? ''}
+                    onChange={(e) => {
+                      const v = e.target.value || undefined;
+                      updateInputSource({ verfuegbarkeit: v as any });
+                    }}
+                  >
+                    <option value="">{t('panel.inputSource.verfuegbarkeit.none')}</option>
+                    <option value="vorhanden">{t('panel.inputSource.verfuegbarkeit.vorhanden')}</option>
+                    <option value="laufzeit">{t('panel.inputSource.verfuegbarkeit.laufzeit')}</option>
+                  </select>
+                </div>
+
+                {/* Kann scheitern Toggle */}
+                <div className="attribute-panel__field attribute-panel__field--row">
+                  <label className="attribute-panel__label">{t('panel.inputSource.kannScheitern')}</label>
+                  <input
+                    type="checkbox"
+                    className="attribute-panel__checkbox"
+                    checked={nodeData.inputSource?.kannScheitern ?? false}
+                    onChange={(e) => updateInputSource({ kannScheitern: e.target.checked })}
+                  />
+                </div>
+
+                {/* Referenzierte Entscheidung */}
+                {nodeData.inputSource?.provider === 'komposition' && (
+                  <div className="attribute-panel__field">
+                    <label className="attribute-panel__label">{t('panel.inputSource.referenziertEntscheidung')}</label>
+                    <input
+                      className="attribute-panel__input"
+                      type="text"
+                      value={nodeData.inputSource?.referenziertEntscheidung ?? ''}
+                      onChange={(e) => updateInputSource({ referenziertEntscheidung: e.target.value || null })}
+                      placeholder={t('panel.inputSource.referenziertEntscheidung.placeholder')}
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
 
         {/* Konsequenz — nur bei Consequence-Knoten */}
         {nodeData.nodeType === 'consequence' && (
@@ -396,6 +595,32 @@ export function AttributePanel() {
             </div>
           </div>
         )}
+
+        {/* Regelautorität — bei allen Knotentypen */}
+        <div className="attribute-panel__section">
+          <h4
+            className="attribute-panel__section-title attribute-panel__section-title--collapsible"
+            onClick={() => setShowKnowledgeSources(!showKnowledgeSources)}
+          >
+            <svg
+              className={`attribute-panel__collapse-icon ${showKnowledgeSources ? 'attribute-panel__collapse-icon--open' : ''}`}
+              width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+            >
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+            {t('panel.knowledgeSources')}
+            {(nodeData.knowledgeSources?.length ?? 0) > 0 && (
+              <span className="attribute-panel__badge">{nodeData.knowledgeSources!.length}</span>
+            )}
+          </h4>
+
+          {showKnowledgeSources && (
+            <KnowledgeSourceEditor
+              sources={nodeData.knowledgeSources ?? []}
+              onChange={(sources) => updateNodeData(selectedNode.id, { knowledgeSources: sources })}
+            />
+          )}
+        </div>
 
         {/* Notizen */}
         <div className="attribute-panel__field">

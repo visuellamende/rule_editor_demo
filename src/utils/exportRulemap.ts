@@ -1,6 +1,7 @@
 import type { Node, Edge } from '@xyflow/react';
-import type { RuleNodeData } from '../types/nodes';
+import type { RuleNodeData, InputDataSource, KnowledgeSource } from '../types/nodes';
 import type { RulemapMeta } from '../types/rulemap';
+import { validateRulemap } from './validateRulemap';
 
 // --- Strukturiertes JSON für KI-Agenten ---
 
@@ -14,7 +15,10 @@ interface ExportNode {
   consequence: ExportConsequence | null;  // Immer vorhanden, ggf. null
   outputs: ExportEdge[];            // Immer vorhanden, ggf. leeres Array
   consequenceRef?: number;
+  inputSource: InputDataSource | null;  // NEU
+  knowledgeSources: KnowledgeSource[] | null;  // NEU
 }
+
 
 interface ExportConsequence {
   business: string | null;
@@ -33,6 +37,7 @@ interface ExportRulemap {
   description: string;
   category: string | null;
   entryNodeId: number | null;
+  validationWarnings: any[] | null; // NEU
   nodes: ExportNode[];
 }
 
@@ -42,11 +47,24 @@ function cleanText(text: string | undefined | null): string | null {
   return trimmed || null;
 }
 
+const exportKnowledgeSources = (sources?: KnowledgeSource[]): KnowledgeSource[] | null => {
+  if (!sources || sources.length === 0) return null;
+  return sources.map((s) => ({
+    id: s.id,
+    art: s.art,
+    verbindlichkeit: s.verbindlichkeit,
+    referenz: cleanText(s.referenz) ?? '',
+    eigner: cleanText(s.eigner),
+    beschreibung: cleanText(s.beschreibung),
+  }));
+};
+
 export function exportAsJSON(
   meta: RulemapMeta,
   nodes: Node[],
   edges: Edge[],
 ): string {
+  const warnings = validateRulemap(nodes, edges);
   const exportNodes: ExportNode[] = nodes.map((node) => {
     const data = node.data as unknown as RuleNodeData;
     const outgoingEdges = edges
@@ -71,7 +89,16 @@ export function exportAsJSON(
       notes: cleanText(data?.notes),
       consequence: null,
       outputs: outgoingEdges,
+      inputSource: data?.inputSource ? {
+        provider: data.inputSource.provider,
+        providerSubtype: cleanText(data.inputSource.providerSubtype),
+        verfuegbarkeit: data.inputSource.verfuegbarkeit,
+        kannScheitern: data.inputSource.kannScheitern,
+        referenziertEntscheidung: cleanText(data.inputSource.referenziertEntscheidung),
+      } : null,
+      knowledgeSources: exportKnowledgeSources(data?.knowledgeSources),
     };
+
 
     if (data?.nodeType === 'consequence' && data.consequence) {
       exportNode.consequence = {
@@ -137,6 +164,14 @@ export function exportAsJSON(
     description: meta.description,
     category: meta.category,
     entryNodeId: entryNode ? entryNode.id : (exportNodes.length > 0 ? exportNodes[0].id : null),
+    validationWarnings: warnings.length > 0
+      ? warnings.map((w) => ({
+          nodeId: w.displayId,
+          type: w.type,
+          message: w.message,
+          severity: w.severity,
+        }))
+      : null,
     nodes: exportNodes,
   };
 

@@ -189,5 +189,25 @@
   flex-shrink: 0;
 }
 
+.rule-node__warning {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: #f59e0b;
+  color: #fff;
+  cursor: help;
+  z-index: 10;
+}
+
+.rule-node__warning--error {
+  background-color: #ef4444;
+}
+
 
 

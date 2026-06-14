@@ -4,6 +4,8 @@ import type { Node, Edge } from '@xyflow/react';
 import type { RulemapMeta, RulemapFile } from '../types/rulemap';
 import { getAutoLayout } from '../utils/autoLayout';
 
+import { validateRulemap, type ValidationWarning } from '../utils/validateRulemap';
+
 interface CanvasStore {
   nodes: Node[];
   edges: Edge[];
@@ -13,6 +15,7 @@ interface CanvasStore {
   filePath: string | null;
   isDirty: boolean;
   nextDisplayId: number;
+  validationWarnings: ValidationWarning[];
 
   setNodes: (nodes: Node[] | ((prev: Node[]) => Node[])) => void;
   setEdges: (edges: Edge[] | ((prev: Edge[]) => Edge[])) => void;
@@ -32,6 +35,7 @@ interface CanvasStore {
   applyAutoLayout: () => void;
   getNextDisplayId: () => number;
   resetCanvas: () => void;
+  refreshValidation: () => void;
 }
 
 export const useCanvasStore = create<CanvasStore>()(
@@ -52,6 +56,7 @@ export const useCanvasStore = create<CanvasStore>()(
       filePath: null,
       isDirty: false,
       nextDisplayId: 1,
+      validationWarnings: [],
 
       setNodes: (nodesOrFn) =>
         set((state) => ({
@@ -223,6 +228,11 @@ export const useCanvasStore = create<CanvasStore>()(
         selectedNodeId: null,
         selectedEdgeId: null,
       }),
+
+      refreshValidation: () =>
+        set((state) => ({
+          validationWarnings: validateRulemap(state.nodes, state.edges),
+        })),
     }),
     {
       partialize: (state) => ({
