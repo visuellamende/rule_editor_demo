@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useCanvasStore } from '../../store/useCanvasStore';
 import { useI18n } from '../../i18n';
 import { CustomSelect } from '../primitives/CustomSelect';
@@ -35,9 +35,10 @@ export function AttributePanel() {
     () => !!(nodeData && (nodeData.knowledgeSources?.length ?? 0) > 0)
   );
 
-  const warnings = useCanvasStore((state) =>
-    selectedNode ? state.validationWarnings.filter((w) => w.nodeId === selectedNode.id) : []
-  );
+  const validationWarnings = useCanvasStore((state) => state.validationWarnings);
+  const warnings = useMemo(() => 
+    selectedNode ? validationWarnings.filter((w) => w.nodeId === selectedNode.id) : [], 
+  [validationWarnings, selectedNode?.id]);
 
   const hasOpenMap = filePath !== null;
 
