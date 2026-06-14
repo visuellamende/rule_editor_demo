@@ -74,6 +74,30 @@ export function HelpContent({ onBack }: HelpContentProps) {
           <p>{t('help.exportText')}</p>
         </section>
 
+        {/* Datenquellen */}
+        <section className="help-content__section">
+          <h3>{t('help.inputSource')}</h3>
+          <p>{t('help.inputSourceText')}</p>
+        </section>
+
+        {/* Regelautorität */}
+        <section className="help-content__section">
+          <h3>{t('help.knowledgeSources')}</h3>
+          <p>{t('help.knowledgeSourcesText')}</p>
+        </section>
+
+        {/* Validierung */}
+        <section className="help-content__section">
+          <h3>{t('help.validation')}</h3>
+          <p>{t('help.validationText')}</p>
+        </section>
+
+        {/* Prompt-Templates */}
+        <section className="help-content__section">
+          <h3>{t('help.promptTemplates')}</h3>
+          <p>{t('help.promptTemplatesText')}</p>
+        </section>
+
         {/* Tastenkürzel */}
         <section className="help-content__section">
           <h3>{t('help.shortcuts')}</h3>
