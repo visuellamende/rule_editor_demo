@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { Handle, Position, useReactFlow, type NodeProps, type Node } from '@xyflow/react';
 import { NodeTypeMenu } from '../NodeTypeMenu';
 import type { RuleNodeData, RuleNodeType } from '../../../types/nodes';
@@ -60,9 +60,8 @@ function getNextEdgeId(): string {
 
 export function RuleNode({ id, data, selected }: NodeProps) {
   const nodeData = data as unknown as RuleNodeData;
-  const warnings = useCanvasStore((state) =>
-    state.validationWarnings.filter((w) => w.nodeId === id)
-  );
+  const validationWarnings = useCanvasStore((state) => state.validationWarnings);
+  const warnings = useMemo(() => validationWarnings.filter((w) => w.nodeId === id), [validationWarnings, id]);
   const hasErrors = warnings.some((w) => w.severity === 'error');
   const hasWarnings = warnings.length > 0;
 
