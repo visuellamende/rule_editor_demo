@@ -6,6 +6,7 @@ import { MapInfoPanel } from './MapInfoPanel';
 import { EdgeLabelSuggestions } from './EdgeLabelSuggestions';
 import type { RuleNodeData, RuleNodeType, ConsequenceData, InputDataSource } from '../../types/nodes';
 import { useReactFlow } from '@xyflow/react';
+import { KnowledgeSourceEditor } from './KnowledgeSourceEditor';
 import './AttributePanel.css';
 
 export function AttributePanel() {
@@ -40,6 +41,7 @@ export function AttributePanel() {
   const selectedEdge = edges.find((e) => e.id === selectedEdgeId);
 
   const [showInputSource, setShowInputSource] = useState(false);
+  const [showKnowledgeSources, setShowKnowledgeSources] = useState(false);
 
   useEffect(() => {
     if (nodeData && (nodeData.nodeType === 'condition' || nodeData.nodeType === 'decision')) {
@@ -48,6 +50,15 @@ export function AttributePanel() {
       setShowInputSource(false);
     }
   }, [selectedNodeId, nodeData?.nodeType]);
+
+  useEffect(() => {
+    if (nodeData) {
+      setShowKnowledgeSources((nodeData.knowledgeSources?.length ?? 0) > 0);
+    } else {
+      setShowKnowledgeSources(false);
+    }
+  }, [selectedNodeId]);
+
 
 
   if (selectedEdge) {
@@ -269,6 +280,32 @@ export function AttributePanel() {
               </div>
             </div>
           )}
+
+          {/* Regelautorität — bei allen Knotentypen */}
+          <div className="attribute-panel__section">
+            <h4
+              className="attribute-panel__section-title attribute-panel__section-title--collapsible"
+              onClick={() => setShowKnowledgeSources(!showKnowledgeSources)}
+            >
+              <svg
+                className={`attribute-panel__collapse-icon ${showKnowledgeSources ? 'attribute-panel__collapse-icon--open' : ''}`}
+                width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+              >
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+              {t('panel.knowledgeSources')}
+              {(nodeData.knowledgeSources?.length ?? 0) > 0 && (
+                <span className="attribute-panel__badge">{nodeData.knowledgeSources!.length}</span>
+              )}
+            </h4>
+
+            {showKnowledgeSources && (
+              <KnowledgeSourceEditor
+                sources={nodeData.knowledgeSources ?? []}
+                onChange={(sources) => updateNodeData(selectedNode.id, { knowledgeSources: sources })}
+              />
+            )}
+          </div>
 
           {/* Notizen */}
           <div className="attribute-panel__field">
@@ -518,6 +555,32 @@ export function AttributePanel() {
             </div>
           </div>
         )}
+
+        {/* Regelautorität — bei allen Knotentypen */}
+        <div className="attribute-panel__section">
+          <h4
+            className="attribute-panel__section-title attribute-panel__section-title--collapsible"
+            onClick={() => setShowKnowledgeSources(!showKnowledgeSources)}
+          >
+            <svg
+              className={`attribute-panel__collapse-icon ${showKnowledgeSources ? 'attribute-panel__collapse-icon--open' : ''}`}
+              width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+            >
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+            {t('panel.knowledgeSources')}
+            {(nodeData.knowledgeSources?.length ?? 0) > 0 && (
+              <span className="attribute-panel__badge">{nodeData.knowledgeSources!.length}</span>
+            )}
+          </h4>
+
+          {showKnowledgeSources && (
+            <KnowledgeSourceEditor
+              sources={nodeData.knowledgeSources ?? []}
+              onChange={(sources) => updateNodeData(selectedNode.id, { knowledgeSources: sources })}
+            />
+          )}
+        </div>
 
         {/* Notizen */}
         <div className="attribute-panel__field">

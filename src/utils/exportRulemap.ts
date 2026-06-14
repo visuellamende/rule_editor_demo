@@ -1,5 +1,5 @@
 import type { Node, Edge } from '@xyflow/react';
-import type { RuleNodeData, InputDataSource } from '../types/nodes';
+import type { RuleNodeData, InputDataSource, KnowledgeSource } from '../types/nodes';
 import type { RulemapMeta } from '../types/rulemap';
 
 // --- Strukturiertes JSON für KI-Agenten ---
@@ -15,7 +15,9 @@ interface ExportNode {
   outputs: ExportEdge[];            // Immer vorhanden, ggf. leeres Array
   consequenceRef?: number;
   inputSource: InputDataSource | null;  // NEU
+  knowledgeSources: KnowledgeSource[] | null;  // NEU
 }
+
 
 interface ExportConsequence {
   business: string | null;
@@ -42,6 +44,18 @@ function cleanText(text: string | undefined | null): string | null {
   const trimmed = text.replace(/\n{2,}/g, '\n').trim();
   return trimmed || null;
 }
+
+const exportKnowledgeSources = (sources?: KnowledgeSource[]): KnowledgeSource[] | null => {
+  if (!sources || sources.length === 0) return null;
+  return sources.map((s) => ({
+    id: s.id,
+    art: s.art,
+    verbindlichkeit: s.verbindlichkeit,
+    referenz: cleanText(s.referenz) ?? '',
+    eigner: cleanText(s.eigner),
+    beschreibung: cleanText(s.beschreibung),
+  }));
+};
 
 export function exportAsJSON(
   meta: RulemapMeta,
@@ -79,7 +93,9 @@ export function exportAsJSON(
         kannScheitern: data.inputSource.kannScheitern,
         referenziertEntscheidung: cleanText(data.inputSource.referenziertEntscheidung),
       } : null,
+      knowledgeSources: exportKnowledgeSources(data?.knowledgeSources),
     };
+
 
     if (data?.nodeType === 'consequence' && data.consequence) {
       exportNode.consequence = {

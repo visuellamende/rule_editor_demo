@@ -1,0 +1,164 @@
+.ks-editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding-top: var(--space-sm);
+}
+
+/* --- Kompakt-Ansicht --- */
+.ks-editor__compact {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xxs);
+  padding: var(--space-sm);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--easing-default);
+}
+
+.ks-editor__compact:hover {
+  border-color: var(--color-primary);
+}
+
+.ks-editor__compact-header {
+  display: flex;
+  gap: var(--space-xs);
+}
+
+.ks-editor__art-badge {
+  font-size: var(--font-size-xs);
+  padding: 1px var(--space-xs);
+  border-radius: var(--radius-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.ks-editor__art-badge--gesetz { background-color: #ef444420; color: #ef4444; }
+.ks-editor__art-badge--norm_standard { background-color: #f59e0b20; color: #f59e0b; }
+.ks-editor__art-badge--interne_richtlinie { background-color: #3b82f620; color: #3b82f6; }
+.ks-editor__art-badge--vertrag { background-color: #8b5cf620; color: #8b5cf6; }
+.ks-editor__art-badge--fachwissen { background-color: #10b98120; color: #10b981; }
+
+.ks-editor__verbindlichkeit-badge {
+  font-size: var(--font-size-xs);
+  padding: 1px var(--space-xs);
+  border-radius: var(--radius-sm);
+}
+
+.ks-editor__verbindlichkeit-badge--verbindlich { background-color: #ef444415; color: #ef4444; }
+.ks-editor__verbindlichkeit-badge--empfohlen { background-color: #f59e0b15; color: #f59e0b; }
+.ks-editor__verbindlichkeit-badge--optional { background-color: #71717a15; color: #71717a; }
+
+.ks-editor__compact-ref {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+}
+
+.ks-editor__compact-eigner {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+/* --- Edit-Modus --- */
+.ks-editor__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: var(--space-sm);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-elevated);
+}
+
+.ks-editor__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xxs);
+}
+
+.ks-editor__label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+.ks-editor__select,
+.ks-editor__input {
+  padding: var(--space-xs) var(--space-sm);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-bg-surface);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-sm);
+}
+
+.ks-editor__select:focus,
+.ks-editor__input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.ks-editor__actions {
+  display: flex;
+  justify-content: space-between;
+  padding-top: var(--space-xs);
+}
+
+.ks-editor__done,
+.ks-editor__remove {
+  font-size: var(--font-size-xs);
+  padding: var(--space-xxs) var(--space-sm);
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: var(--font-family-base);
+}
+
+.ks-editor__done {
+  background-color: var(--color-primary);
+  color: var(--color-text-on-primary);
+}
+
+.ks-editor__remove {
+  background-color: transparent;
+  color: var(--color-text-muted);
+}
+
+.ks-editor__remove:hover {
+  color: #ef4444;
+}
+
+/* --- Add-Button --- */
+.ks-editor__add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm);
+  border: 1px dashed var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--easing-default),
+              color var(--duration-fast) var(--easing-default);
+}
+
+.ks-editor__add:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+/* --- Badge im Section-Titel --- */
+.attribute-panel__badge {
+  font-size: var(--font-size-xs);
+  padding: 0 var(--space-xs);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-primary);
+  color: var(--color-text-on-primary);
+  font-weight: var(--font-weight-medium);
+  margin-left: auto;
+}
