@@ -182,6 +182,18 @@ export const de = {
   'export.markdownCopy': 'Markdown kopieren',
   'export.svgFile': 'SVG speichern',
   'export.pngFile': 'PNG speichern',
+  'export.templates': 'Prompt-Templates',
+  'template.implementation': 'Implementierung',
+  'template.implementation.desc': 'Generiert eine Funktion die die Entscheidungslogik implementiert',
+  'template.tests': 'Testfälle',
+  'template.tests.desc': 'Generiert Unit-Tests für jeden Entscheidungspfad',
+  'template.audit': 'Code-Audit',
+  'template.audit.desc': 'Prüft bestehenden Code gegen das Entscheidungsmodell',
+  'template.documentation': 'Dokumentation',
+  'template.documentation.desc': 'Schreibt eine fachliche Dokumentation der Entscheidungslogik',
+  'template.completeness': 'Vollständigkeitsprüfung',
+  'template.completeness.desc': 'Analysiert das Modell auf Lücken und Inkonsistenzen',
+  'template.copied': 'Kopiert!',
 
   // Help
   'help.whatIs': 'Was ist der Rule Editor?',

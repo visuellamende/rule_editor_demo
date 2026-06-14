@@ -184,6 +184,18 @@ export const en: Record<TranslationKey, string> = {
   'export.markdownCopy': 'Copy Markdown',
   'export.svgFile': 'Save SVG',
   'export.pngFile': 'Save PNG',
+  'export.templates': 'Prompt Templates',
+  'template.implementation': 'Implementation',
+  'template.implementation.desc': 'Generates a function implementing the decision logic',
+  'template.tests': 'Test Cases',
+  'template.tests.desc': 'Generates unit tests for each decision path',
+  'template.audit': 'Code Audit',
+  'template.audit.desc': 'Checks existing code against the decision model',
+  'template.documentation': 'Documentation',
+  'template.documentation.desc': 'Writes a business documentation of the decision logic',
+  'template.completeness': 'Completeness Check',
+  'template.completeness.desc': 'Analyzes the model for gaps and inconsistencies',
+  'template.copied': 'Copied!',
 
   // Help
   'help.whatIs': 'What is the Rule Editor?',
