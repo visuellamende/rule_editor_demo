@@ -139,6 +139,7 @@ export const en: Record<TranslationKey, string> = {
   'export.markdownFile': 'Save Markdown',
   'export.markdownCopy': 'Copy Markdown',
   'export.svgFile': 'Save SVG',
+  'export.pngFile': 'Save PNG',
 
   // Help
   'help.whatIs': 'What is the Rule Editor?',

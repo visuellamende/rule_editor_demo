@@ -5,7 +5,7 @@ import type { RulemapCategory } from '../../types/nodes';
 import { exportAsJSON, exportAsMarkdown } from '../../utils/exportRulemap';
 import { downloadFile } from '../../services/browserStorage';
 import { useReactFlow } from '@xyflow/react';
-import { exportCanvasAsSvg } from '../../utils/exportSvg';
+import { exportCanvasAsSvg, exportCanvasAsPng } from '../../utils/exportSvg';
 import './MapInfoPanel.css';
 
 const categoryValues: RulemapCategory[] = [
@@ -76,6 +76,17 @@ export function MapInfoPanel() {
 
     const mapName = useCanvasStore.getState().mapMeta.name;
     await exportCanvasAsSvg(mapName);
+  };
+
+  const handleExportPng = async () => {
+    // FitView vor dem Export, damit alles sichtbar ist
+    try {
+      reactFlowInstance.fitView({ padding: 0.2, duration: 0 });
+      await new Promise((resolve) => setTimeout(resolve, 200));
+    } catch {}
+
+    const mapName = useCanvasStore.getState().mapMeta.name;
+    await exportCanvasAsPng(mapName);
   };
 
   return (
@@ -153,17 +164,22 @@ export function MapInfoPanel() {
           >
             {t('export.markdownCopy')}
           </button>
+          <button
+            className="map-info-panel__export-button"
+            onClick={handleExportSvg}
+            title={t('export.svgFile')}
+          >
+            {t('export.svgFile')}
+          </button>
+          <button
+            className="map-info-panel__export-button"
+            onClick={handleExportPng}
+            title={t('export.pngFile')}
+          >
+            {t('export.pngFile')}
+          </button>
         </div>
-
-        <button
-          className="map-info-panel__export-button map-info-panel__export-button--full"
-          onClick={handleExportSvg}
-          title={t('export.svgFile')}
-        >
-          {t('export.svgFile')}
-        </button>
       </div>
     </div>
   );
 }
-

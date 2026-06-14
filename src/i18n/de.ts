@@ -137,6 +137,7 @@ export const de = {
   'export.markdownFile': 'Markdown speichern',
   'export.markdownCopy': 'Markdown kopieren',
   'export.svgFile': 'SVG speichern',
+  'export.pngFile': 'PNG speichern',
 
   // Help
   'help.whatIs': 'Was ist der Rule Editor?',
