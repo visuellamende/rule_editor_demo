@@ -141,4 +141,36 @@
   box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb, 0, 122, 204), 0.15);
 }
 
+.attribute-panel__warnings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-md);
+}
+
+.attribute-panel__warning {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-xs);
+  padding: var(--space-sm);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-normal);
+}
+
+.attribute-panel__warning--warning {
+  background-color: #f59e0b15;
+  color: #f59e0b;
+}
+
+.attribute-panel__warning--error {
+  background-color: #ef444415;
+  color: #ef4444;
+}
+
+.attribute-panel__warning svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
 

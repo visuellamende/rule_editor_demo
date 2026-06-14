@@ -3,6 +3,7 @@ import { ReactFlowProvider } from '@xyflow/react';
 import { useTheme } from './hooks/useTheme';
 import { useAutosave } from './hooks/useAutosave';
 import { useUndoRedo } from './hooks/useUndoRedo';
+import { useValidation } from './hooks/useValidation';
 import { AppShell } from './components/layout/AppShell';
 import { MapList } from './components/panels/MapList';
 import { RuleCanvas } from './components/canvas/RuleCanvas';
@@ -17,6 +18,7 @@ function App() {
   useTheme();
   useAutosave();
   useUndoRedo();
+  useValidation();
   const { loadFromFile, filePath: currentMapId } = useCanvasStore();
 
   useEffect(() => {

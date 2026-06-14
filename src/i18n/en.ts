@@ -200,7 +200,13 @@ export const en: Record<TranslationKey, string> = {
   'help.shortcuts': 'Keyboard Shortcuts',
   'help.undo': 'Undo',
   'help.redo': 'Redo',
+  'help.delete': 'Delete selected element',
   'help.doubleClick': 'Double-click on node/connection',
   'help.inlineEdit': 'Edit text inline',
-  'help.delete': 'Delete selected element',
+
+  // Validation
+  'validation.title': 'Validation',
+  'validation.errors': 'Errors',
+  'validation.warnings': 'Warnings',
+  'validation.ok': 'No issues found',
 };

@@ -18,7 +18,10 @@ const categoryValues: RulemapCategory[] = [
 
 export function MapInfoPanel() {
   const { t } = useI18n();
-  const { mapMeta, updateMapMeta } = useCanvasStore();
+  const { mapMeta, updateMapMeta, nodes } = useCanvasStore();
+  const warnings = useCanvasStore((state) => state.validationWarnings);
+  const errorCount = warnings.filter((w) => w.severity === 'error').length;
+  const warningCount = warnings.filter((w) => w.severity === 'warning').length;
   const reactFlowInstance = useReactFlow();
 
   const categoryOptions = [
@@ -130,6 +133,27 @@ export function MapInfoPanel() {
         <span className="map-info-panel__meta-label">{t('sidebar.mapCreated')}</span>
         <span className="map-info-panel__meta-value">{formatDate(mapMeta.created)}</span>
       </div>
+
+      {/* Validation Summary */}
+      {warnings.length > 0 ? (
+        <div className="map-info-panel__validation">
+          <span className="map-info-panel__validation-title">{t('validation.title')}</span>
+          {errorCount > 0 && (
+            <span className="map-info-panel__validation-errors">
+              {errorCount} {t('validation.errors')}
+            </span>
+          )}
+          {warningCount > 0 && (
+            <span className="map-info-panel__validation-warnings">
+              {warningCount} {t('validation.warnings')}
+            </span>
+          )}
+        </div>
+      ) : nodes.length > 0 ? (
+        <div className="map-info-panel__validation map-info-panel__validation--ok">
+          <span>{t('validation.ok')}</span>
+        </div>
+      ) : null}
 
       {/* Export Section */}
       <div className="map-info-panel__section">

@@ -201,6 +201,12 @@ export const de = {
   'help.doubleClick': 'Doppelklick auf Knoten/Verbindung',
   'help.inlineEdit': 'Text direkt bearbeiten',
   'help.delete': 'Ausgewähltes Element löschen',
+
+  // Validation
+  'validation.title': 'Validierung',
+  'validation.errors': 'Fehler',
+  'validation.warnings': 'Hinweise',
+  'validation.ok': 'Keine Probleme gefunden',
 } as const;
 
 export type TranslationKey = keyof typeof de;
