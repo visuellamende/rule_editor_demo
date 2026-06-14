@@ -19,7 +19,7 @@ function App() {
   useAutosave();
   useUndoRedo();
   useValidation();
-  const { loadFromFile, filePath: currentMapId } = useCanvasStore();
+  const { loadFromFile, filePath: currentMapId, selectedNodeId } = useCanvasStore();
 
   useEffect(() => {
     // Initialisierung beim ersten Start
@@ -48,7 +48,7 @@ function App() {
       <AppShell
         sidebar={<MapList />}
         canvas={<RuleCanvas />}
-        panel={<AttributePanel />}
+        panel={<AttributePanel key={selectedNodeId ?? 'empty'} />}
       />
     </ReactFlowProvider>
   );
