@@ -74,3 +74,71 @@
 .attribute-panel__textarea--tall {
   min-height: 100px;
 }
+
+.attribute-panel__section-title--collapsible {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  cursor: pointer;
+  user-select: none;
+}
+
+.attribute-panel__section-title--collapsible:hover {
+  color: var(--color-text-primary);
+}
+
+.attribute-panel__collapse-icon {
+  transition: transform var(--duration-fast) var(--easing-default);
+}
+
+.attribute-panel__collapse-icon--open {
+  transform: rotate(90deg);
+}
+
+.attribute-panel__section-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding-top: var(--space-sm);
+}
+
+.attribute-panel__field--row {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.attribute-panel__checkbox {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+}
+
+.attribute-panel__select {
+  padding: var(--space-xs) var(--space-sm);
+  background-color: var(--color-bg-base);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+  transition: border-color var(--duration-fast) var(--easing-default),
+              box-shadow var(--duration-fast) var(--easing-default);
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right var(--space-sm) center;
+  background-size: 14px;
+  padding-right: var(--space-lg);
+}
+
+.attribute-panel__select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb, 0, 122, 204), 0.15);
+}
+
+

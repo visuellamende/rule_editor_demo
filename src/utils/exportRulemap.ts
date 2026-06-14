@@ -1,5 +1,5 @@
 import type { Node, Edge } from '@xyflow/react';
-import type { RuleNodeData } from '../types/nodes';
+import type { RuleNodeData, InputDataSource } from '../types/nodes';
 import type { RulemapMeta } from '../types/rulemap';
 
 // --- Strukturiertes JSON für KI-Agenten ---
@@ -14,6 +14,7 @@ interface ExportNode {
   consequence: ExportConsequence | null;  // Immer vorhanden, ggf. null
   outputs: ExportEdge[];            // Immer vorhanden, ggf. leeres Array
   consequenceRef?: number;
+  inputSource: InputDataSource | null;  // NEU
 }
 
 interface ExportConsequence {
@@ -71,6 +72,13 @@ export function exportAsJSON(
       notes: cleanText(data?.notes),
       consequence: null,
       outputs: outgoingEdges,
+      inputSource: data?.inputSource ? {
+        provider: data.inputSource.provider,
+        providerSubtype: cleanText(data.inputSource.providerSubtype),
+        verfuegbarkeit: data.inputSource.verfuegbarkeit,
+        kannScheitern: data.inputSource.kannScheitern,
+        referenziertEntscheidung: cleanText(data.inputSource.referenziertEntscheidung),
+      } : null,
     };
 
     if (data?.nodeType === 'consequence' && data.consequence) {

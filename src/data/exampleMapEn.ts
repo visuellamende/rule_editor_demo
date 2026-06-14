@@ -35,6 +35,13 @@ export const exampleMapEn: RulemapFile = {
         technicalKey: 'isUserInOrganization',
         expectedType: 'boolean',
         notes: null,
+        inputSource: {
+          provider: 'system',
+          providerSubtype: 'stammdaten',
+          verfuegbarkeit: 'vorhanden',
+          kannScheitern: false,
+          referenziertEntscheidung: null,
+        },
       },
     },
     {
@@ -66,6 +73,13 @@ export const exampleMapEn: RulemapFile = {
         technicalKey: 'hasExplicitMemberList',
         expectedType: 'boolean',
         notes: 'Public = no explicit internal members (only guests or empty)',
+        inputSource: {
+          provider: 'system',
+          providerSubtype: 'stammdaten',
+          verfuegbarkeit: 'vorhanden',
+          kannScheitern: false,
+          referenziertEntscheidung: null,
+        },
       },
     },
     {
@@ -79,6 +93,13 @@ export const exampleMapEn: RulemapFile = {
         technicalKey: 'memberRole',
         expectedType: 'enum',
         notes: null,
+        inputSource: {
+          provider: 'system',
+          providerSubtype: 'stammdaten',
+          verfuegbarkeit: 'vorhanden',
+          kannScheitern: false,
+          referenziertEntscheidung: null,
+        },
       },
     },
     {
@@ -92,6 +113,13 @@ export const exampleMapEn: RulemapFile = {
         technicalKey: 'isUserIdInMemberList',
         expectedType: 'boolean',
         notes: null,
+        inputSource: {
+          provider: 'system',
+          providerSubtype: 'stammdaten',
+          verfuegbarkeit: 'vorhanden',
+          kannScheitern: false,
+          referenziertEntscheidung: null,
+        },
       },
     },
     {
