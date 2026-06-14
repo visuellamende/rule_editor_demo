@@ -24,18 +24,6 @@ export function AttributePanel() {
     setSelectedNodeId,
   } = useCanvasStore();
 
-  const hasOpenMap = filePath !== null;
-
-  if (!hasOpenMap) {
-    return (
-      <div className="attribute-panel">
-        <div className="attribute-panel__empty">
-          <p className="attribute-panel__empty-hint">{t('panel.noMap')}</p>
-        </div>
-      </div>
-    );
-  }
-
   const selectedNode = nodes.find((n) => n.id === selectedNodeId);
   const nodeData = selectedNode?.data as unknown as RuleNodeData | undefined;
   const selectedEdge = edges.find((e) => e.id === selectedEdgeId);
@@ -47,7 +35,21 @@ export function AttributePanel() {
     () => !!(nodeData && (nodeData.knowledgeSources?.length ?? 0) > 0)
   );
 
+  const warnings = useCanvasStore((state) =>
+    selectedNode ? state.validationWarnings.filter((w) => w.nodeId === selectedNode.id) : []
+  );
 
+  const hasOpenMap = filePath !== null;
+
+  if (!hasOpenMap) {
+    return (
+      <div className="attribute-panel">
+        <div className="attribute-panel__empty">
+          <p className="attribute-panel__empty-hint">{t('panel.noMap')}</p>
+        </div>
+      </div>
+    );
+  }
 
   if (selectedEdge) {
     const sourceNode = nodes.find((n) => n.id === selectedEdge.source);
@@ -104,10 +106,6 @@ export function AttributePanel() {
       </div>
     );
   }
-
-  const warnings = useCanvasStore((state) =>
-    state.validationWarnings.filter((w) => w.nodeId === selectedNode.id)
-  );
 
   const handleTypeChange = (value: string) => {
     const nextType = value as RuleNodeType;
