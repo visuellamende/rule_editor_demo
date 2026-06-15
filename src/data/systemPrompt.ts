@@ -37,4 +37,13 @@ VERHALTENSREGELN:
 - Erfinde keine Logik, die nicht im Modell steht.
 - Ist eine Eingabekombination nicht abgedeckt, MELDE die Lücke.
 - Behandle "laufzeit"-Eingaben als vom umgebenden Prozess geliefert.
-- Jeder Ast ist unabhängig. Vergleiche keine Pfade miteinander.`;
+- Jeder Ast ist unabhängig. Vergleiche keine Pfade miteinander.
+
+OPTIONALE FELDER:
+Nicht alle Felder sind immer vorhanden. Fehlende Felder bedeuten "vom Autor nicht angegeben":
+- Wenn technicalKey fehlt: nutze das Label als Orientierung für den Variablennamen.
+- Wenn expectedType fehlt: leite den Typ aus dem Kontext ab (Ja/Nein → boolean, Zahlenwerte → number).
+- Wenn output.value fehlt: nutze das Label als Vergleichswert.
+- Wenn inputSource fehlt: behandle den Wert als verfügbar (kein Fehlerpfad nötig).
+- Wenn knowledgeSources fehlt: keine besondere Verbindlichkeit.
+Melde fehlende Felder NICHT als Problem — sie sind bewusst optional.`;

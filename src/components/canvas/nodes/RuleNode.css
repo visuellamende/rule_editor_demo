@@ -209,5 +209,19 @@
   background-color: #ef4444;
 }
 
+.rule-node__indicators {
+  display: flex;
+  gap: var(--space-xs);
+  padding: var(--space-xxs) var(--space-md) var(--space-sm);
+}
 
+.rule-node__indicator {
+  color: var(--color-text-muted);
+  opacity: 0.6;
+  cursor: help;
+  transition: opacity var(--duration-fast) var(--easing-default);
+}
 
+.rule-node__indicator:hover {
+  opacity: 1;
+}

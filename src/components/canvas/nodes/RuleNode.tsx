@@ -265,6 +265,35 @@ export function RuleNode({ id, data, selected }: NodeProps) {
         )}
       </div>
 
+      {/* Metadaten-Indikatoren */}
+      {(nodeData.inputSource?.provider || (nodeData.knowledgeSources?.length ?? 0) > 0) && (
+        <div className="rule-node__indicators">
+          {nodeData.inputSource?.provider && (
+            <span
+              className="rule-node__indicator"
+              title={t(`panel.inputSource.provider.${nodeData.inputSource.provider}` as TranslationKey)}
+            >
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <ellipse cx="12" cy="5" rx="9" ry="3" />
+                <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
+                <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+              </svg>
+            </span>
+          )}
+          {(nodeData.knowledgeSources?.length ?? 0) > 0 && (
+            <span
+              className="rule-node__indicator"
+              title={`${nodeData.knowledgeSources!.length} ${t('panel.knowledgeSources' as TranslationKey)}`}
+            >
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+              </svg>
+            </span>
+          )}
+        </div>
+      )}
+
       {/* Source-Handle mit Plus-Button — nicht bei Consequence */}
       {nodeData.nodeType !== 'consequence' && (
         <div className="rule-node__source-area">

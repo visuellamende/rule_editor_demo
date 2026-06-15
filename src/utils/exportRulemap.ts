@@ -9,26 +9,26 @@ interface ExportNode {
   id: number;
   type: string;
   label: string | null;
-  technicalKey: string | null;      // NEU
-  expectedType: string | null;      // NEU
-  notes: string | null;             // Immer vorhanden, ggf. null
-  consequence: ExportConsequence | null;  // Immer vorhanden, ggf. null
+  technicalKey?: string | null;      // NEU
+  expectedType?: string | null;      // NEU
+  notes?: string | null;             // Immer vorhanden, ggf. null
+  consequence?: ExportConsequence | null;  // Immer vorhanden, ggf. null
   outputs: ExportEdge[];            // Immer vorhanden, ggf. leeres Array
   consequenceRef?: number;
-  inputSource: InputDataSource | null;  // NEU
-  knowledgeSources: KnowledgeSource[] | null;  // NEU
+  inputSource?: InputDataSource | null;  // NEU
+  knowledgeSources?: KnowledgeSource[] | null;  // NEU
 }
 
 
 interface ExportConsequence {
-  business: string | null;
-  technical: string | null;
-  reference: string | null;
+  business?: string | null;
+  technical?: string | null;
+  reference?: string | null;
 }
 
 interface ExportEdge {
-  label: string | null;
-  value: string | null;             // NEU: maschinenlesbarer Wert
+  label?: string | null;
+  value?: string | null;             // NEU: maschinenlesbarer Wert
   targetNodeId: number;
 }
 
@@ -45,6 +45,16 @@ function cleanText(text: string | undefined | null): string | null {
   if (text === undefined || text === null) return null;
   const trimmed = text.replace(/\n{2,}/g, '\n').trim();
   return trimmed || null;
+}
+
+function omitNulls<T extends Record<string, any>>(obj: T): Partial<T> {
+  const result: Record<string, any> = {};
+  for (const [key, value] of Object.entries(obj)) {
+    if (value !== null && value !== undefined) {
+      result[key] = value;
+    }
+  }
+  return result as Partial<T>;
 }
 
 const exportKnowledgeSources = (sources?: KnowledgeSource[]): KnowledgeSource[] | null => {
@@ -73,23 +83,22 @@ export function exportAsJSON(
         const targetNode = nodes.find((n) => n.id === e.target);
         const targetData = targetNode?.data as unknown as RuleNodeData | undefined;
         const edgeData = e.data as any;
-        return {
+        return omitNulls({
           label: cleanText(e.label as string),
           value: cleanText(edgeData?.value as string),
           targetNodeId: targetData?.displayId ?? 0,
-        };
+        }) as ExportEdge;
       });
 
-    const exportNode: ExportNode = {
+    const exportNode: ExportNode = omitNulls({
       id: data?.displayId ?? 0,
       type: data?.nodeType || 'ruleNode',
-      label: cleanText(data?.label),
+      label: cleanText(data?.label) ?? '',
       technicalKey: cleanText(data?.technicalKey),
       expectedType: cleanText(data?.expectedType),
       notes: cleanText(data?.notes),
-      consequence: null,
       outputs: outgoingEdges,
-      inputSource: data?.inputSource ? {
+      inputSource: data?.inputSource?.provider ? {
         provider: data.inputSource.provider,
         providerSubtype: cleanText(data.inputSource.providerSubtype),
         verfuegbarkeit: data.inputSource.verfuegbarkeit,
@@ -97,15 +106,15 @@ export function exportAsJSON(
         referenziertEntscheidung: cleanText(data.inputSource.referenziertEntscheidung),
       } : null,
       knowledgeSources: exportKnowledgeSources(data?.knowledgeSources),
-    };
+    }) as ExportNode;
 
 
     if (data?.nodeType === 'consequence' && data.consequence) {
-      exportNode.consequence = {
+      exportNode.consequence = omitNulls({
         business: cleanText(data.consequence.business),
         technical: cleanText(data.consequence.technical),
         reference: cleanText(data.consequence.reference),
-      };
+      }) as ExportConsequence;
     } else if (data?.nodeType === 'consequence-ref') {
       const refNode = nodes.find(
         (n) => (n.data as unknown as RuleNodeData).displayId === data.refNodeId
@@ -114,12 +123,12 @@ export function exportAsJSON(
       exportNode.type = 'consequence';
       exportNode.consequenceRef = data.refNodeId;
       exportNode.consequence = refData?.consequence
-        ? {
+        ? (omitNulls({
             business: cleanText(refData.consequence.business),
             technical: cleanText(refData.consequence.technical),
             reference: cleanText(refData.consequence.reference),
-          }
-        : null;
+          }) as ExportConsequence)
+        : undefined;
     }
 
     return exportNode;
