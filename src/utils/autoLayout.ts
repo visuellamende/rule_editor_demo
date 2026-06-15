@@ -36,14 +36,14 @@ export function getAutoLayout(nodes: Node[], edges: Edge[]): Node[] {
     
     if (targetInputs[node.id] && targetInputs[node.id].length > 0) {
        const inputs = targetInputs[node.id];
-       const maxInputHeight = Math.max(...inputs.map(n => n.measured?.height ?? 80));
+       const maxInputHeight = Math.max(...inputs.map(n => n.measured?.height ?? n.height ?? 80));
        inputSpace = maxInputHeight + 40; // 40px Padding
        
-       inputGroupWidth = inputs.reduce((sum, n) => sum + (n.measured?.width ?? 180), 0) + 20 * (inputs.length - 1);
+       inputGroupWidth = inputs.reduce((sum, n) => sum + (n.measured?.width ?? n.width ?? 180), 0) + 20 * (inputs.length - 1);
     }
     
-    const visualWidth = node.measured?.width ?? 240;
-    const visualHeight = node.measured?.height ?? 80;
+    const visualWidth = node.measured?.width ?? node.width ?? 240;
+    const visualHeight = node.measured?.height ?? node.height ?? 80;
     
     graph.setNode(node.id, {
       width: Math.max(visualWidth, inputGroupWidth),
@@ -73,18 +73,18 @@ export function getAutoLayout(nodes: Node[], edges: Edge[]): Node[] {
         const inputsForTarget = targetInputs[targetId];
         const currentIndex = inputsForTarget.indexOf(node);
         
-        const targetVisualHeight = nodes.find(n => n.id === targetId)?.measured?.height ?? 80;
-        const inputSpace = Math.max(...inputsForTarget.map(n => n.measured?.height ?? 80)) + 40;
+        const targetVisualHeight = nodes.find(n => n.id === targetId)?.measured?.height ?? nodes.find(n => n.id === targetId)?.height ?? 80;
+        const inputSpace = Math.max(...inputsForTarget.map(n => n.measured?.height ?? n.height ?? 80)) + 40;
         const visualTargetY = targetNode.y + (inputSpace / 2) - (targetVisualHeight / 2);
         
-        const myHeight = node.measured?.height ?? 80;
+        const myHeight = node.measured?.height ?? node.height ?? 80;
         yPos = visualTargetY - myHeight - 40; 
         
-        const totalGroupWidth = inputsForTarget.reduce((sum, n) => sum + (n.measured?.width ?? 180), 0) + 20 * (inputsForTarget.length - 1);
+        const totalGroupWidth = inputsForTarget.reduce((sum, n) => sum + (n.measured?.width ?? n.width ?? 180), 0) + 20 * (inputsForTarget.length - 1);
         let currentX = targetNode.x - (totalGroupWidth / 2); 
         
         for (let i = 0; i < currentIndex; i++) {
-           currentX += (inputsForTarget[i].measured?.width ?? 180) + 20;
+           currentX += (inputsForTarget[i].measured?.width ?? inputsForTarget[i].width ?? 180) + 20;
         }
         xPos = currentX;
       }
@@ -93,13 +93,13 @@ export function getAutoLayout(nodes: Node[], edges: Edge[]): Node[] {
     }
 
     const nodeWithPosition = graph.node(node.id);
-    const visualWidth = node.measured?.width ?? 240;
-    const visualHeight = node.measured?.height ?? 80;
+    const visualWidth = node.measured?.width ?? node.width ?? 240;
+    const visualHeight = node.measured?.height ?? node.height ?? 80;
     
     let inputSpace = 0;
     if (targetInputs[node.id] && targetInputs[node.id].length > 0) {
        const inputs = targetInputs[node.id];
-       inputSpace = Math.max(...inputs.map(n => n.measured?.height ?? 80)) + 40;
+       inputSpace = Math.max(...inputs.map(n => n.measured?.height ?? n.height ?? 80)) + 40;
     }
     
     const visualY = nodeWithPosition.y + (inputSpace / 2) - (visualHeight / 2);

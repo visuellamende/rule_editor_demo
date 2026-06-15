@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect, useRef } from 'react';
 import {
   ReactFlow,
   Background,
@@ -7,6 +7,7 @@ import {
   applyNodeChanges,
   applyEdgeChanges,
   useReactFlow,
+  useNodesInitialized,
   type Connection,
   type Node,
   type Edge,
@@ -62,6 +63,26 @@ export function RuleCanvas() {
   const { fitView, screenToFlowPosition } = useReactFlow();
   const { t } = useI18n();
   const [contextMenuPos, setContextMenuPos] = useState<{ top: number; left: number; flowX: number; flowY: number } | null>(null);
+
+  const nodesInitialized = useNodesInitialized();
+  const hasRunRef = useRef(false);
+  const [layoutReady, setLayoutReady] = useState(false);
+
+  useEffect(() => {
+    if (nodesInitialized && nodes.length > 0 && !hasRunRef.current) {
+      hasRunRef.current = true;
+      applyAutoLayout();
+      requestAnimationFrame(() => {
+        fitView({ padding: 0.3, duration: 0 });
+        setLayoutReady(true);
+      });
+    }
+  }, [nodesInitialized, nodes.length, applyAutoLayout, fitView]);
+
+  useEffect(() => {
+    hasRunRef.current = false;
+    setLayoutReady(false);
+  }, [filePath]);
 
   const hasOpenMap = filePath !== null;
 
@@ -213,6 +234,7 @@ export function RuleCanvas() {
         ) : (
           <>
             <ReactFlow
+              className={!layoutReady ? 'react-flow--initializing' : ''}
               nodes={nodes}
               edges={edges}
               onNodesChange={onNodesChange}

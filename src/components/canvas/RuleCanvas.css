@@ -93,3 +93,20 @@
   background-color: var(--color-bg-elevated);
   color: var(--color-text-primary);
 }
+
+/* Initializing Layout */
+.react-flow--initializing .react-flow__nodes {
+  opacity: 0;
+}
+
+.react-flow--initializing .react-flow__edges {
+  opacity: 0;
+}
+
+.react-flow__nodes {
+  transition: opacity 0.15s ease;
+}
+
+.react-flow__edges {
+  transition: opacity 0.15s ease;
+}
