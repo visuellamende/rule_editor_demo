@@ -8,13 +8,16 @@ Knoten (nodes):
 - type "action": Führt eine Aktion aus bevor die nächste Prüfung folgt.
 - type "consequence": Endpunkt eines Pfades. Enthält die fachliche Konsequenz (business), den technischen Hinweis (technical) und eine Code-Referenz (reference).
 
+Eingaben (inputData):
+- Definiert alle Datenwerte, die in die Entscheidung einfließen.
+- technicalKey und expectedType definieren den Datentyp.
+
 Verbindungen (outputs):
 - label: Menschenlesbare Beschriftung des Ausgangs.
 - value: Maschinenlesbarer Wert (z.B. "true", "false", "GUEST", "MEMBER").
 - targetNodeId: Zielknoten dieses Ausgangs.
 
-Datenquellen (inputSource):
-- provider "system": Persistente Systemdaten. Direkter Zugriff.
+  - provider "system": Persistente Systemdaten. Direkter Zugriff.
 - provider "manuell": Wird zur Laufzeit durch Mensch/Prozess erhoben. Die Entscheidung KONSUMIERT den Wert nur.
 - provider "komposition": Ergebnis einer anderen Entscheidung. Zuerst jene auswerten.
 - verfuegbarkeit "vorhanden": Liegt vor dem Entscheidungslauf vor.
@@ -44,6 +47,6 @@ Nicht alle Felder sind immer vorhanden. Fehlende Felder bedeuten "vom Autor nich
 - Wenn technicalKey fehlt: nutze das Label als Orientierung für den Variablennamen.
 - Wenn expectedType fehlt: leite den Typ aus dem Kontext ab (Ja/Nein → boolean, Zahlenwerte → number).
 - Wenn output.value fehlt: nutze das Label als Vergleichswert.
-- Wenn inputSource fehlt: behandle den Wert als verfügbar (kein Fehlerpfad nötig).
+- Wenn inputSource in inputData fehlt: behandle den Wert als verfügbar (kein Fehlerpfad nötig).
 - Wenn knowledgeSources fehlt: keine besondere Verbindlichkeit.
 Melde fehlende Felder NICHT als Problem — sie sind bewusst optional.`;

@@ -17,6 +17,7 @@ export const en: Record<TranslationKey, string> = {
   'nodeType.action': 'Action',
   'nodeType.consequence': 'Consequence',
   'nodeType.consequenceRef': 'Reference',
+  'nodeType.input': 'Input Data',
 
   // Node Type Descriptions
   'nodeType.decision.description': 'A business question with multiple outcomes',
@@ -24,12 +25,14 @@ export const en: Record<TranslationKey, string> = {
   'nodeType.action.description': 'Executes an action',
   'nodeType.consequence.description': 'Endpoint — what happens at the end of the path',
   'nodeType.consequenceRef.description': 'References an existing consequence',
+  'nodeType.input.description': 'Describes a data value flowing into the decision',
 
   // Default Node Labels
   'nodeLabel.decision': 'New decision',
   'nodeLabel.condition': 'New condition',
   'nodeLabel.action': 'New action',
   'nodeLabel.consequence': 'New consequence',
+  'nodeLabel.input': 'New input',
 
   // Node Actions
   'node.addButton.ariaLabel': 'Add node',
@@ -94,6 +97,13 @@ export const en: Record<TranslationKey, string> = {
   'panel.inputSource.kannScheitern': 'Can fail',
   'panel.inputSource.referenziertEntscheidung': 'Referenced Decision',
   'panel.inputSource.referenziertEntscheidung.placeholder': 'e.g. isCustomerVerified',
+  'panel.inputSource.provider.system.short': 'System',
+  'panel.inputSource.provider.manuell.short': 'Manual',
+  'panel.inputSource.provider.komposition.short': 'Composition',
+  'panel.inputSource.verfuegbarkeit.vorhanden.short': 'available',
+  'panel.inputSource.verfuegbarkeit.laufzeit.short': 'runtime',
+  'panel.connectedInput': 'Connected data source',
+  'panel.noConnectedInput': 'No data source connected',
   'panel.knowledgeSources': 'Rule Authority',
   'ks.art': 'Source Type',
   'ks.art.gesetz': 'Law / Regulation',

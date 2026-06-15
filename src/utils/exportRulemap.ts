@@ -1,5 +1,5 @@
 import type { Node, Edge } from '@xyflow/react';
-import type { RuleNodeData, InputDataSource, KnowledgeSource } from '../types/nodes';
+import type { RuleNodeData, KnowledgeSource } from '../types/nodes';
 import type { RulemapMeta } from '../types/rulemap';
 import { validateRulemap } from './validateRulemap';
 
@@ -15,8 +15,14 @@ interface ExportNode {
   consequence?: ExportConsequence | null;  // Immer vorhanden, ggf. null
   outputs: ExportEdge[];            // Immer vorhanden, ggf. leeres Array
   consequenceRef?: number;
-  inputSource?: InputDataSource | null;  // NEU
-  knowledgeSources?: KnowledgeSource[] | null;  // NEU
+  inputSource?: {
+    provider: 'system' | 'manuell' | 'komposition';
+    providerSubtype: string | null;
+    verfuegbarkeit: 'vorhanden' | 'laufzeit';
+    kannScheitern: boolean;
+    referenziertEntscheidung: string | null;
+  } | null;
+  knowledgeSources?: KnowledgeSource[] | null;
 }
 
 
@@ -37,7 +43,8 @@ interface ExportRulemap {
   description: string;
   category: string | null;
   entryNodeId: number | null;
-  validationWarnings: any[] | null; // NEU
+  validationWarnings: any[] | null;
+  inputData: ExportNode[];
   nodes: ExportNode[];
 }
 
@@ -98,12 +105,12 @@ export function exportAsJSON(
       expectedType: cleanText(data?.expectedType),
       notes: cleanText(data?.notes),
       outputs: outgoingEdges,
-      inputSource: data?.inputSource?.provider ? {
-        provider: data.inputSource.provider,
-        providerSubtype: cleanText(data.inputSource.providerSubtype),
-        verfuegbarkeit: data.inputSource.verfuegbarkeit,
-        kannScheitern: data.inputSource.kannScheitern,
-        referenziertEntscheidung: cleanText(data.inputSource.referenziertEntscheidung),
+      inputSource: data?.inputProvider ? {
+        provider: data.inputProvider,
+        providerSubtype: cleanText(data.inputProviderSubtype),
+        verfuegbarkeit: data.inputVerfuegbarkeit,
+        kannScheitern: data.inputKannScheitern,
+        referenziertEntscheidung: cleanText(data.inputReferenziertEntscheidung),
       } : null,
       knowledgeSources: exportKnowledgeSources(data?.knowledgeSources),
     }) as ExportNode;
@@ -181,7 +188,8 @@ export function exportAsJSON(
           severity: w.severity,
         }))
       : null,
-    nodes: exportNodes,
+    inputData: exportNodes.filter((n) => n.type === 'input'),
+    nodes: exportNodes.filter((n) => n.type !== 'input'),
   };
 
   return JSON.stringify(result, null, 2);

@@ -4,7 +4,7 @@ import { useI18n } from '../../i18n';
 import { CustomSelect } from '../primitives/CustomSelect';
 import { MapInfoPanel } from './MapInfoPanel';
 import { EdgeLabelSuggestions } from './EdgeLabelSuggestions';
-import type { RuleNodeData, RuleNodeType, ConsequenceData, InputDataSource } from '../../types/nodes';
+import type { RuleNodeData, RuleNodeType, ConsequenceData } from '../../types/nodes';
 import { useReactFlow } from '@xyflow/react';
 import { KnowledgeSourceEditor } from './KnowledgeSourceEditor';
 import './AttributePanel.css';
@@ -29,7 +29,7 @@ export function AttributePanel() {
   const selectedEdge = edges.find((e) => e.id === selectedEdgeId);
 
   const [showInputSource, setShowInputSource] = useState(
-    () => !!(nodeData && (nodeData.nodeType === 'condition' || nodeData.nodeType === 'decision') && nodeData.inputSource?.provider)
+    () => !!(nodeData && nodeData.nodeType === 'input')
   );
   const [showKnowledgeSources, setShowKnowledgeSources] = useState(
     () => !!(nodeData && (nodeData.knowledgeSources?.length ?? 0) > 0)
@@ -142,19 +142,6 @@ export function AttributePanel() {
     });
   };
 
-  const updateInputSource = (partial: Partial<InputDataSource>) => {
-    if (!selectedNode || !nodeData) return;
-    const current = nodeData.inputSource ?? {
-      provider: 'system',
-      providerSubtype: null,
-      verfuegbarkeit: 'vorhanden',
-      kannScheitern: false,
-      referenziertEntscheidung: null,
-    };
-    updateNodeData(selectedNode.id, {
-      inputSource: { ...current, ...partial },
-    });
-  };
 
   // Typ-Optionen mit i18n Labels
   const typeOptions = [
@@ -162,6 +149,7 @@ export function AttributePanel() {
     { value: 'condition', label: t('nodeType.condition') },
     { value: 'action', label: t('nodeType.action') },
     { value: 'consequence', label: t('nodeType.consequence') },
+    { value: 'input', label: t('nodeType.input') },
   ];
 
   if (nodeData.nodeType === 'consequence-ref' || nodes.some((n) => (n.data as unknown as RuleNodeData).nodeType === 'consequence')) {
@@ -381,8 +369,8 @@ export function AttributePanel() {
           />
         </div>
 
-        {/* Technical Key & Expected Type for Condition and Decision nodes */}
-        {(nodeData.nodeType === 'condition' || nodeData.nodeType === 'decision') && (
+        {/* Technical Key & Expected Type for Condition, Decision, and Input nodes */}
+        {(nodeData.nodeType === 'condition' || nodeData.nodeType === 'decision' || nodeData.nodeType === 'input') && (
           <>
             <div className="attribute-panel__field">
               <label className="attribute-panel__label">{t('panel.technicalKey')}</label>
@@ -407,7 +395,7 @@ export function AttributePanel() {
           </>
         )}
 
-        {(nodeData.nodeType === 'condition' || nodeData.nodeType === 'decision') && (
+        {nodeData.nodeType === 'input' && (
           <div className="attribute-panel__section">
             <h4
               className="attribute-panel__section-title attribute-panel__section-title--collapsible"
@@ -430,10 +418,10 @@ export function AttributePanel() {
                   <label className="attribute-panel__label">{t('panel.inputSource.provider')}</label>
                   <select
                     className="attribute-panel__select"
-                    value={nodeData.inputSource?.provider ?? ''}
+                    value={nodeData.inputProvider ?? ''}
                     onChange={(e) => {
                       const provider = e.target.value || undefined;
-                      updateInputSource({ provider: provider as any });
+                      updateNodeData(selectedNode.id, { inputProvider: provider as any });
                     }}
                   >
                     <option value="">{t('panel.inputSource.provider.none')}</option>
@@ -449,8 +437,8 @@ export function AttributePanel() {
                   <input
                     className="attribute-panel__input"
                     type="text"
-                    value={nodeData.inputSource?.providerSubtype ?? ''}
-                    onChange={(e) => updateInputSource({ providerSubtype: e.target.value || null })}
+                    value={nodeData.inputProviderSubtype ?? ''}
+                    onChange={(e) => updateNodeData(selectedNode.id, { inputProviderSubtype: e.target.value || null })}
                     placeholder={t('panel.inputSource.subtype.placeholder')}
                   />
                 </div>
@@ -460,10 +448,10 @@ export function AttributePanel() {
                   <label className="attribute-panel__label">{t('panel.inputSource.verfuegbarkeit')}</label>
                   <select
                     className="attribute-panel__select"
-                    value={nodeData.inputSource?.verfuegbarkeit ?? ''}
+                    value={nodeData.inputVerfuegbarkeit ?? ''}
                     onChange={(e) => {
                       const v = e.target.value || undefined;
-                      updateInputSource({ verfuegbarkeit: v as any });
+                      updateNodeData(selectedNode.id, { inputVerfuegbarkeit: v as any });
                     }}
                   >
                     <option value="">{t('panel.inputSource.verfuegbarkeit.none')}</option>
@@ -478,26 +466,70 @@ export function AttributePanel() {
                   <input
                     type="checkbox"
                     className="attribute-panel__checkbox"
-                    checked={nodeData.inputSource?.kannScheitern ?? false}
-                    onChange={(e) => updateInputSource({ kannScheitern: e.target.checked })}
+                    checked={nodeData.inputKannScheitern ?? false}
+                    onChange={(e) => updateNodeData(selectedNode.id, { inputKannScheitern: e.target.checked })}
                   />
                 </div>
 
                 {/* Referenzierte Entscheidung */}
-                {nodeData.inputSource?.provider === 'komposition' && (
+                {nodeData.inputProvider === 'komposition' && (
                   <div className="attribute-panel__field">
                     <label className="attribute-panel__label">{t('panel.inputSource.referenziertEntscheidung')}</label>
                     <input
                       className="attribute-panel__input"
                       type="text"
-                      value={nodeData.inputSource?.referenziertEntscheidung ?? ''}
-                      onChange={(e) => updateInputSource({ referenziertEntscheidung: e.target.value || null })}
+                      value={nodeData.inputReferenziertEntscheidung ?? ''}
+                      onChange={(e) => updateNodeData(selectedNode.id, { inputReferenziertEntscheidung: e.target.value || null })}
                       placeholder={t('panel.inputSource.referenziertEntscheidung.placeholder')}
                     />
                   </div>
                 )}
               </div>
             )}
+          </div>
+        )}
+
+        {/* Readonly Display of Connected Inputs for Condition and Decision */}
+        {(nodeData.nodeType === 'condition' || nodeData.nodeType === 'decision') && (
+          <div className="attribute-panel__section">
+            <h4 className="attribute-panel__section-title">
+              {t('panel.connectedInput')}
+            </h4>
+            <div className="attribute-panel__section-body">
+              {(() => {
+                const connectedInputs = edges
+                  .filter((e) => e.target === selectedNode.id)
+                  .map((e) => nodes.find((n) => n.id === e.source))
+                  .filter((n) => (n?.data as unknown as RuleNodeData)?.nodeType === 'input');
+                
+                if (connectedInputs.length === 0) {
+                  return <p className="attribute-panel__empty-hint">{t('panel.noConnectedInput')}</p>;
+                }
+
+                return connectedInputs.map((inputNode) => {
+                  if (!inputNode) return null;
+                  const iData = inputNode.data as unknown as RuleNodeData;
+                  // Wir rendern readonly karten
+                  return (
+                    <div key={inputNode.id} style={{ padding: 'var(--space-sm)', backgroundColor: 'var(--color-bg-elevated)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border-subtle)', marginBottom: 'var(--space-sm)' }}>
+                      <p style={{ margin: 0, fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-medium)', color: 'var(--color-text-primary)' }}>
+                        #{iData.displayId} {iData.label}
+                      </p>
+                      {iData.inputProvider && (
+                        <p style={{ margin: 'var(--space-xs) 0 0 0', fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)' }}>
+                          {t(`panel.inputSource.provider.${iData.inputProvider}` as import('../../i18n').TranslationKey)}
+                        </p>
+                      )}
+                      {iData.expectedType && (
+                        <p style={{ margin: 'var(--space-xs) 0 0 0', fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)' }}>
+                          {t('panel.expectedType')}: {iData.expectedType}
+                        </p>
+                      )}
+                    </div>
+                  );
+                });
+              })()}
+            </div>
           </div>
         )}
 

@@ -39,11 +39,22 @@ function ActionIcon() {
   );
 }
 
+function InputIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <ellipse cx="12" cy="5" rx="9" ry="3" />
+      <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
+      <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+    </svg>
+  );
+}
+
 const iconMap = {
   decision: DecisionIcon,
   consequence: ConsequenceIcon,
   condition: ConditionIcon,
   action: ActionIcon,
+  input: InputIcon,
 };
 
 let nodeIdCounter = 100;
@@ -77,29 +88,6 @@ export function RuleNode({ id, data, selected }: NodeProps) {
       </svg>
     </div>
   );
-
-  // Referenz-Knoten: kompakte Darstellung
-  if (nodeData.nodeType === 'consequence-ref') {
-    const refId = nodeData.refNodeId;
-
-    return (
-      <div className={`rule-node rule-node--consequence-ref ${selected ? 'rule-node--selected' : ''}`}>
-        <Handle type="target" position={Position.Left} className="rule-node__handle" />
-        <div className="rule-node__ref-body">
-          <svg className="rule-node__ref-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-          </svg>
-          <span className="rule-node__ref-label">
-            {nodeData.label}
-          </span>
-          <span className="rule-node__ref-id">→ #{refId}</span>
-        </div>
-        {warningBadge}
-        {/* Kein Source-Handle — Endpunkt */}
-      </div>
-    );
-  }
 
   const Icon = iconMap[nodeData.nodeType as keyof typeof iconMap];
   const [menuOpen, setMenuOpen] = useState(false);
@@ -141,6 +129,71 @@ export function RuleNode({ id, data, selected }: NodeProps) {
       setIsEditing(false);
     }
   };
+
+  // Referenz-Knoten: kompakte Darstellung
+  if (nodeData.nodeType === 'consequence-ref') {
+    const refId = nodeData.refNodeId;
+
+    return (
+      <div className={`rule-node rule-node--consequence-ref ${selected ? 'rule-node--selected' : ''}`}>
+        <Handle type="target" position={Position.Left} className="rule-node__handle" />
+        <div className="rule-node__ref-body">
+          <svg className="rule-node__ref-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+          </svg>
+          <span className="rule-node__ref-label">
+            {nodeData.label}
+          </span>
+          <span className="rule-node__ref-id">→ #{refId}</span>
+        </div>
+        {warningBadge}
+        {/* Kein Source-Handle — Endpunkt */}
+      </div>
+    );
+  }
+
+  if (nodeData.nodeType === 'input') {
+    return (
+      <div className={`rule-node rule-node--input ${selected ? 'rule-node--selected' : ''}`}>
+        <div className="rule-node__header">
+          <span className="rule-node__icon">
+            <InputIcon />
+          </span>
+          <span className="rule-node__type-label">INPUT</span>
+          <span className="rule-node__display-id">#{nodeData.displayId}</span>
+        </div>
+        <div className="rule-node__body" onDoubleClick={handleDoubleClick}>
+          {isEditing ? (
+            <textarea
+              ref={inputRef}
+              className="rule-node__edit-input"
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              onBlur={handleEditConfirm}
+              onKeyDown={handleEditKeyDown}
+              rows={2}
+            />
+          ) : (
+            <span className="rule-node__label">{nodeData.label}</span>
+          )}
+        </div>
+        {(nodeData.inputProvider || nodeData.expectedType || nodeData.inputVerfuegbarkeit) && (
+          <span className="rule-node__input-meta">
+            {[
+              nodeData.inputProvider ? t(`panel.inputSource.provider.${nodeData.inputProvider}.short` as TranslationKey) : null,
+              nodeData.expectedType,
+              nodeData.inputVerfuegbarkeit ? t(`panel.inputSource.verfuegbarkeit.${nodeData.inputVerfuegbarkeit}.short` as TranslationKey) : null
+            ].filter(Boolean).join(' · ')}
+          </span>
+        )}
+        {warningBadge}
+        <Handle type="source" position={Position.Right} className="rule-node__handle" />
+      </div>
+    );
+  }
+
+
 
   const handleAddNode = (type: RuleNodeType) => {
     const currentNode = nodes.find((n) => n.id === id);
@@ -266,12 +319,12 @@ export function RuleNode({ id, data, selected }: NodeProps) {
       </div>
 
       {/* Metadaten-Indikatoren */}
-      {(nodeData.inputSource?.provider || (nodeData.knowledgeSources?.length ?? 0) > 0) && (
+      {(nodeData.inputProvider || (nodeData.knowledgeSources?.length ?? 0) > 0) && (
         <div className="rule-node__indicators">
-          {nodeData.inputSource?.provider && (
+          {nodeData.inputProvider && (
             <span
               className="rule-node__indicator"
-              title={t(`panel.inputSource.provider.${nodeData.inputSource.provider}` as TranslationKey)}
+              title={t(`panel.inputSource.provider.${nodeData.inputProvider}` as TranslationKey)}
             >
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <ellipse cx="12" cy="5" rx="9" ry="3" />

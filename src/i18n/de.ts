@@ -15,6 +15,7 @@ export const de = {
   'nodeType.action': 'Action',
   'nodeType.consequence': 'Consequence',
   'nodeType.consequenceRef': 'Referenz',
+  'nodeType.input': 'Input Data',
 
   // Node Type Descriptions
   'nodeType.decision.description': 'Eine fachliche Frage mit mehreren Ausgängen',
@@ -22,12 +23,14 @@ export const de = {
   'nodeType.action.description': 'Führt eine Aktion aus',
   'nodeType.consequence.description': 'Endpunkt — was passiert am Ende des Pfades',
   'nodeType.consequenceRef.description': 'Verweist auf eine bestehende Konsequenz',
+  'nodeType.input.description': 'Beschreibt einen Datenwert der in die Entscheidung einfließt',
 
   // Default Node Labels
   'nodeLabel.decision': 'Neue Entscheidung',
   'nodeLabel.condition': 'Neue Bedingung',
   'nodeLabel.action': 'Neue Aktion',
   'nodeLabel.consequence': 'Neue Konsequenz',
+  'nodeLabel.input': 'Neuer Input',
 
   // Node Actions
   'node.addButton.ariaLabel': 'Knoten hinzufügen',
@@ -92,6 +95,13 @@ export const de = {
   'panel.inputSource.kannScheitern': 'Kann scheitern',
   'panel.inputSource.referenziertEntscheidung': 'Referenzierte Entscheidung',
   'panel.inputSource.referenziertEntscheidung.placeholder': 'z.B. isCustomerVerified',
+  'panel.inputSource.provider.system.short': 'System',
+  'panel.inputSource.provider.manuell.short': 'Manuell',
+  'panel.inputSource.provider.komposition.short': 'Komposition',
+  'panel.inputSource.verfuegbarkeit.vorhanden.short': 'vorhanden',
+  'panel.inputSource.verfuegbarkeit.laufzeit.short': 'laufzeit',
+  'panel.connectedInput': 'Verbundene Datenquelle',
+  'panel.noConnectedInput': 'Keine Datenquelle verbunden',
   'panel.knowledgeSources': 'Regelautorität',
   'ks.art': 'Art der Quelle',
   'ks.art.gesetz': 'Gesetz',

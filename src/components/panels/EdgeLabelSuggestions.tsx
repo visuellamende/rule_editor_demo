@@ -41,6 +41,7 @@ const suggestions: Record<RuleNodeType, TranslationKey[][]> = {
   ],
   consequence: [],
   'consequence-ref': [],
+  input: [],
 };
 
 export function EdgeLabelSuggestions({

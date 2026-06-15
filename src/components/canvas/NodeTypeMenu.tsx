@@ -9,6 +9,8 @@ interface NodeTypeMenuProps {
   onSelect: (type: RuleNodeType) => void;
   onClose: () => void;
   anchorRef?: React.RefObject<HTMLElement | null>;
+  position?: { top: number; left: number };
+  allowInput?: boolean;
   onSelectRef?: (refNodeId: number, label: string) => void;
 }
 
@@ -18,7 +20,7 @@ interface MenuOption {
   description: string;
 }
 
-export function NodeTypeMenu({ onSelect, onClose, anchorRef, onSelectRef }: NodeTypeMenuProps) {
+export function NodeTypeMenu({ onSelect, onClose, anchorRef, position, allowInput, onSelectRef }: NodeTypeMenuProps) {
   const { t } = useI18n();
   const { nodes } = useCanvasStore();
 
@@ -54,18 +56,20 @@ export function NodeTypeMenu({ onSelect, onClose, anchorRef, onSelectRef }: Node
     },
   ];
   const menuRef = useRef<HTMLDivElement>(null);
-  const [position, setPosition] = useState<{ top: number; left: number } | null>(null);
+  const [menuPosition, setMenuPosition] = useState<{ top: number; left: number } | null>(position || null);
 
   // Position des Menüs anhand des Anker-Elements berechnen
   useEffect(() => {
     if (anchorRef?.current) {
       const rect = anchorRef.current.getBoundingClientRect();
-      setPosition({
+      setMenuPosition({
         top: rect.top + rect.height / 2,
         left: rect.right + 8,
       });
+    } else if (position) {
+      setMenuPosition(position);
     }
-  }, [anchorRef]);
+  }, [anchorRef, position]);
 
   // Schließen bei Klick außerhalb
   useEffect(() => {
@@ -92,12 +96,12 @@ export function NodeTypeMenu({ onSelect, onClose, anchorRef, onSelectRef }: Node
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
 
-  const style: React.CSSProperties = position
+  const style: React.CSSProperties = menuPosition
     ? {
         position: 'fixed',
-        top: position.top,
-        left: position.left,
-        transform: 'translateY(-50%)',
+        top: menuPosition.top,
+        left: menuPosition.left,
+        transform: anchorRef ? 'translateY(-50%)' : 'none',
       }
     : {};
 
@@ -116,6 +120,22 @@ export function NodeTypeMenu({ onSelect, onClose, anchorRef, onSelectRef }: Node
           </div>
         </button>
       ))}
+
+      {allowInput && (
+        <>
+          <div className="node-type-menu__divider" />
+          <button
+            className="node-type-menu__item"
+            onClick={() => onSelect('input')}
+          >
+            <span className="node-type-menu__dot node-type-menu__dot--input" style={{ backgroundColor: 'var(--color-node-input)' }} />
+            <div className="node-type-menu__text">
+              <span className="node-type-menu__label">{t('nodeType.input')}</span>
+              <span className="node-type-menu__description">{t('nodeType.input.description')}</span>
+            </div>
+          </button>
+        </>
+      )}
 
       {onSelectRef && existingConsequences.length > 0 && (
         <>
@@ -150,9 +170,8 @@ export function NodeTypeMenu({ onSelect, onClose, anchorRef, onSelectRef }: Node
     </div>
   );
 
-  // Wenn ein anchorRef da ist (Knoten-Kontext): Portal nutzen
-  // Wenn kein anchorRef (Empty State): direkt rendern
-  if (anchorRef) {
+  // Wenn ein anchorRef da ist (Knoten-Kontext) oder position gesetzt ist (Canvas-Kontext): Portal nutzen
+  if (anchorRef || position) {
     return createPortal(menu, document.body);
   }
   return menu;

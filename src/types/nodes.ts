@@ -1,19 +1,11 @@
 export type RulemapCategory = 'validation' | 'permission' | 'state' | 'business-logic' | 'error-handling';
 
-export type RuleNodeType = 'decision' | 'consequence' | 'condition' | 'action' | 'consequence-ref';
+export type RuleNodeType = 'decision' | 'consequence' | 'condition' | 'action' | 'consequence-ref' | 'input';
 
 export interface ConsequenceData {
   business: string;
   technical?: string;
   reference?: string;
-}
-
-export interface InputDataSource {
-  provider: 'system' | 'manuell' | 'komposition';
-  providerSubtype: string | null;       // z.B. "stammdaten", "externe_api", "kassierer_eingabe"
-  verfuegbarkeit: 'vorhanden' | 'laufzeit';
-  kannScheitern: boolean;
-  referenziertEntscheidung: string | null;  // Bei komposition: technicalKey der anderen Entscheidung
 }
 
 export interface KnowledgeSource {
@@ -35,8 +27,14 @@ export interface RuleNodeData {
   technicalKey?: string;
   expectedType?: string;
   refNodeId?: number;       // NEU: ID des referenzierten Consequence-Knotens
-  inputSource?: InputDataSource;        // NEU
   knowledgeSources?: KnowledgeSource[];   // NEU
+
+  // NEU — nur für input-Knoten:
+  inputProvider?: 'system' | 'manuell' | 'komposition';
+  inputProviderSubtype?: string | null;
+  inputVerfuegbarkeit?: 'vorhanden' | 'laufzeit';
+  inputKannScheitern?: boolean;
+  inputReferenziertEntscheidung?: string | null;
 }
 
 

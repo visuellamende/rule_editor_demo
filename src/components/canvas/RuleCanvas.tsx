@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import {
   ReactFlow,
   Background,
@@ -18,6 +18,7 @@ import '@xyflow/react/dist/style.css';
 import { RuleNode } from './nodes/RuleNode';
 import { LabeledEdge } from './edges/LabeledEdge';
 import { CanvasHeader } from './CanvasHeader';
+import { NodeTypeMenu } from './NodeTypeMenu';
 import { EmptyState } from './EmptyState';
 import { NoMapState } from './NoMapState';
 import { useCanvasStore } from '../../store/useCanvasStore';
@@ -40,6 +41,7 @@ const defaultLabels: Record<RuleNodeType, string> = {
   condition: 'Neue Bedingung',
   action: 'Neue Aktion',
   'consequence-ref': 'Referenz',
+  'input': 'Neuer Input',
 };
 
 let firstNodeCounter = 0;
@@ -56,8 +58,9 @@ export function RuleCanvas() {
     applyAutoLayout,
     getNextDisplayId,
   } = useCanvasStore();
-  const { fitView } = useReactFlow();
+  const { fitView, screenToFlowPosition } = useReactFlow();
   const { t } = useI18n();
+  const [contextMenuPos, setContextMenuPos] = useState<{ top: number; left: number; flowX: number; flowY: number } | null>(null);
 
   const hasOpenMap = filePath !== null;
 
@@ -90,19 +93,34 @@ export function RuleCanvas() {
   const onConnect = useCallback(
     (connection: Connection) => {
       const sourceNode = nodes.find((n) => n.id === connection.source);
+      const targetNode = nodes.find((n) => n.id === connection.target);
+      const sourceType = (sourceNode?.data as unknown as RuleNodeData)?.nodeType;
+      const targetType = (targetNode?.data as unknown as RuleNodeData)?.nodeType;
+
+      if (sourceType === 'input') {
+        if (targetType !== 'condition' && targetType !== 'decision') {
+          return;
+        }
+      }
+
       const isDecisionOrCondition =
-        sourceNode?.data?.nodeType === 'decision' ||
-        sourceNode?.data?.nodeType === 'condition';
-      setEdges((eds) =>
-        addEdge(
-          {
-            ...connection,
-            type: 'labeled',
-            label: isDecisionOrCondition ? '' : undefined,
-          },
-          eds,
-        ),
-      );
+        sourceType === 'decision' ||
+        sourceType === 'condition';
+
+      const newEdge: Edge = {
+        ...connection,
+        type: sourceType === 'input' ? 'default' : 'labeled',
+        id: `e${connection.source}-${connection.target}-${Date.now()}`,
+      };
+
+      if (sourceType === 'input') {
+        newEdge.style = { stroke: 'var(--color-node-input)', strokeDasharray: '5,5', strokeWidth: 1.5 };
+        newEdge.animated = false;
+      } else {
+        newEdge.label = isDecisionOrCondition ? '' : undefined;
+      }
+
+      setEdges((eds) => addEdge(newEdge, eds));
     },
     [setEdges, nodes],
   );
@@ -124,7 +142,22 @@ export function RuleCanvas() {
   const onPaneClick = useCallback(() => {
     setSelectedNodeId(null);
     setSelectedEdgeId(null);
+    setContextMenuPos(null);
   }, [setSelectedNodeId, setSelectedEdgeId]);
+
+  const onPaneContextMenu = useCallback(
+    (event: React.MouseEvent | MouseEvent) => {
+      event.preventDefault();
+      const position = screenToFlowPosition({ x: event.clientX, y: event.clientY });
+      setContextMenuPos({
+        top: event.clientY,
+        left: event.clientX,
+        flowX: position.x,
+        flowY: position.y,
+      });
+    },
+    [screenToFlowPosition]
+  );
 
   const handleCreateFirst = (type: RuleNodeType) => {
     firstNodeCounter += 1;
@@ -138,7 +171,23 @@ export function RuleCanvas() {
         displayId: getNextDisplayId(),
       } satisfies RuleNodeData,
     };
-    setNodes([newNode]);
+    setNodes((nds) => [...nds, newNode]);
+  };
+
+  const handleAddNodeFromContext = (type: RuleNodeType) => {
+    if (!contextMenuPos) return;
+    const newNode: Node = {
+      id: `n${Date.now()}`,
+      type: 'ruleNode',
+      position: { x: contextMenuPos.flowX, y: contextMenuPos.flowY },
+      data: {
+        label: defaultLabels[type],
+        nodeType: type,
+        displayId: getNextDisplayId(),
+      } satisfies RuleNodeData,
+    };
+    setNodes((nds) => [...nds, newNode]);
+    setContextMenuPos(null);
   };
 
   const handleAutoLayout = useCallback(() => {
@@ -167,6 +216,7 @@ export function RuleCanvas() {
               onNodeClick={onNodeClick}
               onEdgeClick={onEdgeClick}
               onPaneClick={onPaneClick}
+              onPaneContextMenu={onPaneContextMenu}
               nodeTypes={nodeTypes}
               edgeTypes={edgeTypes}
               fitView
@@ -209,6 +259,14 @@ export function RuleCanvas() {
                 </svg>
               </button>
             </div>
+            {contextMenuPos && (
+              <NodeTypeMenu
+                position={{ top: contextMenuPos.top, left: contextMenuPos.left }}
+                onClose={() => setContextMenuPos(null)}
+                onSelect={handleAddNodeFromContext}
+                allowInput
+              />
+            )}
           </>
         )}
       </div>

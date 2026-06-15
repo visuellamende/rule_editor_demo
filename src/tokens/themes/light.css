@@ -31,6 +31,7 @@
   --color-node-consequence: #10B981;
   --color-node-condition: #F59E0B;
   --color-node-action: #8B5CF6;
+  --color-node-input: #0891b2;
 
   /* Schatten (leichtere Schatten für Light) */
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);

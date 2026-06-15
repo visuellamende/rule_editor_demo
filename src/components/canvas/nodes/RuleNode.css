@@ -225,3 +225,20 @@
 .rule-node__indicator:hover {
   opacity: 1;
 }
+
+.rule-node--input {
+  border-radius: var(--radius-xl, 16px);
+  border-color: var(--color-node-input);
+}
+
+.rule-node--input .rule-node__header {
+  background-color: var(--color-node-input);
+  color: var(--color-text-on-primary, #fff);
+}
+
+.rule-node__input-meta {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  padding: 0 var(--space-md) var(--space-sm);
+  display: block;
+}
