@@ -173,10 +173,18 @@ export const useCanvasStore = create<CanvasStore>()(
             ...n,
             type: n.type ?? 'ruleNode',
           })),
-          edges: data.edges.map((e) => ({
-            ...e,
-            type: e.type ?? 'labeled',
-          })),
+          edges: data.edges.map((e) => {
+            const sourceNode = nodesWithIds.find(n => n.id === e.source);
+            const sourceType = (sourceNode?.data as any)?.nodeType;
+            const isInputEdge = sourceType === 'input' || sourceType === 'input-ref';
+            return {
+              ...e,
+              type: isInputEdge ? 'default' : (e.type ?? 'labeled'),
+              targetHandle: isInputEdge ? 'input-target' : 'tree-target',
+              style: isInputEdge ? { stroke: 'var(--color-node-input)', strokeDasharray: '5,5', strokeWidth: 1.5 } : e.style,
+              animated: isInputEdge ? false : e.animated,
+            };
+          }),
           mapMeta: data.meta,
           filePath,
           isDirty: false,

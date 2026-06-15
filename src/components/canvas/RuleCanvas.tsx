@@ -98,7 +98,9 @@ export function RuleCanvas() {
       const sourceType = (sourceNode?.data as unknown as RuleNodeData)?.nodeType;
       const targetType = (targetNode?.data as unknown as RuleNodeData)?.nodeType;
 
-      if (sourceType === 'input') {
+      const isInputEdge = sourceType === 'input' || sourceType === 'input-ref';
+
+      if (isInputEdge) {
         if (targetType !== 'condition' && targetType !== 'decision') {
           return;
         }
@@ -110,11 +112,11 @@ export function RuleCanvas() {
 
       const newEdge: Edge = {
         ...connection,
-        type: sourceType === 'input' ? 'default' : 'labeled',
+        type: isInputEdge ? 'default' : 'labeled',
         id: `e${connection.source}-${connection.target}-${Date.now()}`,
       };
 
-      if (sourceType === 'input') {
+      if (isInputEdge) {
         newEdge.style = { stroke: 'var(--color-node-input)', strokeDasharray: '5,5', strokeWidth: 1.5 };
         newEdge.animated = false;
         newEdge.targetHandle = 'input-target';

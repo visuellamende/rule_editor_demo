@@ -47,8 +47,9 @@ export function getAutoLayout(nodes: Node[], edges: Edge[]): Node[] {
   // Obere Kante des Baums finden
   const treeMinY = treeNodes.length > 0 ? Math.min(...treeNodes.map((n) => graph.node(n.id).y - NODE_HEIGHT / 2)) : 0;
 
-  // Track inputs per target
-  const targetInputCounts: Record<string, number> = {};
+  const usedXPositions = new Set<number>();
+  const INPUT_WIDTH = 180;
+  const spacing = 20;
 
   return nodes.map((node) => {
     if (inputTypes.includes((node.data as any)?.nodeType)) {
@@ -57,15 +58,14 @@ export function getAutoLayout(nodes: Node[], edges: Edge[]): Node[] {
       const targetNode = targetId ? graph.node(targetId) : null;
       
       let xPos = inputNodes.indexOf(node) * 220;
-      if (targetNode && targetId) {
-        const count = targetInputCounts[targetId] || 0;
-        targetInputCounts[targetId] = count + 1;
+      if (targetNode) {
+        xPos = targetNode.x - NODE_WIDTH / 2;
         
         // Versetze Inputs mit demselben Target horizontal
-        const INPUT_WIDTH = 180;
-        const spacing = 20;
-        const offset = count * (INPUT_WIDTH + spacing);
-        xPos = targetNode.x - NODE_WIDTH / 2 + offset;
+        while (Array.from(usedXPositions).some(usedX => Math.abs(usedX - xPos) < INPUT_WIDTH)) {
+          xPos += INPUT_WIDTH + spacing;
+        }
+        usedXPositions.add(xPos);
       }
       
       const position = {
