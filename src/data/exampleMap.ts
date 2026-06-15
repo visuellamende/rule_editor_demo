@@ -151,7 +151,7 @@ export const exampleMap: RulemapFile = {
     {
       id: 'n12',
       type: 'ruleNode',
-      position: { x: -300, y: 200 },
+      position: { x: 350, y: 0 },
       data: {
         label: 'Nutzer in Organisation',
         nodeType: 'input',
@@ -168,7 +168,7 @@ export const exampleMap: RulemapFile = {
     {
       id: 'n13',
       type: 'ruleNode',
-      position: { x: -300, y: 350 },
+      position: { x: 700, y: 150 },
       data: {
         label: 'Space Mitgliederliste vorhanden',
         nodeType: 'input',
@@ -185,7 +185,7 @@ export const exampleMap: RulemapFile = {
     {
       id: 'n14',
       type: 'ruleNode',
-      position: { x: -300, y: 500 },
+      position: { x: 1050, y: 0 },
       data: {
         label: 'Nutzerrolle in Organisation',
         nodeType: 'input',
@@ -202,7 +202,7 @@ export const exampleMap: RulemapFile = {
     {
       id: 'n15',
       type: 'ruleNode',
-      position: { x: -300, y: 650 },
+      position: { x: 1050, y: 250 },
       data: {
         label: 'Nutzer in Space-Liste',
         nodeType: 'input',
