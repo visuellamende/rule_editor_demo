@@ -21,12 +21,26 @@ export function getAutoLayout(nodes: Node[], edges: Edge[]): Node[] {
 
   const inputTypes = ['input', 'input-ref'];
   const dagreNodes = nodes.filter((n) => !inputTypes.includes((n.data as any)?.nodeType));
+  const inputNodes = nodes.filter((n) => inputTypes.includes((n.data as any)?.nodeType));
   
+  // Track how many inputs each target has
+  const targetInputCounts: Record<string, number> = {};
+  inputNodes.forEach((node) => {
+    const connectedEdge = edges.find((e) => e.source === node.id);
+    if (connectedEdge) {
+      const targetId = connectedEdge.target;
+      targetInputCounts[targetId] = (targetInputCounts[targetId] || 0) + 1;
+    }
+  });
+
+  const INPUT_SPACE = 120; // Extra height for inputs above the node
+
   // Knoten zum Graph hinzufügen
   dagreNodes.forEach((node) => {
+    const hasInputs = (targetInputCounts[node.id] || 0) > 0;
     graph.setNode(node.id, {
       width: NODE_WIDTH,
-      height: NODE_HEIGHT,
+      height: hasInputs ? NODE_HEIGHT + INPUT_SPACE : NODE_HEIGHT,
     });
   });
 
@@ -40,16 +54,11 @@ export function getAutoLayout(nodes: Node[], edges: Edge[]): Node[] {
   // Layout berechnen
   dagre.layout(graph);
 
-  // Neue Positionen auf die Knoten anwenden
-  const treeNodes = nodes.filter((n) => !inputTypes.includes((n.data as any)?.nodeType));
-  const inputNodes = nodes.filter((n) => inputTypes.includes((n.data as any)?.nodeType));
-  
-  // Obere Kante des Baums finden
-  const treeMinY = treeNodes.length > 0 ? Math.min(...treeNodes.map((n) => graph.node(n.id).y - NODE_HEIGHT / 2)) : 0;
-
-  const usedXPositions = new Set<number>();
   const INPUT_WIDTH = 180;
   const spacing = 20;
+
+  // Wir tracken für jeden targetId den Index des aktuell gezeichneten Inputs, um sie zentriert aufzureihen
+  const targetInputCurrentIndex: Record<string, number> = {};
 
   return nodes.map((node) => {
     if (inputTypes.includes((node.data as any)?.nodeType)) {
@@ -58,29 +67,44 @@ export function getAutoLayout(nodes: Node[], edges: Edge[]): Node[] {
       const targetNode = targetId ? graph.node(targetId) : null;
       
       let xPos = inputNodes.indexOf(node) * 220;
-      if (targetNode) {
-        xPos = targetNode.x - NODE_WIDTH / 2;
+      let yPos = 0;
+      
+      if (targetNode && targetId) {
+        const totalInputs = targetInputCounts[targetId] || 1;
+        const currentIndex = targetInputCurrentIndex[targetId] || 0;
+        targetInputCurrentIndex[targetId] = currentIndex + 1;
         
-        // Versetze Inputs mit demselben Target horizontal
-        while (Array.from(usedXPositions).some(usedX => Math.abs(usedX - xPos) < INPUT_WIDTH)) {
-          xPos += INPUT_WIDTH + spacing;
-        }
-        usedXPositions.add(xPos);
+        // Target Node in Dagre ist `NODE_HEIGHT + INPUT_SPACE` hoch, ihr Zentrum ist in `targetNode.y`.
+        // Die "visuelle" Y-Position des Tree-Knotens ist `targetNode.y + (INPUT_SPACE / 2) - (NODE_HEIGHT / 2)`.
+        const visualY = targetNode.y + (INPUT_SPACE / 2) - (NODE_HEIGHT / 2);
+        
+        yPos = visualY - INPUT_SPACE;
+        
+        // Zentriere alle Inputs über dem Knoten
+        const totalGroupWidth = totalInputs * INPUT_WIDTH + (totalInputs - 1) * spacing;
+        // Start-X relativ zur Mitte des Zielknotens
+        const startX = targetNode.x - (totalGroupWidth / 2) + (INPUT_WIDTH / 2);
+        xPos = startX + currentIndex * (INPUT_WIDTH + spacing) - (INPUT_WIDTH / 2);
       }
       
       const position = {
         x: xPos,
-        y: treeMinY - 120,
+        y: yPos,
       };
       return { ...node, position };
     }
 
     const nodeWithPosition = graph.node(node.id);
+    const hasInputs = (targetInputCounts[node.id] || 0) > 0;
+    const visualY = hasInputs 
+      ? nodeWithPosition.y + (INPUT_SPACE / 2) - (NODE_HEIGHT / 2)
+      : nodeWithPosition.y - NODE_HEIGHT / 2;
+
     return {
       ...node,
       position: {
         x: nodeWithPosition.x - NODE_WIDTH / 2,
-        y: nodeWithPosition.y - NODE_HEIGHT / 2,
+        y: visualY,
       },
     };
   });

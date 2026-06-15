@@ -14,7 +14,7 @@ export const exampleMap: RulemapFile = {
     {
       id: 'n1',
       type: 'ruleNode',
-      position: { x: 0, y: 200 },
+      position: { x: 50, y: 360 },
       data: {
         label: 'Wird dem Nutzer Zugriff auf den Space gewährt?',
         nodeType: 'decision',
@@ -27,7 +27,7 @@ export const exampleMap: RulemapFile = {
     {
       id: 'n2',
       type: 'ruleNode',
-      position: { x: 350, y: 200 },
+      position: { x: 390, y: 420 },
       data: {
         label: 'Ist Nutzer Teil der Organisation?',
         nodeType: 'condition',
@@ -40,7 +40,7 @@ export const exampleMap: RulemapFile = {
     {
       id: 'n3',
       type: 'ruleNode',
-      position: { x: 700, y: 50 },
+      position: { x: 730, y: 460 },
       data: {
         label: 'Zugriff verweigert',
         nodeType: 'consequence',
@@ -58,7 +58,7 @@ export const exampleMap: RulemapFile = {
     {
       id: 'n4',
       type: 'ruleNode',
-      position: { x: 700, y: 300 },
+      position: { x: 730, y: 320 },
       data: {
         label: 'Hat der Space eine explizite Mitgliederliste?',
         nodeType: 'condition',
@@ -71,7 +71,7 @@ export const exampleMap: RulemapFile = {
     {
       id: 'n6',
       type: 'ruleNode',
-      position: { x: 1050, y: 150 },
+      position: { x: 1070, y: 460 },
       data: {
         label: 'Welche Rolle hat der Nutzer in der Organisation?',
         nodeType: 'condition',
@@ -84,7 +84,7 @@ export const exampleMap: RulemapFile = {
     {
       id: 'n7',
       type: 'ruleNode',
-      position: { x: 1050, y: 400 },
+      position: { x: 1070, y: 180 },
       data: {
         label: 'Ist die User-ID in der Space-Mitgliederliste?',
         nodeType: 'condition',
@@ -97,7 +97,7 @@ export const exampleMap: RulemapFile = {
     {
       id: 'n8',
       type: 'ruleNode',
-      position: { x: 1400, y: 50 },
+      position: { x: 1410, y: 470 },
       data: {
         label: 'Zugriff verweigert',
         nodeType: 'consequence-ref',
@@ -109,7 +109,7 @@ export const exampleMap: RulemapFile = {
     {
       id: 'n9',
       type: 'ruleNode',
-      position: { x: 1400, y: 200 },
+      position: { x: 1410, y: 330 },
       data: {
         label: 'Zugriff erlaubt',
         nodeType: 'consequence',
@@ -127,7 +127,7 @@ export const exampleMap: RulemapFile = {
     {
       id: 'n10',
       type: 'ruleNode',
-      position: { x: 1400, y: 350 },
+      position: { x: 1410, y: 190 },
       data: {
         label: 'Zugriff verweigert',
         nodeType: 'consequence-ref',
@@ -139,7 +139,7 @@ export const exampleMap: RulemapFile = {
     {
       id: 'n11',
       type: 'ruleNode',
-      position: { x: 1400, y: 500 },
+      position: { x: 1410, y: 50 },
       data: {
         label: 'Zugriff erlaubt',
         nodeType: 'consequence-ref',
@@ -151,7 +151,7 @@ export const exampleMap: RulemapFile = {
     {
       id: 'n12',
       type: 'ruleNode',
-      position: { x: 350, y: 0 },
+      position: { x: 420, y: 300 },
       data: {
         label: 'Nutzer in Organisation',
         nodeType: 'input',
@@ -168,7 +168,7 @@ export const exampleMap: RulemapFile = {
     {
       id: 'n13',
       type: 'ruleNode',
-      position: { x: 700, y: 150 },
+      position: { x: 760, y: 200 },
       data: {
         label: 'Space Mitgliederliste vorhanden',
         nodeType: 'input',
@@ -185,7 +185,7 @@ export const exampleMap: RulemapFile = {
     {
       id: 'n14',
       type: 'ruleNode',
-      position: { x: 1050, y: 0 },
+      position: { x: 1100, y: 340 },
       data: {
         label: 'Nutzerrolle in Organisation',
         nodeType: 'input',
@@ -202,7 +202,7 @@ export const exampleMap: RulemapFile = {
     {
       id: 'n15',
       type: 'ruleNode',
-      position: { x: 1050, y: 250 },
+      position: { x: 1100, y: 60 },
       data: {
         label: 'Nutzer in Space-Liste',
         nodeType: 'input',

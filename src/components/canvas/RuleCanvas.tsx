@@ -117,7 +117,7 @@ export function RuleCanvas() {
       };
 
       if (isInputEdge) {
-        newEdge.style = { stroke: 'var(--color-node-input)', strokeDasharray: '5,5', strokeWidth: 1.5 };
+        newEdge.style = { stroke: 'var(--color-node-input)', strokeWidth: 1.5 };
         newEdge.animated = false;
         newEdge.targetHandle = 'input-target';
       } else {

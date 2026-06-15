@@ -181,7 +181,7 @@ export const useCanvasStore = create<CanvasStore>()(
               ...e,
               type: isInputEdge ? 'default' : (e.type ?? 'labeled'),
               targetHandle: isInputEdge ? 'input-target' : 'tree-target',
-              style: isInputEdge ? { stroke: 'var(--color-node-input)', strokeDasharray: '5,5', strokeWidth: 1.5 } : e.style,
+              style: isInputEdge ? { stroke: 'var(--color-node-input)', strokeWidth: 1.5 } : e.style,
               animated: isInputEdge ? false : e.animated,
             };
           }),
