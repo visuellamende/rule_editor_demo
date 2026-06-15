@@ -41,6 +41,7 @@ const defaultLabels: Record<RuleNodeType, string> = {
   condition: 'Neue Bedingung',
   action: 'Neue Aktion',
   'consequence-ref': 'Referenz',
+  'input-ref': 'Referenz',
   'input': 'Neuer Input',
 };
 
