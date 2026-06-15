@@ -11,7 +11,7 @@ interface NodeTypeMenuProps {
   anchorRef?: React.RefObject<HTMLElement | null>;
   position?: { top: number; left: number };
   allowInput?: boolean;
-  onSelectRef?: (refNodeId: number, label: string) => void;
+  onSelectRef?: (type: 'consequence-ref' | 'input-ref', refNodeId: number, label: string) => void;
 }
 
 interface MenuOption {
@@ -27,6 +27,15 @@ export function NodeTypeMenu({ onSelect, onClose, anchorRef, position, allowInpu
   const existingConsequences = anchorRef
     ? nodes
         .filter((n) => (n.data as unknown as RuleNodeData).nodeType === 'consequence')
+        .map((n) => ({
+          displayId: (n.data as unknown as RuleNodeData).displayId,
+          label: (n.data as unknown as RuleNodeData).label,
+        }))
+    : [];
+
+  const existingInputs = anchorRef
+    ? nodes
+        .filter((n) => (n.data as unknown as RuleNodeData).nodeType === 'input')
         .map((n) => ({
           displayId: (n.data as unknown as RuleNodeData).displayId,
           label: (n.data as unknown as RuleNodeData).label,
@@ -144,7 +153,7 @@ export function NodeTypeMenu({ onSelect, onClose, anchorRef, position, allowInpu
             <button
               key={c.displayId}
               className="node-type-menu__item"
-              onClick={() => onSelectRef(c.displayId, c.label)}
+              onClick={() => onSelectRef('consequence-ref', c.displayId, c.label)}
             >
               <svg
                 width="12"
@@ -162,6 +171,37 @@ export function NodeTypeMenu({ onSelect, onClose, anchorRef, position, allowInpu
               <div className="node-type-menu__text">
                 <span className="node-type-menu__label">→ #{c.displayId} {c.label}</span>
                 <span className="node-type-menu__description">{t('nodeType.consequenceRef.description')}</span>
+              </div>
+            </button>
+          ))}
+        </>
+      )}
+
+      {onSelectRef && existingInputs.length > 0 && (
+        <>
+          <div className="node-type-menu__divider" />
+          {existingInputs.map((inp) => (
+            <button
+              key={inp.displayId}
+              className="node-type-menu__item"
+              onClick={() => onSelectRef('input-ref', inp.displayId, inp.label)}
+            >
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                style={{ flexShrink: 0, color: 'var(--color-node-input)' }}
+              >
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+              </svg>
+              <div className="node-type-menu__text">
+                <span className="node-type-menu__label">📥 → #{inp.displayId} {inp.label}</span>
+                <span className="node-type-menu__description">{t('nodeType.inputRef.description')}</span>
               </div>
             </button>
           ))}

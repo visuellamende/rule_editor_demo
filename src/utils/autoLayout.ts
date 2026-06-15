@@ -19,7 +19,8 @@ export function getAutoLayout(nodes: Node[], edges: Edge[]): Node[] {
     marginy: 50,
   });
 
-  const dagreNodes = nodes.filter((n) => (n.data as any)?.nodeType !== 'input');
+  const inputTypes = ['input', 'input-ref'];
+  const dagreNodes = nodes.filter((n) => !inputTypes.includes((n.data as any)?.nodeType));
   
   // Knoten zum Graph hinzufügen
   dagreNodes.forEach((node) => {
@@ -40,14 +41,21 @@ export function getAutoLayout(nodes: Node[], edges: Edge[]): Node[] {
   dagre.layout(graph);
 
   // Neue Positionen auf die Knoten anwenden
-  let inputY = 0;
+  const treeNodes = nodes.filter((n) => !inputTypes.includes((n.data as any)?.nodeType));
+  const inputNodes = nodes.filter((n) => inputTypes.includes((n.data as any)?.nodeType));
+  
+  // Obere Kante des Baums finden
+  const treeMinY = treeNodes.length > 0 ? Math.min(...treeNodes.map((n) => graph.node(n.id).y - NODE_HEIGHT / 2)) : 0;
+
   return nodes.map((node) => {
-    if ((node.data as any)?.nodeType === 'input') {
+    if (inputTypes.includes((node.data as any)?.nodeType)) {
+      const connectedEdge = edges.find((e) => e.source === node.id);
+      const targetNode = connectedEdge ? graph.node(connectedEdge.target) : null;
+      
       const position = {
-        x: -300,
-        y: inputY,
+        x: targetNode ? targetNode.x - NODE_WIDTH / 2 : inputNodes.indexOf(node) * 220,
+        y: treeMinY - 120,
       };
-      inputY += NODE_HEIGHT + VERTICAL_GAP;
       return { ...node, position };
     }
 

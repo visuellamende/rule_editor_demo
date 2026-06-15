@@ -116,8 +116,10 @@ export function RuleCanvas() {
       if (sourceType === 'input') {
         newEdge.style = { stroke: 'var(--color-node-input)', strokeDasharray: '5,5', strokeWidth: 1.5 };
         newEdge.animated = false;
+        newEdge.targetHandle = 'input-target';
       } else {
         newEdge.label = isDecisionOrCondition ? '' : undefined;
+        newEdge.targetHandle = 'tree-target';
       }
 
       setEdges((eds) => addEdge(newEdge, eds));

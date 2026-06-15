@@ -1,6 +1,6 @@
 export type RulemapCategory = 'validation' | 'permission' | 'state' | 'business-logic' | 'error-handling';
 
-export type RuleNodeType = 'decision' | 'consequence' | 'condition' | 'action' | 'consequence-ref' | 'input';
+export type RuleNodeType = 'decision' | 'consequence' | 'condition' | 'action' | 'consequence-ref' | 'input' | 'input-ref';
 
 export interface ConsequenceData {
   business: string;

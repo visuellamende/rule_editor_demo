@@ -25,6 +25,8 @@ export const en: Record<TranslationKey, string> = {
   'nodeType.action.description': 'Executes an action',
   'nodeType.consequence.description': 'Endpoint — what happens at the end of the path',
   'nodeType.consequenceRef.description': 'References an existing consequence',
+  'nodeType.inputRef': 'Input Reference',
+  'nodeType.inputRef.description': 'References an existing input',
   'nodeType.input.description': 'Describes a data value flowing into the decision',
 
   // Default Node Labels

@@ -97,6 +97,19 @@ export const useCanvasStore = create<CanvasStore>()(
             });
           }
 
+          // Wenn es ein Input-Knoten ist und das Label geändert wird: alle Referenzen updaten
+          const isInput = updatedData?.nodeType === 'input' || (newData.nodeType === 'input' && updatedData?.nodeType === 'input-ref');
+          if (isInput && newData.label !== undefined) {
+            const displayId = updatedData.displayId;
+            updatedNodes = updatedNodes.map((node) => {
+              const data = node.data as any;
+              if (data.nodeType === 'input-ref' && data.refNodeId === displayId) {
+                return { ...node, data: { ...data, label: newData.label } };
+              }
+              return node;
+            });
+          }
+
           return { nodes: updatedNodes, isDirty: true };
         }),
 

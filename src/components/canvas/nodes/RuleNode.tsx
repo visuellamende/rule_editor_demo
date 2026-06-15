@@ -136,7 +136,7 @@ export function RuleNode({ id, data, selected }: NodeProps) {
 
     return (
       <div className={`rule-node rule-node--consequence-ref ${selected ? 'rule-node--selected' : ''}`}>
-        <Handle type="target" position={Position.Left} className="rule-node__handle" />
+        <Handle type="target" position={Position.Left} className="rule-node__handle" id="tree-target" />
         <div className="rule-node__ref-body">
           <svg className="rule-node__ref-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
@@ -149,6 +149,23 @@ export function RuleNode({ id, data, selected }: NodeProps) {
         </div>
         {warningBadge}
         {/* Kein Source-Handle — Endpunkt */}
+      </div>
+    );
+  }
+
+  if (nodeData.nodeType === 'input-ref') {
+    return (
+      <div className={`rule-node rule-node--input-ref ${selected ? 'rule-node--selected' : ''}`}>
+        <div className="rule-node__ref-body">
+          <svg className="rule-node__ref-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+          </svg>
+          <span className="rule-node__ref-label">{nodeData.label}</span>
+          <span className="rule-node__ref-id">→ #{nodeData.refNodeId}</span>
+        </div>
+        {warningBadge}
+        <Handle type="source" position={Position.Bottom} className="rule-node__handle rule-node__handle--input" />
       </div>
     );
   }
@@ -188,7 +205,7 @@ export function RuleNode({ id, data, selected }: NodeProps) {
           </span>
         )}
         {warningBadge}
-        <Handle type="source" position={Position.Right} className="rule-node__handle" />
+        <Handle type="source" position={Position.Bottom} className="rule-node__handle" />
       </div>
     );
   }
@@ -240,7 +257,7 @@ export function RuleNode({ id, data, selected }: NodeProps) {
     }, 50);
   };
 
-  const handleAddRefNode = (refNodeId: number, label: string) => {
+  const handleAddRefNode = (type: 'consequence-ref' | 'input-ref', refNodeId: number, label: string) => {
     const currentNode = nodes.find((n) => n.id === id);
     if (!currentNode) return;
 
@@ -256,7 +273,7 @@ export function RuleNode({ id, data, selected }: NodeProps) {
       },
       data: {
         label,
-        nodeType: 'consequence-ref',
+        nodeType: type,
         displayId: getNextDisplayId(),
         refNodeId,
       } satisfies RuleNodeData,
@@ -290,6 +307,13 @@ export function RuleNode({ id, data, selected }: NodeProps) {
         type="target"
         position={Position.Left}
         className="rule-node__handle"
+        id="tree-target"
+      />
+      <Handle
+        type="target"
+        position={Position.Top}
+        className="rule-node__handle rule-node__handle--input"
+        id="input-target"
       />
 
       <div className="rule-node__header">

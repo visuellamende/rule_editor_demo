@@ -23,6 +23,8 @@ export const de = {
   'nodeType.action.description': 'Führt eine Aktion aus',
   'nodeType.consequence.description': 'Endpunkt — was passiert am Ende des Pfades',
   'nodeType.consequenceRef.description': 'Verweist auf eine bestehende Konsequenz',
+  'nodeType.inputRef': 'Input-Referenz',
+  'nodeType.inputRef.description': 'Verweist auf einen bestehenden Input',
   'nodeType.input.description': 'Beschreibt einen Datenwert der in die Entscheidung einfließt',
 
   // Default Node Labels

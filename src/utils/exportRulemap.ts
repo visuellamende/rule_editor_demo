@@ -15,6 +15,7 @@ interface ExportNode {
   consequence?: ExportConsequence | null;  // Immer vorhanden, ggf. null
   outputs: ExportEdge[];            // Immer vorhanden, ggf. leeres Array
   consequenceRef?: number;
+  inputRef?: number;
   inputSource?: {
     provider: 'system' | 'manuell' | 'komposition';
     providerSubtype: string | null;
@@ -136,6 +137,9 @@ export function exportAsJSON(
             reference: cleanText(refData.consequence.reference),
           }) as ExportConsequence)
         : undefined;
+    } else if (data?.nodeType === 'input-ref') {
+      exportNode.type = 'input';
+      exportNode.inputRef = data.refNodeId;
     }
 
     return exportNode;
@@ -246,12 +250,12 @@ export function exportAsMarkdown(
     const indent = '  '.repeat(depth);
     
     let typeTag = `[${data.nodeType.charAt(0).toUpperCase() + data.nodeType.slice(1)}]`;
-    if (data.nodeType === 'consequence-ref') {
+    if (data.nodeType === 'consequence-ref' || data.nodeType === 'input-ref') {
       typeTag = '[Reference]';
     }
 
     // Knotenzeile
-    if (data.nodeType === 'consequence-ref') {
+    if (data.nodeType === 'consequence-ref' || data.nodeType === 'input-ref') {
       lines.push(`${indent}**#${data.displayId}** ${typeTag} ${data.label} *(→ #${data.refNodeId})*`);
     } else {
       lines.push(`${indent}**#${data.displayId}** ${typeTag} ${data.label}`);
