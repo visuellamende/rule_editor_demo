@@ -45,6 +45,7 @@ export function MapList() {
       writeMap(id, data);
       refreshList();
       loadFromFile(data, id);
+      localStorage.setItem('ruleeditor_lastMapId', id);
     } catch (error) {
       console.error('Import failed:', error);
       alert(t('import.error'));
@@ -82,6 +83,7 @@ export function MapList() {
     const data = readMap(id);
     if (data) {
       loadFromFile(data, id);
+      localStorage.setItem('ruleeditor_lastMapId', id);
     }
   };
 
@@ -89,6 +91,7 @@ export function MapList() {
     const { id, data } = createNewMap();
     refreshList();
     loadFromFile(data, id);
+    localStorage.setItem('ruleeditor_lastMapId', id);
     // Sofort in den Edit-Modus
     setEditingId(id);
     setEditValue(data.meta.name);

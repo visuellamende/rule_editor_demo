@@ -24,21 +24,37 @@ function App() {
   useEffect(() => {
     // Initialisierung beim ersten Start
     const mapList = getMapList();
-    if (mapList.length === 0) {
-      // Sprache erkennen
+    const exampleAlreadyLoaded = localStorage.getItem('ruleeditor_exampleLoaded');
+
+    if (mapList.length === 0 && !exampleAlreadyLoaded) {
+      // Allererster Besuch: Beispiel-Map erstellen
       const locale = localStorage.getItem('locale')
         || (navigator.language.startsWith('de') ? 'de' : 'en');
       const example = locale === 'de' ? exampleMap : exampleMapEn;
 
-      // Beispiel-Map in localStorage schreiben
       writeMap(example.meta.id, example);
+      localStorage.setItem('ruleeditor_exampleLoaded', 'true');
       loadFromFile(example, example.meta.id);
+      localStorage.setItem('ruleeditor_lastMapId', example.meta.id);
     } else if (!currentMapId) {
-      // Letzte/erste Map laden falls nichts aktiv
-      const lastMapId = mapList[0];
-      const data = readMap(lastMapId);
-      if (data) {
-        loadFromFile(data, lastMapId);
+      // Wiederkehrender Besuch: letzte aktive Map laden
+      const lastMapId = localStorage.getItem('ruleeditor_lastMapId');
+      if (lastMapId) {
+        const data = readMap(lastMapId);
+        if (data) {
+          loadFromFile(data, lastMapId);
+          return;
+        }
+      }
+
+      // Fallback: erste Map aus der Liste
+      if (mapList.length > 0) {
+        const fallbackMapId = mapList[0];
+        const data = readMap(fallbackMapId);
+        if (data) {
+          loadFromFile(data, fallbackMapId);
+          localStorage.setItem('ruleeditor_lastMapId', fallbackMapId);
+        }
       }
     }
   }, [loadFromFile, currentMapId]);
