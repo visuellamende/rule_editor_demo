@@ -66,7 +66,16 @@ export function RuleCanvas() {
 
   const nodesInitialized = useNodesInitialized();
   const hasRunRef = useRef(false);
+  const prevFilePathRef = useRef<string | null>(filePath);
   const [layoutReady, setLayoutReady] = useState(false);
+
+  useEffect(() => {
+    if (filePath !== prevFilePathRef.current) {
+      prevFilePathRef.current = filePath;
+      hasRunRef.current = false;
+      setLayoutReady(false);
+    }
+  }, [filePath]);
 
   useEffect(() => {
     if (nodesInitialized && nodes.length > 0 && !hasRunRef.current) {
@@ -77,12 +86,7 @@ export function RuleCanvas() {
         setLayoutReady(true);
       });
     }
-  }, [nodesInitialized, nodes.length, applyAutoLayout, fitView]);
-
-  useEffect(() => {
-    hasRunRef.current = false;
-    setLayoutReady(false);
-  }, [filePath]);
+  }, [nodesInitialized, nodes.length, filePath, applyAutoLayout, fitView]);
 
   const hasOpenMap = filePath !== null;
 
