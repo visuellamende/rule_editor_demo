@@ -1,21 +1,29 @@
 import { useState } from 'react';
 import { useI18n } from '../../i18n';
 import { SettingsOverlay } from './SettingsOverlay';
+import { AgentOverlay } from './AgentOverlay';
 import './Header.css';
 
 export function Header() {
   const { t } = useI18n();
-  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showAgentOverlay, setShowAgentOverlay] = useState(false);
 
   return (
     <header className="header">
       <div className="header__left">
         <span className="header__logo">{t('app.name')}</span>
       </div>
-      <div className="header__right">
+      <div className="header__actions">
         <button
-          className="header__icon-button"
-          onClick={() => setSettingsOpen(true)}
+          className="header__agent-button"
+          onClick={() => setShowAgentOverlay(true)}
+        >
+          {t('header.forAgents')}
+        </button>
+        <button
+          className="header__settings-button"
+          onClick={() => setShowSettings(true)}
           aria-label={t('header.settings')}
           title={t('header.settings')}
         >
@@ -35,8 +43,12 @@ export function Header() {
         </button>
       </div>
 
-      {settingsOpen && (
-        <SettingsOverlay onClose={() => setSettingsOpen(false)} />
+      {showSettings && (
+        <SettingsOverlay onClose={() => setShowSettings(false)} />
+      )}
+
+      {showAgentOverlay && (
+        <AgentOverlay onClose={() => setShowAgentOverlay(false)} />
       )}
     </header>
   );

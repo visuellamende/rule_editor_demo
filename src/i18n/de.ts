@@ -239,6 +239,17 @@ export const de = {
   'validation.errors': 'Fehler',
   'validation.warnings': 'Hinweise',
   'validation.ok': 'Keine Probleme gefunden',
+
+  // Agent
+  'header.forAgents': 'Für KI-Agenten',
+  'agent.title': 'Für KI-Agenten',
+  'agent.description': 'KI-Agenten können Rulemaps automatisch aus Fachkonzepten erstellen. Kopiere die JSON-Spezifikation oder einen fertigen Prompt, füge dein Fachkonzept ein und lasse den Agenten eine Map generieren. Das Ergebnis importierst du über den Upload-Button in der Sidebar, korrigierst es visuell und exportierst das verbesserte JSON.',
+  'agent.schema.title': 'JSON-Schema',
+  'agent.schema.description': 'Die vollständige Spezifikation des JSON-Formats — alle Knotentypen, Verbindungsregeln und optionale Felder. Gib sie einem Agenten damit er weiß, wie eine valide Rulemap aussieht.',
+  'agent.schema.copy': 'Schema kopieren',
+  'agent.generate.title': 'Map generieren lassen',
+  'agent.generate.description': 'Ein Prompt der das Schema enthält und den Agenten anweist, aus einem Fachkonzept eine Rulemap zu erstellen. Füge am Ende dein Fachkonzept ein.',
+  'agent.generate.copy': 'Prompt kopieren',
 } as const;
 
 export type TranslationKey = keyof typeof de;
