@@ -195,12 +195,13 @@ export function RuleNode({ id, data, selected }: NodeProps) {
             <span className="rule-node__label">{nodeData.label}</span>
           )}
         </div>
-        {(nodeData.inputProvider || nodeData.expectedType || nodeData.inputVerfuegbarkeit) && (
+        {(nodeData.inputProvider || nodeData.inputProviderSubtype || nodeData.expectedType || nodeData.inputVerfuegbarkeit) && (
           <span className="rule-node__input-meta">
             {[
-              nodeData.inputProvider ? t(`panel.inputSource.provider.${nodeData.inputProvider}.short` as TranslationKey) : null,
+              nodeData.inputProvider && t(`panel.inputSource.provider.${nodeData.inputProvider}.short` as TranslationKey),
+              nodeData.inputProviderSubtype,
               nodeData.expectedType,
-              nodeData.inputVerfuegbarkeit ? t(`panel.inputSource.verfuegbarkeit.${nodeData.inputVerfuegbarkeit}.short` as TranslationKey) : null
+              nodeData.inputVerfuegbarkeit && t(`panel.inputSource.verfuegbarkeit.${nodeData.inputVerfuegbarkeit}.short` as TranslationKey)
             ].filter(Boolean).join(' · ')}
           </span>
         )}
