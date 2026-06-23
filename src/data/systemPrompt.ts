@@ -30,8 +30,12 @@ Regelautorität (knowledgeSources):
 - verbindlichkeit "optional": Darf hinterfragt und optimiert werden.
 - referenz: Auflösbarer Verweis auf die fachliche Grundlage (Paragraph, Dokument-ID, Link).
 
-Consequence-Referenzen (consequenceRef):
-- Wenn mehrere Knoten denselben consequenceRef haben, führen sie zum selben Ergebnis. Implementiere die Logik einmal und referenziere sie.
+Referenz-Knoten (consequence-ref, input-ref):
+- Ein Knoten mit type "consequence-ref" oder "input-ref" ist KEIN eigenständiger Knoten. Er ist ein Verweis auf einen anderen Knoten (angegeben durch refId).
+- "refId" bedeutet: dieser Knoten IST der referenzierte Knoten. Nicht eine Kopie, nicht ein ähnlicher Knoten — DASSELBE Objekt.
+- Konsequenz für die Implementierung: die referenzierte Logik wird EINMAL implementiert (als Funktion, Methode oder Handler). Jede Stelle die über einen Ref darauf zeigt, ruft diese eine Implementierung auf. Kein duplizierter Code.
+- Beispiel: Knoten #3 ist eine Consequence "Zugriff verweigert". Knoten #10 ist ein consequence-ref mit refId: 3. Im Code gibt es EINE Funktion deny_access(). Beide Pfade rufen deny_access() auf.
+- Dasselbe gilt für input-ref: der Ref verweist auf einen Input-Knoten. Die Datenquelle ist DIESELBE — nicht eine zweite Instanz mit gleichen Eigenschaften.
 
 Validierungswarnungen (validationWarnings):
 - Falls vorhanden: das Modell hat bekannte Lücken. Melde sie explizit, fülle sie NICHT durch Raten.

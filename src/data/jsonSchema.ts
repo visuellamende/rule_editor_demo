@@ -67,11 +67,13 @@ Jeder Knoten hat folgende Pflichtfelder:
 }
 \`\`\`
 
-**consequence-ref** — Verweist auf eine bestehende Consequence.
+**consequence-ref** — Verweis auf eine bestehende Consequence. Hat KEINE eigenen Daten.
 \`\`\`json
-{ "nodeType": "consequence-ref", "label": "Zugriff verweigert", "refNodeId": 3 }
+{ "id": 10, "type": "consequence-ref", "refId": 3 }
 \`\`\`
-refNodeId ist die displayId des referenzierten Consequence-Knotens.
+refId zeigt auf die id des Original-Consequence-Knotens.
+Alle Daten (label, consequence, knowledgeSources) kommen vom Original.
+Implementiere die Logik einmal und referenziere sie — es ist DASSELBE Objekt.
 
 **input** — Beschreibt einen Datenwert der in die Entscheidung einfließt.
 \`\`\`json
@@ -87,10 +89,12 @@ refNodeId ist die displayId des referenzierten Consequence-Knotens.
 }
 \`\`\`
 
-**input-ref** — Verweist auf einen bestehenden Input.
+**input-ref** — Verweis auf einen bestehenden Input. Hat KEINE eigenen Daten.
 \`\`\`json
-{ "nodeType": "input-ref", "label": "Nutzerrolle", "refNodeId": 5 }
+{ "id": 8, "type": "input-ref", "refId": 5 }
 \`\`\`
+refId zeigt auf die id des Original-Input-Knotens.
+Die Datenquelle ist DIESELBE — nicht eine zweite Instanz.
 
 ### Optionale Felder (bei allen Knotentypen)
 

@@ -22,7 +22,7 @@ Anforderungen:
 - Traversiere den Entscheidungsbaum vom Entry-Knoten aus.
 - Nutze die technicalKeys als Variablennamen und expectedTypes als Datentypen.
 - Nutze die output.values für Vergleiche (nicht die Labels).
-- Implementiere identische Consequences (gleicher consequenceRef) als gemeinsame Funktion.
+- Implementiere referenzierte Consequences (type: "consequence-ref") als gemeinsame Funktion (nur einmal implementiert, an allen Stellen referenziert).
 - Wenn inputSource.kannScheitern = true: implementiere Fehlerbehandlung.
 - Wenn inputSource.provider = "manuell": dokumentiere dass der Wert extern geliefert wird.
 - Respektiere die Verbindlichkeit der Knowledge Sources.
@@ -42,7 +42,7 @@ Anforderungen:
 - Der Testname beschreibt den Pfad (z.B. "test_user_not_in_org_access_denied").
 - Nutze die output.values als Eingabedaten.
 - Das erwartete Ergebnis kommt aus consequence.business.
-- Bei identischen Consequences (consequenceRef): teste jeden Pfad separat.
+- Bei referenzierten Consequences (consequence-ref): teste jeden Pfad separat.
 - Wenn Validierungswarnungen existieren: generiere einen fehlschlagenden Test pro Warnung mit Kommentar.`,
   },
   {

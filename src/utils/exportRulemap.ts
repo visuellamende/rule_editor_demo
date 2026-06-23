@@ -8,14 +8,15 @@ import { validateRulemap } from './validateRulemap';
 interface ExportNode {
   id: number;
   type: string;
-  label: string | null;
+  label?: string | null;
   technicalKey?: string | null;      // NEU
   expectedType?: string | null;      // NEU
   notes?: string | null;             // Immer vorhanden, ggf. null
   consequence?: ExportConsequence | null;  // Immer vorhanden, ggf. null
-  outputs: ExportEdge[];            // Immer vorhanden, ggf. leeres Array
+  outputs?: ExportEdge[];            // Immer vorhanden, ggf. leeres Array
   consequenceRef?: number;
   inputRef?: number;
+  refId?: number;
   inputSource?: {
     provider: 'system' | 'manuell' | 'komposition';
     providerSubtype: string | null;
@@ -85,6 +86,25 @@ export function exportAsJSON(
   const warnings = validateRulemap(nodes, edges);
   const exportNodes: ExportNode[] = nodes.map((node) => {
     const data = node.data as unknown as RuleNodeData;
+
+    // Consequence-Ref exportieren
+    if (data?.nodeType === 'consequence-ref') {
+      return {
+        id: data.displayId,
+        type: 'consequence-ref',
+        refId: data.refNodeId,
+      } as unknown as ExportNode;
+    }
+
+    // Input-Ref exportieren
+    if (data?.nodeType === 'input-ref') {
+      return {
+        id: data.displayId,
+        type: 'input-ref',
+        refId: data.refNodeId,
+      } as unknown as ExportNode;
+    }
+
     const outgoingEdges = edges
       .filter((e) => e.source === node.id)
       .map((e) => {
@@ -123,23 +143,6 @@ export function exportAsJSON(
         technical: cleanText(data.consequence.technical),
         reference: cleanText(data.consequence.reference),
       }) as ExportConsequence;
-    } else if (data?.nodeType === 'consequence-ref') {
-      const refNode = nodes.find(
-        (n) => (n.data as unknown as RuleNodeData).displayId === data.refNodeId
-      );
-      const refData = refNode?.data as unknown as RuleNodeData | undefined;
-      exportNode.type = 'consequence';
-      exportNode.consequenceRef = data.refNodeId;
-      exportNode.consequence = refData?.consequence
-        ? (omitNulls({
-            business: cleanText(refData.consequence.business),
-            technical: cleanText(refData.consequence.technical),
-            reference: cleanText(refData.consequence.reference),
-          }) as ExportConsequence)
-        : undefined;
-    } else if (data?.nodeType === 'input-ref') {
-      exportNode.type = 'input';
-      exportNode.inputRef = data.refNodeId;
     }
 
     return exportNode;
@@ -148,20 +151,22 @@ export function exportAsJSON(
   // Entry Node erkennen
   const targetIds = new Set<number>();
   for (const node of exportNodes) {
-    for (const output of node.outputs) {
-      targetIds.add(output.targetNodeId);
+    if (node.outputs) {
+      for (const output of node.outputs) {
+        targetIds.add(output.targetNodeId);
+      }
     }
   }
 
   // Typ im Export überschreiben
   for (const node of exportNodes) {
-    if (!targetIds.has(node.id)) {
+    if (node.type !== 'consequence-ref' && node.type !== 'input-ref' && !targetIds.has(node.id)) {
       node.type = 'entry';
       break;
     }
   }
 
-  // Consequence-Knoten mit identischem Inhalt bekommen denselben consequenceRef
+  // Consequence-Knoten mit identischem Inhalt bekommen denselben consequenceRef (nicht für Refs)
   const consequenceGroups = new Map<string, number>();
 
   for (const node of exportNodes) {
@@ -170,7 +175,6 @@ export function exportAsJSON(
       if (!consequenceGroups.has(key)) {
         consequenceGroups.set(key, node.id);
       }
-      node.consequenceRef = node.consequenceRef ?? consequenceGroups.get(key)!;
     }
   }
 
@@ -192,8 +196,8 @@ export function exportAsJSON(
           severity: w.severity,
         }))
       : null,
-    inputData: exportNodes.filter((n) => n.type === 'input'),
-    nodes: exportNodes.filter((n) => n.type !== 'input'),
+    inputData: exportNodes.filter((n) => n.type === 'input' || n.type === 'input-ref'),
+    nodes: exportNodes.filter((n) => n.type !== 'input' && n.type !== 'input-ref'),
   };
 
   return JSON.stringify(result, null, 2);
