@@ -8,8 +8,9 @@ export function getAutoLayout(nodes: Node[], edges: Edge[]): Node[] {
   graph.setDefaultEdgeLabel(() => ({}));
   graph.setGraph({
     rankdir: 'LR',
-    nodesep: 60, // Normaler Abstand
-    ranksep: 100,
+    nodesep: 100, // vertikaler Abstand zwischen Knoten
+    ranksep: 180, // horizontaler Abstand zwischen Ebenen
+    edgesep: 30,  // Mindestabstand zwischen parallelen Edges
     marginx: 50,
     marginy: 50,
   });
