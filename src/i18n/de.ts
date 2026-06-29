@@ -250,6 +250,24 @@ export const de = {
   'agent.generate.title': 'Map generieren lassen',
   'agent.generate.description': 'Ein Prompt der das Schema enthält und den Agenten anweist, aus einem Fachkonzept eine Rulemap zu erstellen. Füge am Ende dein Fachkonzept ein.',
   'agent.generate.copy': 'Prompt kopieren',
+
+  // Golden Examples
+  'panel.examples': 'Beispiele',
+  'example.name': 'Name',
+  'example.name.placeholder': 'z.B. Gast ohne Mitgliedschaft',
+  'example.inputs': 'Eingabewerte',
+  'example.key.placeholder': 'Key',
+  'example.value.placeholder': 'Wert',
+  'example.addInput': 'Eingabe hinzufügen',
+  'example.expected': 'Erwartetes Ergebnis',
+  'example.expected.placeholder': 'z.B. Zugriff verweigert',
+  'example.notes': 'Hinweis',
+  'example.notes.placeholder': 'Warum ist dieser Fall wichtig?',
+  'example.add': 'Beispiel hinzufügen',
+  'example.done': 'Fertig',
+  'example.remove': 'Entfernen',
+  'example.unnamed': 'Unbenanntes Beispiel',
+  'example.noInputs': 'Keine Eingaben definiert',
 } as const;
 
 export type TranslationKey = keyof typeof de;

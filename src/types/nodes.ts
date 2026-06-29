@@ -17,6 +17,14 @@ export interface KnowledgeSource {
   beschreibung: string | null;      // Kurzbeschreibung
 }
 
+export interface GoldenExample {
+  id: string;                          // crypto.randomUUID().slice(0, 8)
+  name: string;                        // Kurzbeschreibung, z.B. "Gast ohne Mitgliedschaft"
+  inputs: Record<string, string>;      // technicalKey → Wert, z.B. { "memberRole": "GUEST", "isInMemberList": "false" }
+  expectedResult: string;              // Fachliches Ergebnis, z.B. "Zugriff verweigert"
+  notes?: string;                      // Optionale Erklärung warum dieser Fall wichtig ist
+}
+
 export interface RuleNodeData {
   label: string;
   nodeType: RuleNodeType;
@@ -28,6 +36,7 @@ export interface RuleNodeData {
   expectedType?: string;
   refNodeId?: number;       // NEU: ID des referenzierten Consequence-Knotens
   knowledgeSources?: KnowledgeSource[];   // NEU
+  examples?: GoldenExample[];          // NEU — nur bei consequence-Knoten
 
   // NEU — nur für input-Knoten:
   inputProvider?: 'system' | 'manuell' | 'komposition';
@@ -36,6 +45,7 @@ export interface RuleNodeData {
   inputKannScheitern?: boolean;
   inputReferenziertEntscheidung?: string | null;
 }
+
 
 
 

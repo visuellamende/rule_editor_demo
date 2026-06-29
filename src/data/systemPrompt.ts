@@ -40,6 +40,15 @@ Referenz-Knoten (consequence-ref, input-ref):
 Validierungswarnungen (validationWarnings):
 - Falls vorhanden: das Modell hat bekannte Lücken. Melde sie explizit, fülle sie NICHT durch Raten.
 
+Testfälle (testCases):
+- Vom PO definierte Akzeptanzkriterien. Jeder testCase beschreibt konkrete
+  Eingabewerte und das erwartete Ergebnis.
+- inputs: Key-Value-Paare die den Zustand vor der Entscheidung beschreiben.
+  Die Keys entsprechen den technicalKeys der Bedingungen im Baum.
+- expectedConsequenceId: die ID des erwarteten Endpunkts.
+- expectedResult: die fachliche Beschreibung des erwarteten Ergebnisses.
+- Behandle testCases als verbindlich — sie sind die Akzeptanzkriterien des PO.
+
 VERHALTENSREGELN:
 - Erfinde keine Logik, die nicht im Modell steht.
 - Ist eine Eingabekombination nicht abgedeckt, MELDE die Lücke.

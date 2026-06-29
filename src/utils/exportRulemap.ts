@@ -40,12 +40,22 @@ interface ExportEdge {
   targetNodeId: number;
 }
 
+interface ExportTestCase {
+  id: string;
+  name: string;
+  inputs: Record<string, string>;
+  expectedConsequenceId: number;
+  expectedResult: string;
+  notes?: string;
+}
+
 interface ExportRulemap {
   name: string;
   description: string;
   category: string | null;
   entryNodeId: number | null;
   validationWarnings: any[] | null;
+  testCases?: ExportTestCase[];
   inputData: ExportNode[];
   nodes: ExportNode[];
 }
@@ -183,6 +193,24 @@ export function exportAsJSON(
 
   const entryNode = exportNodes.find((n) => n.type === 'entry');
 
+  // Alle Examples aus Consequence-Knoten sammeln
+  const testCases: ExportTestCase[] = [];
+  for (const node of nodes) {
+    const data = node.data as unknown as RuleNodeData;
+    if (data?.nodeType === 'consequence' && data.examples?.length) {
+      for (const example of data.examples) {
+        testCases.push({
+          id: example.id,
+          name: example.name,
+          inputs: example.inputs,
+          expectedConsequenceId: data.displayId,
+          expectedResult: example.expectedResult,
+          ...(example.notes ? { notes: example.notes } : {}),
+        });
+      }
+    }
+  }
+
   const result: ExportRulemap = {
     name: meta.name,
     description: meta.description,
@@ -196,6 +224,7 @@ export function exportAsJSON(
           severity: w.severity,
         }))
       : null,
+    testCases: testCases.length > 0 ? testCases : undefined,
     inputData: exportNodes.filter((n) => n.type === 'input' || n.type === 'input-ref'),
     nodes: exportNodes.filter((n) => n.type !== 'input' && n.type !== 'input-ref'),
   };

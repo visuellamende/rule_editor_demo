@@ -37,13 +37,22 @@ Anforderungen:
 
 Generiere für JEDEN Pfad im Entscheidungsbaum einen Unit-Test.
 
+WICHTIG: Das Modell enthält vom PO definierte Testfälle (testCases).
+Diese sind die PRIMÄRE Quelle für Tests — sie beschreiben exakt welche
+Eingaben zu welchem Ergebnis führen sollen. Implementiere sie 1:1 als
+Unit-Tests.
+
+Für Pfade OHNE definierte Testfälle: generiere einen Test basierend auf
+der Baumstruktur (wie bisher).
+
 Anforderungen:
-- Jeder Pfad vom Entry-Knoten bis zur Consequence ist ein Testfall.
-- Der Testname beschreibt den Pfad (z.B. "test_user_not_in_org_access_denied").
-- Nutze die output.values als Eingabedaten.
-- Das erwartete Ergebnis kommt aus consequence.business.
-- Bei referenzierten Consequences (consequence-ref): teste jeden Pfad separat.
-- Wenn Validierungswarnungen existieren: generiere einen fehlschlagenden Test pro Warnung mit Kommentar.`,
+- PO-definierte testCases haben Vorrang.
+- Jeder testCase wird ein eigener Unit-Test.
+- Der Testname enthält den Namen des testCase.
+- Eingabewerte kommen aus testCase.inputs.
+- Das erwartete Ergebnis kommt aus testCase.expectedResult.
+- expectedConsequenceId gibt an, welcher Consequence-Knoten das Ergebnis ist.
+- Für automatisch generierte Tests: nutze die output.values aus den Edges.`,
   },
   {
     id: 'audit',

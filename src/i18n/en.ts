@@ -252,4 +252,22 @@ export const en: Record<TranslationKey, string> = {
   'agent.generate.title': 'Generate Map',
   'agent.generate.description': 'A prompt containing the schema that instructs an agent to create a rulemap from a business concept. Add your business concept at the end.',
   'agent.generate.copy': 'Copy Prompt',
+
+  // Golden Examples
+  'panel.examples': 'Examples',
+  'example.name': 'Name',
+  'example.name.placeholder': 'e.g. Guest without membership',
+  'example.inputs': 'Input Values',
+  'example.key.placeholder': 'Key',
+  'example.value.placeholder': 'Value',
+  'example.addInput': 'Add input',
+  'example.expected': 'Expected Result',
+  'example.expected.placeholder': 'e.g. Access denied',
+  'example.notes': 'Note',
+  'example.notes.placeholder': 'Why is this case important?',
+  'example.add': 'Add example',
+  'example.done': 'Done',
+  'example.remove': 'Remove',
+  'example.unnamed': 'Unnamed example',
+  'example.noInputs': 'No inputs defined',
 };

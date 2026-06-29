@@ -1,0 +1,191 @@
+.example-editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding-top: var(--space-sm);
+}
+
+/* Kompakt-Ansicht */
+.example-editor__compact {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-sm);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--easing-default);
+}
+
+.example-editor__compact:hover {
+  border-color: var(--color-primary);
+}
+
+.example-editor__compact-name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.example-editor__compact-inputs {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  font-family: var(--font-family-mono);
+}
+
+.example-editor__compact-result {
+  font-size: var(--font-size-xs);
+  color: var(--color-node-consequence);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Edit-Modus */
+.example-editor__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: var(--space-sm);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-elevated);
+}
+
+.example-editor__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xxs);
+}
+
+.example-editor__label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+.example-editor__input {
+  padding: var(--space-xs) var(--space-sm);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-bg-surface);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-sm);
+}
+
+.example-editor__input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+/* Input Key-Value Paare */
+.example-editor__inputs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.example-editor__input-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xxs);
+}
+
+.example-editor__input--key {
+  flex: 2;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+}
+
+.example-editor__input--value {
+  flex: 3;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+}
+
+.example-editor__separator {
+  color: var(--color-text-muted);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+}
+
+.example-editor__remove-input {
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+}
+
+.example-editor__remove-input:hover {
+  color: #ef4444;
+}
+
+.example-editor__add-input {
+  padding: var(--space-xxs) var(--space-sm);
+  border: 1px dashed var(--color-border-subtle);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  text-align: left;
+}
+
+.example-editor__add-input:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+/* Aktionen */
+.example-editor__actions {
+  display: flex;
+  justify-content: space-between;
+  padding-top: var(--space-xs);
+}
+
+.example-editor__done,
+.example-editor__remove {
+  font-size: var(--font-size-xs);
+  padding: var(--space-xxs) var(--space-sm);
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: var(--font-family-base);
+}
+
+.example-editor__done {
+  background-color: var(--color-primary);
+  color: var(--color-text-on-primary);
+}
+
+.example-editor__remove {
+  background: transparent;
+  color: var(--color-text-muted);
+}
+
+.example-editor__remove:hover {
+  color: #ef4444;
+}
+
+/* Add-Button */
+.example-editor__add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm);
+  border: 1px dashed var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+
+.example-editor__add:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}

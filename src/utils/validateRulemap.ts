@@ -17,12 +17,26 @@ export type ValidationWarningType =
   | 'empty_consequence'         // Consequence ohne fachliche Beschreibung
   | 'missing_edge_label'        // Edge an Multi-Output-Knoten ohne Label
   | 'orphan_ref'                // Consequence-Ref verweist auf nicht existierenden Knoten
+  | 'invalid_example_key'        // Key im Example existiert nicht im Baum
   ;
 
 export function validateRulemap(nodes: Node[], edges: Edge[]): ValidationWarning[] {
   const warnings: ValidationWarning[] = [];
 
   if (nodes.length === 0) return warnings;
+
+  // Verfügbare Keys für Examples ermitteln
+  const availableKeys: string[] = [];
+  for (const n of nodes) {
+    const d = n.data as unknown as RuleNodeData;
+    if (d && d.nodeType === 'input' && d.technicalKey) {
+      availableKeys.push(d.technicalKey);
+    }
+    if (d && d.nodeType === 'condition' && d.technicalKey) {
+      availableKeys.push(d.technicalKey);
+    }
+  }
+  const uniqueAvailableKeys = [...new Set(availableKeys)];
 
   // Hilfsdaten aufbauen
   const nodeMap = new Map<string, Node>();
@@ -157,6 +171,23 @@ export function validateRulemap(nodes: Node[], edges: Edge[]): ValidationWarning
           message: `Referenz #${data.displayId} verweist auf Knoten #${data.refNodeId}, der nicht existiert.`,
           severity: 'error',
         });
+      }
+    }
+
+    // --- 8. Ungültige Example Keys ---
+    if (data.nodeType === 'consequence' && data.examples?.length) {
+      for (const example of data.examples) {
+        for (const key of Object.keys(example.inputs)) {
+          if (key && !uniqueAvailableKeys.includes(key)) {
+            warnings.push({
+              nodeId: node.id,
+              displayId: data.displayId,
+              type: 'invalid_example_key',
+              message: `Beispiel "${example.name}": Key "${key}" existiert nicht im Baum.`,
+              severity: 'warning',
+            });
+          }
+        }
       }
     }
   }

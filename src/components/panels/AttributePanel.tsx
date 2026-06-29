@@ -5,8 +5,9 @@ import { CustomSelect } from '../primitives/CustomSelect';
 import { MapInfoPanel } from './MapInfoPanel';
 import { EdgeLabelSuggestions } from './EdgeLabelSuggestions';
 import type { RuleNodeData, RuleNodeType, ConsequenceData } from '../../types/nodes';
-import { useReactFlow } from '@xyflow/react';
+import { useReactFlow, type Node } from '@xyflow/react';
 import { KnowledgeSourceEditor } from './KnowledgeSourceEditor';
+import { ExampleEditor } from './ExampleEditor';
 import './AttributePanel.css';
 
 export function AttributePanel() {
@@ -33,6 +34,9 @@ export function AttributePanel() {
   );
   const [showKnowledgeSources, setShowKnowledgeSources] = useState(
     () => !!(nodeData && (nodeData.knowledgeSources?.length ?? 0) > 0)
+  );
+  const [showExamples, setShowExamples] = useState(
+    () => !!(nodeData && (nodeData.examples?.length ?? 0) > 0)
   );
 
   const validationWarnings = useCanvasStore((state) => state.validationWarnings);
@@ -615,6 +619,35 @@ export function AttributePanel() {
           </div>
         )}
 
+        {/* Beispiele — nur bei Consequence-Knoten */}
+        {nodeData.nodeType === 'consequence' && (
+          <div className="attribute-panel__section">
+            <h4
+              className="attribute-panel__section-title attribute-panel__section-title--collapsible"
+              onClick={() => setShowExamples(!showExamples)}
+            >
+              <svg
+                className={`attribute-panel__collapse-icon ${showExamples ? 'attribute-panel__collapse-icon--open' : ''}`}
+                width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+              >
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+              {t('panel.examples')}
+              {(nodeData.examples?.length ?? 0) > 0 && (
+                <span className="attribute-panel__badge">{nodeData.examples!.length}</span>
+              )}
+            </h4>
+
+            {showExamples && (
+              <ExampleEditor
+                examples={nodeData.examples ?? []}
+                onChange={(examples) => updateNodeData(selectedNode.id, { examples })}
+                availableInputKeys={getAvailableInputKeys(nodes)}
+              />
+            )}
+          </div>
+        )}
+
         {/* Regelautorität — bei allen Knotentypen */}
         <div className="attribute-panel__section">
           <h4
@@ -655,4 +688,20 @@ export function AttributePanel() {
       </div>
     </div>
   );
+}
+
+function getAvailableInputKeys(nodes: Node[]): string[] {
+  const keys: string[] = [];
+  for (const node of nodes) {
+    const data = node.data as unknown as RuleNodeData;
+    // Aus Input-Knoten
+    if (data.nodeType === 'input' && data.technicalKey) {
+      keys.push(data.technicalKey);
+    }
+    // Aus Condition-Knoten (Fallback wenn kein Input verbunden)
+    if (data.nodeType === 'condition' && data.technicalKey) {
+      keys.push(data.technicalKey);
+    }
+  }
+  return [...new Set(keys)];
 }
