@@ -3,6 +3,7 @@ import { useI18n } from '../../i18n';
 import { useCanvasStore } from '../../store/useCanvasStore';
 import { getMapList, readMap, writeMap, createNewMap, deleteMap } from '../../services/browserStorage';
 import type { RulemapFile } from '../../types/rulemap';
+import { isExportFormat, convertExportToRulemap } from '../../utils/convertExportToRulemap';
 import './MapList.css';
 
 interface MapEntry {
@@ -32,10 +33,15 @@ export function MapList() {
 
     try {
       const text = await file.text();
-      const data = JSON.parse(text) as RulemapFile;
+      const rawData = JSON.parse(text);
+      let data: RulemapFile;
 
-      // Grundlegende Validierung
-      if (!data.meta || !data.nodes || !data.edges) {
+      // Dateiformat (React-Flow) oder flaches Export-Format erkennen & konvertieren
+      if (rawData && rawData.meta && rawData.nodes && rawData.edges) {
+        data = rawData as RulemapFile;
+      } else if (isExportFormat(rawData)) {
+        data = convertExportToRulemap(rawData);
+      } else {
         alert(t('import.invalidFormat'));
         return;
       }

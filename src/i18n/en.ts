@@ -246,11 +246,14 @@ export const en: Record<TranslationKey, string> = {
   'header.forAgents': 'For AI Agents',
   'agent.title': 'For AI Agents',
   'agent.description': 'AI agents can automatically create rulemaps from business concepts. Copy the JSON specification or a ready-made prompt, add your business concept and let the agent generate a map. Import the result via the upload button in the sidebar, review it visually and export the improved JSON.',
-  'agent.schema.title': 'JSON Schema',
-  'agent.schema.description': 'The complete specification of the JSON format — all node types, connection rules and optional fields. Give it to an agent so it knows what a valid rulemap looks like.',
-  'agent.schema.copy': 'Copy Schema',
+  'agent.schemaImport.title': 'JSON Schema (Import / File Format)',
+  'agent.schemaImport.description': 'The complete specification of the file format (React Flow structure) — node types, connection rules and optional fields for importing into the editor.',
+  'agent.schemaImport.copy': 'Copy Import Schema',
+  'agent.schemaExport.title': 'JSON Schema (Export / Agent Format)',
+  'agent.schemaExport.description': 'The specification of the flat output format generated when exporting from Rule Editor — optimized for direct AI agent consumption.',
+  'agent.schemaExport.copy': 'Copy Export Schema',
   'agent.generate.title': 'Generate Map',
-  'agent.generate.description': 'A prompt containing the schema that instructs an agent to create a rulemap from a business concept. Add your business concept at the end.',
+  'agent.generate.description': 'A prompt containing the import schema that instructs an agent to create a rulemap from a business concept. Add your business concept at the end.',
   'agent.generate.copy': 'Copy Prompt',
 
   // Golden Examples

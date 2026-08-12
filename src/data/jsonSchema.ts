@@ -1,6 +1,8 @@
-export const JSON_SCHEMA_SPEC = `# Rule Editor — JSON-Spezifikation
+export const JSON_SCHEMA_SPEC = `# Rule Editor — JSON-Spezifikation (Import / Dateiformat)
 
-Dieses Dokument beschreibt das JSON-Format, das der Rule Editor exportiert und importiert. Nutze es um Rulemaps programmatisch zu erstellen.
+Dieses Dokument beschreibt das Import-/Dateiformat (React-Flow-Struktur) des Rule Editors. Nutze es, um Rulemaps programmatisch zu erstellen oder von KI-Agenten generieren zu lassen.
+
+Hinweis: Der JSON-Export der Anwendung nutzt ein anderes, flaches Format für die Weiterverarbeitung durch KI-Agenten.
 
 ## Grundstruktur
 
@@ -67,12 +69,22 @@ Jeder Knoten hat folgende Pflichtfelder:
 }
 \`\`\`
 
-**consequence-ref** — Verweis auf eine bestehende Consequence. Hat KEINE eigenen Daten.
+**consequence-ref** — Verweis auf eine bestehende Consequence.
 \`\`\`json
-{ "id": 10, "type": "consequence-ref", "refId": 3 }
+{
+  "id": "n10",
+  "type": "ruleNode",
+  "position": { "x": 0, "y": 0 },
+  "data": {
+    "label": "Zugriff verweigert",
+    "nodeType": "consequence-ref",
+    "displayId": 10,
+    "refNodeId": 4
+  }
+}
 \`\`\`
-refId zeigt auf die id des Original-Consequence-Knotens.
-Alle Daten (label, consequence, knowledgeSources) kommen vom Original.
+refNodeId verweist auf die displayId des Original-Consequence-Knotens (z.B. 4 für Knoten #4).
+Alle Daten (consequence, knowledgeSources) kommen vom Original.
 Implementiere die Logik einmal und referenziere sie — es ist DASSELBE Objekt.
 
 **input** — Beschreibt einen Datenwert der in die Entscheidung einfließt.
@@ -89,17 +101,29 @@ Implementiere die Logik einmal und referenziere sie — es ist DASSELBE Objekt.
 }
 \`\`\`
 
-**input-ref** — Verweis auf einen bestehenden Input. Hat KEINE eigenen Daten.
+**input-ref** — Verweis auf einen bestehenden Input.
 \`\`\`json
-{ "id": 8, "type": "input-ref", "refId": 5 }
+{
+  "id": "n8",
+  "type": "ruleNode",
+  "position": { "x": 0, "y": 0 },
+  "data": {
+    "label": "Nutzerrolle",
+    "nodeType": "input-ref",
+    "displayId": 8,
+    "refNodeId": 5
+  }
+}
 \`\`\`
-refId zeigt auf die id des Original-Input-Knotens.
+refNodeId verweist auf die displayId des Original-Input-Knotens (z.B. 5 für Knoten #5).
 Die Datenquelle ist DIESELBE — nicht eine zweite Instanz.
 
 ### Optionale Felder (bei allen Knotentypen)
 
 \`\`\`json
 {
+  "technicalKey": "string (optional, z.B. 'memberRole')",
+  "expectedType": "string (optional, z.B. 'boolean', 'enum', 'number')",
   "notes": "string (optional, Notizen)",
   "knowledgeSources": [
     {
@@ -144,9 +168,9 @@ Die Datenquelle ist DIESELBE — nicht eine zweite Instanz.
 
 ## IDs
 
-- \`id\`: interner Identifier für Knoten und Edges (z.B. "n1", "n2", "e1", "e2")
+- \`id\`: interner React-Flow Identifier für Knoten und Edges (z.B. "n1", "n2", "e1", "e2")
 - \`displayId\`: sichtbare Nummer im Canvas (#1, #2, ...), fortlaufend, beginnt bei 1
-- \`refNodeId\`: verweist auf die displayId des referenzierten Knotens
+- \`refNodeId\`: verweist auf die displayId des referenzierten Knotens (z.B. 4 für Knoten #4)
 
 ## Beispiel
 
@@ -170,6 +194,8 @@ Die Datenquelle ist DIESELBE — nicht eine zweite Instanz.
         "label": "Nutzer in Organisation",
         "nodeType": "input",
         "displayId": 1,
+        "technicalKey": "inOrg",
+        "expectedType": "boolean",
         "inputProvider": "system",
         "inputProviderSubtype": "stammdaten",
         "inputVerfuegbarkeit": "vorhanden",
@@ -220,6 +246,17 @@ Die Datenquelle ist DIESELBE — nicht eine zweite Instanz.
         "consequence": {
           "business": "Nutzer erhält Zugriff."
         }
+      }
+    },
+    {
+      "id": "n6",
+      "type": "ruleNode",
+      "position": { "x": 0, "y": 0 },
+      "data": {
+        "label": "Zugriff verweigert",
+        "nodeType": "consequence-ref",
+        "displayId": 6,
+        "refNodeId": 4
       }
     }
   ],

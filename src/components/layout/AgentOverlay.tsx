@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useI18n } from '../../i18n';
 import { JSON_SCHEMA_SPEC } from '../../data/jsonSchema';
+import { JSON_EXPORT_SPEC } from '../../data/jsonExportSchema';
 import { GENERATE_MAP_PROMPT } from '../../data/generatePrompt';
 import './AgentOverlay.css';
 
@@ -51,15 +52,27 @@ export function AgentOverlay({ onClose }: AgentOverlayProps) {
         </p>
 
         <div className="agent-overlay__options">
-          {/* JSON-Schema */}
+          {/* JSON-Schema Import */}
           <div className="agent-overlay__option">
-            <h3 className="agent-overlay__option-title">{t('agent.schema.title')}</h3>
-            <p className="agent-overlay__option-description">{t('agent.schema.description')}</p>
+            <h3 className="agent-overlay__option-title">{t('agent.schemaImport.title')}</h3>
+            <p className="agent-overlay__option-description">{t('agent.schemaImport.description')}</p>
             <button
-              className={`agent-overlay__copy-button ${copiedButton === 'schema' ? 'agent-overlay__copy-button--copied' : ''}`}
-              onClick={() => handleCopy(JSON_SCHEMA_SPEC, 'schema')}
+              className={`agent-overlay__copy-button ${copiedButton === 'schemaImport' ? 'agent-overlay__copy-button--copied' : ''}`}
+              onClick={() => handleCopy(JSON_SCHEMA_SPEC, 'schemaImport')}
             >
-              {copiedButton === 'schema' ? t('template.copied') : t('agent.schema.copy')}
+              {copiedButton === 'schemaImport' ? t('template.copied') : t('agent.schemaImport.copy')}
+            </button>
+          </div>
+
+          {/* JSON-Schema Export */}
+          <div className="agent-overlay__option">
+            <h3 className="agent-overlay__option-title">{t('agent.schemaExport.title')}</h3>
+            <p className="agent-overlay__option-description">{t('agent.schemaExport.description')}</p>
+            <button
+              className={`agent-overlay__copy-button ${copiedButton === 'schemaExport' ? 'agent-overlay__copy-button--copied' : ''}`}
+              onClick={() => handleCopy(JSON_EXPORT_SPEC, 'schemaExport')}
+            >
+              {copiedButton === 'schemaExport' ? t('template.copied') : t('agent.schemaExport.copy')}
             </button>
           </div>
 
@@ -79,3 +92,4 @@ export function AgentOverlay({ onClose }: AgentOverlayProps) {
     </div>
   );
 }
+

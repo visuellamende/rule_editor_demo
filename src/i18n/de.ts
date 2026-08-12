@@ -244,11 +244,14 @@ export const de = {
   'header.forAgents': 'Für KI-Agenten',
   'agent.title': 'Für KI-Agenten',
   'agent.description': 'KI-Agenten können Rulemaps automatisch aus Fachkonzepten erstellen. Kopiere die JSON-Spezifikation oder einen fertigen Prompt, füge dein Fachkonzept ein und lasse den Agenten eine Map generieren. Das Ergebnis importierst du über den Upload-Button in der Sidebar, korrigierst es visuell und exportierst das verbesserte JSON.',
-  'agent.schema.title': 'JSON-Schema',
-  'agent.schema.description': 'Die vollständige Spezifikation des JSON-Formats — alle Knotentypen, Verbindungsregeln und optionale Felder. Gib sie einem Agenten damit er weiß, wie eine valide Rulemap aussieht.',
-  'agent.schema.copy': 'Schema kopieren',
+  'agent.schemaImport.title': 'JSON-Schema (Import / Dateiformat)',
+  'agent.schemaImport.description': 'Die vollständige Spezifikation des Dateiformats (React-Flow-Struktur) — Knotentypen, Verbindungsregeln und optionale Felder zum Importieren in den Editor.',
+  'agent.schemaImport.copy': 'Import-Schema kopieren',
+  'agent.schemaExport.title': 'JSON-Schema (Export / Agenten-Format)',
+  'agent.schemaExport.description': 'Die Spezifikation des flachen Ausgabeformats, das der Rule Editor beim Export erzeugt — optimiert für die direkte Weiterverarbeitung durch KI-Agenten.',
+  'agent.schemaExport.copy': 'Export-Schema kopieren',
   'agent.generate.title': 'Map generieren lassen',
-  'agent.generate.description': 'Ein Prompt der das Schema enthält und den Agenten anweist, aus einem Fachkonzept eine Rulemap zu erstellen. Füge am Ende dein Fachkonzept ein.',
+  'agent.generate.description': 'Ein Prompt der das Import-Schema enthält und den Agenten anweist, aus einem Fachkonzept eine Rulemap zu erstellen. Füge am Ende dein Fachkonzept ein.',
   'agent.generate.copy': 'Prompt kopieren',
 
   // Golden Examples
