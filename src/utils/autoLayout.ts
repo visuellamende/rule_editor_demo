@@ -1,6 +1,25 @@
 import dagre from '@dagrejs/dagre';
 import type { Node, Edge } from '@xyflow/react';
 
+function getNodeDimensions(node: Node): { width: number; height: number } {
+  const nodeType = (node.data as any)?.nodeType;
+  let defaultWidth = 240;
+  let defaultHeight = 110;
+
+  if (nodeType === 'input' || nodeType === 'input-ref') {
+    defaultWidth = 180;
+    defaultHeight = 50;
+  } else if (nodeType === 'consequence-ref') {
+    defaultWidth = 200;
+    defaultHeight = 60;
+  }
+
+  return {
+    width: node.measured?.width ?? node.width ?? defaultWidth,
+    height: node.measured?.height ?? node.height ?? defaultHeight,
+  };
+}
+
 export function getAutoLayout(nodes: Node[], edges: Edge[]): Node[] {
   if (nodes.length === 0) return nodes;
 
@@ -8,9 +27,9 @@ export function getAutoLayout(nodes: Node[], edges: Edge[]): Node[] {
   graph.setDefaultEdgeLabel(() => ({}));
   graph.setGraph({
     rankdir: 'LR',
-    nodesep: 100, // vertikaler Abstand zwischen Knoten
-    ranksep: 180, // horizontaler Abstand zwischen Ebenen
-    edgesep: 30,  // Mindestabstand zwischen parallelen Edges
+    nodesep: 160, // vertikaler Abstand zwischen Knoten in derselben Ebene (vorher 100)
+    ranksep: 200, // horizontaler Abstand zwischen Ebenen (vorher 180)
+    edgesep: 40,  // Mindestabstand zwischen parallelen Edges (vorher 30)
     marginx: 50,
     marginy: 50,
   });
@@ -37,18 +56,17 @@ export function getAutoLayout(nodes: Node[], edges: Edge[]): Node[] {
     
     if (targetInputs[node.id] && targetInputs[node.id].length > 0) {
        const inputs = targetInputs[node.id];
-       const maxInputHeight = Math.max(...inputs.map(n => n.measured?.height ?? n.height ?? 80));
+       const maxInputHeight = Math.max(...inputs.map(n => getNodeDimensions(n).height));
        inputSpace = maxInputHeight + 40; // 40px Padding
        
-       inputGroupWidth = inputs.reduce((sum, n) => sum + (n.measured?.width ?? n.width ?? 180), 0) + 20 * (inputs.length - 1);
+       inputGroupWidth = inputs.reduce((sum, n) => sum + getNodeDimensions(n).width, 0) + 20 * (inputs.length - 1);
     }
     
-    const visualWidth = node.measured?.width ?? node.width ?? 240;
-    const visualHeight = node.measured?.height ?? node.height ?? 80;
+    const dims = getNodeDimensions(node);
     
     graph.setNode(node.id, {
-      width: Math.max(visualWidth, inputGroupWidth),
-      height: visualHeight + inputSpace,
+      width: Math.max(dims.width, inputGroupWidth),
+      height: dims.height + inputSpace,
     });
   });
 
@@ -74,18 +92,18 @@ export function getAutoLayout(nodes: Node[], edges: Edge[]): Node[] {
         const inputsForTarget = targetInputs[targetId];
         const currentIndex = inputsForTarget.indexOf(node);
         
-        const targetVisualHeight = nodes.find(n => n.id === targetId)?.measured?.height ?? nodes.find(n => n.id === targetId)?.height ?? 80;
-        const inputSpace = Math.max(...inputsForTarget.map(n => n.measured?.height ?? n.height ?? 80)) + 40;
+        const targetVisualHeight = getNodeDimensions(nodes.find(n => n.id === targetId)!).height;
+        const inputSpace = Math.max(...inputsForTarget.map(n => getNodeDimensions(n).height)) + 40;
         const visualTargetY = targetNode.y + (inputSpace / 2) - (targetVisualHeight / 2);
         
-        const myHeight = node.measured?.height ?? node.height ?? 80;
+        const myHeight = getNodeDimensions(node).height;
         yPos = visualTargetY - myHeight - 40; 
         
-        const totalGroupWidth = inputsForTarget.reduce((sum, n) => sum + (n.measured?.width ?? n.width ?? 180), 0) + 20 * (inputsForTarget.length - 1);
+        const totalGroupWidth = inputsForTarget.reduce((sum, n) => sum + getNodeDimensions(n).width, 0) + 20 * (inputsForTarget.length - 1);
         let currentX = targetNode.x - (totalGroupWidth / 2); 
         
         for (let i = 0; i < currentIndex; i++) {
-           currentX += (inputsForTarget[i].measured?.width ?? inputsForTarget[i].width ?? 180) + 20;
+           currentX += getNodeDimensions(inputsForTarget[i]).width + 20;
         }
         xPos = currentX;
       }
@@ -94,17 +112,16 @@ export function getAutoLayout(nodes: Node[], edges: Edge[]): Node[] {
     }
 
     const nodeWithPosition = graph.node(node.id);
-    const visualWidth = node.measured?.width ?? node.width ?? 240;
-    const visualHeight = node.measured?.height ?? node.height ?? 80;
+    const dims = getNodeDimensions(node);
     
     let inputSpace = 0;
     if (targetInputs[node.id] && targetInputs[node.id].length > 0) {
        const inputs = targetInputs[node.id];
-       inputSpace = Math.max(...inputs.map(n => n.measured?.height ?? n.height ?? 80)) + 40;
+       inputSpace = Math.max(...inputs.map(n => getNodeDimensions(n).height)) + 40;
     }
     
-    const visualY = nodeWithPosition.y + (inputSpace / 2) - (visualHeight / 2);
-    const visualX = nodeWithPosition.x - (visualWidth / 2);
+    const visualY = nodeWithPosition.y + (inputSpace / 2) - (dims.height / 2);
+    const visualX = nodeWithPosition.x - (dims.width / 2);
 
     return {
       ...node,

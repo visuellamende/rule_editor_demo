@@ -27,6 +27,7 @@ export function LabeledEdge({
     targetY,
     sourcePosition,
     targetPosition,
+    borderRadius: 12,
   });
 
   const [isEditing, setIsEditing] = useState(false);

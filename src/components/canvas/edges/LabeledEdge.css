@@ -2,14 +2,17 @@
   background-color: var(--color-bg-surface);
   padding: var(--space-xxs) var(--space-xs);
   border-radius: var(--radius-sm);
-  border: 1px solid transparent;
+  border: 1px solid var(--color-border-subtle);
+  box-shadow: var(--shadow-sm);
   cursor: pointer;
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
   transition: border-color var(--duration-fast) var(--easing-default),
-              background-color var(--duration-fast) var(--easing-default);
+              background-color var(--duration-fast) var(--easing-default),
+              box-shadow var(--duration-fast) var(--easing-default);
   min-width: 24px;
   text-align: center;
+  z-index: 5;
 }
 
 .labeled-edge__label:hover {
