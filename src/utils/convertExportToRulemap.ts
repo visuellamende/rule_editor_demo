@@ -1,6 +1,16 @@
 import type { Node, Edge } from '@xyflow/react';
 import type { RulemapFile, RulemapMeta } from '../types/rulemap';
-import type { RuleNodeData, RuleNodeType, GoldenExample, KnowledgeSource, ConsequenceData } from '../types/nodes';
+import type { RuleNodeData, RuleNodeType, RulemapCategory, GoldenExample, KnowledgeSource, ConsequenceData } from '../types/nodes';
+
+const VALID_NODE_TYPES: RuleNodeType[] = [
+  'decision',
+  'condition',
+  'action',
+  'consequence',
+  'consequence-ref',
+  'input',
+  'input-ref',
+];
 
 interface RawOutput {
   label?: string | null;
@@ -86,9 +96,11 @@ export function convertExportToRulemap(exportData: RawExportData): RulemapFile {
     const displayId: number = typeof rawNode.id === 'number' ? rawNode.id : Number(rawNode.id) || 1;
     const nodeId = `n${displayId}`;
 
-    let nodeType: RuleNodeType = (rawNode.type as RuleNodeType) || 'decision';
+    let nodeType: RuleNodeType = 'decision';
     if (rawNode.type === 'entry') {
-      nodeType = 'decision';
+      nodeType = 'decision'; // Abwärtskompatibel für alte Exports
+    } else if (rawNode.type && VALID_NODE_TYPES.includes(rawNode.type as RuleNodeType)) {
+      nodeType = rawNode.type as RuleNodeType;
     }
 
     const nodeData: RuleNodeData = {
@@ -102,10 +114,17 @@ export function convertExportToRulemap(exportData: RawExportData): RulemapFile {
       ...(rawNode.knowledgeSources ? { knowledgeSources: rawNode.knowledgeSources } : {}),
     };
 
-    // Referenzen
+    // Referenzen & Label-Auflösung aus dem Originalknoten
     const refId = rawNode.refId ?? rawNode.refNodeId ?? rawNode.consequenceRef ?? rawNode.inputRef;
     if (refId !== undefined && refId !== null) {
-      nodeData.refNodeId = Number(refId);
+      const numericRefId = Number(refId);
+      nodeData.refNodeId = numericRefId;
+      if (!nodeData.label) {
+        const targetOriginal = rawNodes.find((n) => Number(n.id) === numericRefId);
+        if (targetOriginal?.label) {
+          nodeData.label = targetOriginal.label;
+        }
+      }
     }
 
     // Input-Quellen

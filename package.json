@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
+    "check-roundtrip": "npx tsx scripts/roundtrip-check.ts",
     "preview": "vite preview"
   },
   "dependencies": {

@@ -22,11 +22,11 @@ Dieses Dokument beschreibt das flache, agentenorientierte JSON-Format, das der R
 - \`name\`: string — Name der Rulemap.
 - \`description\`: string — Beschreibung der Rulemap.
 - \`category\`: string | null — Kategorie (\`validation\`, \`permission\`, \`state\`, \`business-logic\`, \`error-handling\`).
-- \`entryNodeId\`: number | null — ID (\`displayId\`) des Wurzelknotens (\`type: "entry"\`).
+- \`entryNodeId\`: number | null — ID (\`displayId\`) des Einstiegsknotens. Der Einstiegsknoten ist ein regulärer Logikknoten im Baumbereich (nie ein Input).
 - \`validationWarnings\`: Array<{ nodeId: number, type: string, message: string, severity: "error" | "warning" }> | null — Aktuelle Validierungswarnungen oder \`null\`.
 - \`testCases\`: Array<TestCase> (optional) — Fachliche Golden Examples aus den Consequence-Knoten.
-- \`inputData\`: Array<ExportNode> — Alle Input-Knoten (\`type: "input"\` oder \`type: "input-ref"\`).
-- \`nodes\`: Array<ExportNode> — Alle Entscheidungs- und Logikknoten (\`entry\`, \`decision\`, \`condition\`, \`action\`, \`consequence\`, \`consequence-ref\`).
+- \`inputData\`: Array<ExportNode> — Alle Input-Knoten (\`type: "input"\` oder \`type: "input-ref"\`). Input-Knoten können nie Einstiegsknoten sein.
+- \`nodes\`: Array<ExportNode> — Alle Entscheidungs- und Logikknoten (\`decision\`, \`condition\`, \`action\`, \`consequence\`, \`consequence-ref\`).
 
 ---
 
@@ -37,7 +37,7 @@ Im Export-Format werden Knoten flach ohne React-Flow-Hülle exportiert. Ausgehen
 \`\`\`json
 {
   "id": 2,
-  "type": "entry",
+  "type": "decision",
   "label": "Wird dem Nutzer Zugriff gewährt?",
   "technicalKey": null,
   "expectedType": null,
@@ -53,13 +53,13 @@ Im Export-Format werden Knoten flach ohne React-Flow-Hülle exportiert. Ausgehen
 ### Knoten-Felder
 
 - \`id\`: number — Sichtbare Knoten-ID (numerisch ab 1).
-- \`type\`: \`"entry" | "decision" | "condition" | "action" | "consequence" | "consequence-ref" | "input" | "input-ref"\` — Der Wurzelknoten wird im Export als \`"entry"\` typisiert.
+- \`type\`: \`"decision" | "condition" | "action" | "consequence" | "consequence-ref" | "input" | "input-ref"\` — Der Knotentyp (Knoten behalten ihren echten Typ; für Abwärtskompatibilität wird bei älteren Exports auch \`"entry"\` als Synonym für \`"decision"\` akzeptiert).
 - \`label\`: string | null — Fachliche Beschreibung des Knotens.
 - \`technicalKey\`: string | null — Optionaler technischer Schlüssel (z. B. Variablenname).
 - \`expectedType\`: string | null — Optionaler Datentyp (z. B. \`"boolean"\`, \`"enum"\`, \`"number"\`).
 - \`notes\`: string | null — Notizen oder Kommentare.
 - \`consequence\`: Object | null — Nur bei \`consequence\`-Knoten (siehe unten).
-- \`outputs\`: Array<ExportEdge> — Ausgehende Verbindungen (siehe unten).
+- \`outputs\`: Array<ExportEdge> — Ausgehende Verbindungen (siehe unten). Bei \`consequence-ref\` entfällt \`outputs\` (Endpunkt).
 - \`refId\`: number (optional) — Nur bei \`consequence-ref\` und \`input-ref\`: ID des referenzierten Originalknotens.
 - \`inputSource\`: Object | null — Nur bei Knoten mit Datenquelle (siehe unten).
 - \`knowledgeSources\`: Array<KnowledgeSource> | null — Fachliche Quellen/Regelautoritäten.
@@ -120,6 +120,8 @@ Im Export-Format werden Knoten flach ohne React-Flow-Hülle exportiert. Ausgehen
 }
 \`\`\`
 - Nutzt das Feld \`refId\` (nicht \`refNodeId\`), welches direkt auf die numerische \`id\` des Zielknotens zeigt.
+- \`input-ref\`-Knoten enthalten das Feld \`outputs\` mit ihrer ausgehenden Verbindung zur Condition.
+- \`consequence-ref\`-Knoten haben keine \`outputs\` (Endpunkt).
 
 ### testCases (Golden Examples)
 
@@ -175,7 +177,7 @@ Im Export-Format werden Knoten flach ohne React-Flow-Hülle exportiert. Ausgehen
   "nodes": [
     {
       "id": 2,
-      "type": "entry",
+      "type": "decision",
       "label": "Wird dem Nutzer Zugriff gewährt?",
       "technicalKey": null,
       "expectedType": null,

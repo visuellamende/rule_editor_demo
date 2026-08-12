@@ -9,13 +9,11 @@ interface ExportNode {
   id: number;
   type: string;
   label?: string | null;
-  technicalKey?: string | null;      // NEU
-  expectedType?: string | null;      // NEU
-  notes?: string | null;             // Immer vorhanden, ggf. null
-  consequence?: ExportConsequence | null;  // Immer vorhanden, ggf. null
-  outputs?: ExportEdge[];            // Immer vorhanden, ggf. leeres Array
-  consequenceRef?: number;
-  inputRef?: number;
+  technicalKey?: string | null;
+  expectedType?: string | null;
+  notes?: string | null;
+  consequence?: ExportConsequence | null;
+  outputs?: ExportEdge[];
   refId?: number;
   inputSource?: {
     provider: 'system' | 'manuell' | 'komposition';
@@ -54,7 +52,12 @@ interface ExportRulemap {
   description: string;
   category: string | null;
   entryNodeId: number | null;
-  validationWarnings: any[] | null;
+  validationWarnings: Array<{
+    nodeId: number;
+    type: string;
+    message: string;
+    severity: string;
+  }> | null;
   testCases?: ExportTestCase[];
   inputData: ExportNode[];
   nodes: ExportNode[];
@@ -66,8 +69,8 @@ function cleanText(text: string | undefined | null): string | null {
   return trimmed || null;
 }
 
-function omitNulls<T extends Record<string, any>>(obj: T): Partial<T> {
-  const result: Record<string, any> = {};
+function omitNulls<T extends Record<string, unknown>>(obj: T): Partial<T> {
+  const result: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(obj)) {
     if (value !== null && value !== undefined) {
       result[key] = value;
@@ -97,20 +100,11 @@ export function exportAsJSON(
   const exportNodes: ExportNode[] = nodes.map((node) => {
     const data = node.data as unknown as RuleNodeData;
 
-    // Consequence-Ref exportieren
+    // Consequence-Ref exportieren (Endpunkt, keine Ausgänge)
     if (data?.nodeType === 'consequence-ref') {
       return {
         id: data.displayId,
         type: 'consequence-ref',
-        refId: data.refNodeId,
-      } as unknown as ExportNode;
-    }
-
-    // Input-Ref exportieren
-    if (data?.nodeType === 'input-ref') {
-      return {
-        id: data.displayId,
-        type: 'input-ref',
         refId: data.refNodeId,
       } as unknown as ExportNode;
     }
@@ -120,13 +114,23 @@ export function exportAsJSON(
       .map((e) => {
         const targetNode = nodes.find((n) => n.id === e.target);
         const targetData = targetNode?.data as unknown as RuleNodeData | undefined;
-        const edgeData = e.data as any;
+        const edgeData = e.data as Record<string, unknown> | undefined;
         return omitNulls({
           label: cleanText(e.label as string),
           value: cleanText(edgeData?.value as string),
           targetNodeId: targetData?.displayId ?? 0,
         }) as ExportEdge;
       });
+
+    // Input-Ref exportieren (inklusive ausgehender Kante zur Condition)
+    if (data?.nodeType === 'input-ref') {
+      return omitNulls({
+        id: data.displayId,
+        type: 'input-ref',
+        refId: data.refNodeId,
+        outputs: outgoingEdges.length > 0 ? outgoingEdges : undefined,
+      }) as unknown as ExportNode;
+    }
 
     const exportNode: ExportNode = omitNulls({
       id: data?.displayId ?? 0,
@@ -158,7 +162,7 @@ export function exportAsJSON(
     return exportNode;
   });
 
-  // Entry Node erkennen
+  // Entry Node erkennen (Knoten ohne eingehende Logik-Kanten)
   const targetIds = new Set<number>();
   for (const node of exportNodes) {
     if (node.outputs) {
@@ -168,30 +172,15 @@ export function exportAsJSON(
     }
   }
 
-  // Typ im Export überschreiben
-  for (const node of exportNodes) {
-    if (node.type !== 'consequence-ref' && node.type !== 'input-ref' && !targetIds.has(node.id)) {
-      node.type = 'entry';
-      break;
-    }
-  }
+  const isRefOrInput = (t: string) =>
+    t === 'consequence-ref' || t === 'input-ref' || t === 'input';
 
-  // Consequence-Knoten mit identischem Inhalt bekommen denselben consequenceRef (nicht für Refs)
-  const consequenceGroups = new Map<string, number>();
+  // Entry Node finden: Erster echter Logikknoten (nicht Input/Ref) ohne eingehende Kanten
+  const entryNode = exportNodes.find((n) => !isRefOrInput(n.type) && !targetIds.has(n.id))
+    ?? exportNodes.find((n) => !isRefOrInput(n.type));
 
-  for (const node of exportNodes) {
-    if (node.type === 'consequence' && node.consequence) {
-      const key = `${node.label ?? ''}|${node.consequence.business ?? ''}`;
-      if (!consequenceGroups.has(key)) {
-        consequenceGroups.set(key, node.id);
-      }
-    }
-  }
-
-  // Sort nodes
+  // Sort nodes by ID
   exportNodes.sort((a, b) => a.id - b.id);
-
-  const entryNode = exportNodes.find((n) => n.type === 'entry');
 
   // Alle Examples aus Consequence-Knoten sammeln
   const testCases: ExportTestCase[] = [];
