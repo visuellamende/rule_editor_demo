@@ -247,7 +247,7 @@ export const en: Record<TranslationKey, string> = {
   'help.export': 'Export',
   'help.exportText': "Export your map as JSON (for AI agents) or Markdown (for documentation). You'll find the buttons in the right panel under \"General\".",
   'help.dmnExport': 'DMN Export',
-  'help.dmnExportText': 'Exports a decision table in the open DMN standard, readable e.g. in Camunda Modeler or at demo.bpmn.io. For clean tables, each condition edge needs a technical value, and conditions that check the same property need the same technical key.',
+  'help.dmnExportText': 'Exports a decision table in the open DMN standard, readable e.g. in Camunda Modeler or at https://demo.bpmn.io/dmn/new. For clean tables, each condition edge needs a technical value, and conditions that check the same property need the same technical key.',
   'help.inputSource': 'Data Sources',
   'help.inputSourceText': 'Each condition can have a data source describing where the checked value comes from (system, manual, another decision) and whether it needs to be obtained at runtime.',
   'help.knowledgeSources': 'Rule Authority',

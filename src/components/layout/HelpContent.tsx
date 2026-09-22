@@ -77,7 +77,25 @@ export function HelpContent({ onBack }: HelpContentProps) {
         {/* DMN-Export */}
         <section className="help-content__section">
           <h3>{t('help.dmnExport')}</h3>
-          <p>{t('help.dmnExportText')}</p>
+          <p>
+            {(() => {
+              const text = t('help.dmnExportText');
+              const url = 'https://demo.bpmn.io/dmn/new';
+              if (text.includes(url)) {
+                const parts = text.split(url);
+                return (
+                  <>
+                    {parts[0]}
+                    <a href={url} target="_blank" rel="noopener noreferrer">
+                      demo.bpmn.io/dmn/new
+                    </a>
+                    {parts[1]}
+                  </>
+                );
+              }
+              return text;
+            })()}
+          </p>
         </section>
 
         {/* Datenquellen */}

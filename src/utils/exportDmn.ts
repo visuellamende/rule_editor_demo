@@ -173,6 +173,15 @@ export function buildDmnXml(
   const decision = helper.createElementNS(DMN_NS, 'decision');
   decision.setAttribute('id', decElId);
   decision.setAttribute('name', rm.label(decisionId) || mapName);
+
+  const decNode = rm.nodes.get(decisionId);
+  const decNotes = (rm.d(decNode).notes || '').trim();
+  if (decNotes) {
+    const desc = helper.createElementNS(DMN_NS, 'description');
+    desc.textContent = decNotes;
+    decision.appendChild(desc);
+  }
+
   defs.appendChild(decision);
 
   // Input Data IDs & Information Requirements
@@ -238,6 +247,12 @@ export function buildDmnXml(
     const inp = helper.createElementNS(DMN_NS, 'input');
     inp.setAttribute('id', `Input_${i}`);
     inp.setAttribute('label', col.label);
+
+    if (col.notes && col.notes.length > 0) {
+      const desc = helper.createElementNS(DMN_NS, 'description');
+      desc.textContent = col.notes.join('\n');
+      inp.appendChild(desc);
+    }
 
     const expr = helper.createElementNS(DMN_NS, 'inputExpression');
     expr.setAttribute('id', `InputExpression_${i}`);
@@ -310,9 +325,18 @@ export function buildDmnXml(
     el.setAttribute('name', rm.label(nid));
 
     const metaFields = [data.inputProvider, data.inputProviderSubtype, data.inputVerfuegbarkeit].filter(Boolean);
+    const note = (data.notes || '').trim();
+    const descParts: string[] = [];
     if (metaFields.length > 0) {
+      descParts.push(metaFields.join(' · '));
+    }
+    if (note) {
+      descParts.push(`Notiz #${rm.did(nid)}: ${note}`);
+    }
+
+    if (descParts.length > 0) {
       const dEl = helper.createElementNS(DMN_NS, 'description');
-      dEl.textContent = metaFields.join(' · ');
+      dEl.textContent = descParts.join(' · ');
       el.appendChild(dEl);
     }
 

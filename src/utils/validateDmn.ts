@@ -29,6 +29,15 @@ export const TYPE_MAP: Record<string, string> = {
 export const FEEL_PASSTHROUGH = /^(<=|>=|<|>|=|\[|\(|\]|not\(|")/;
 export const NUMERIC = /^-?\d+(\.\d+)?$/;
 
+export function normalizeLabel(label: string): string {
+  return label
+    .toLowerCase()
+    .replace(/\([^)]*\)/g, '')          // Klammerzusätze entfernen
+    .replace(/[?!.,:;„“"'‚‘…–-]/g, ' ') // Satzzeichen entfernen
+    .replace(/\s+/g, ' ')               // Leerzeichen zusammenfassen
+    .trim();
+}
+
 export interface DmnColumn {
   key: string;
   label: string;
@@ -36,6 +45,7 @@ export interface DmnColumn {
   typeRef: string | null;
   typeDerived: boolean;
   nodeIds: string[]; // React Flow node IDs
+  notes: string[];   // e.g. "Notiz #4: ..."
 }
 
 export interface DmnRow {
@@ -342,28 +352,34 @@ export function validateRuleMap(rm: RuleMap, t: Translator = defaultTranslate): 
     }
   }
 
-  // Gleiches Label, abweichender oder fehlender Key
-  const byLabel = new Map<string, string[]>();
+  // Gleiches oder normalisiertes Label, abweichender oder fehlender Key
+  const byNormalizedLabel = new Map<string, string[]>();
   for (const [nid] of rm.nodes) {
     if (rm.type(nid) === 'condition') {
-      const lbl = rm.label(nid).toLowerCase();
-      if (!byLabel.has(lbl)) {
-        byLabel.set(lbl, []);
+      const norm = normalizeLabel(rm.label(nid));
+      if (!byNormalizedLabel.has(norm)) {
+        byNormalizedLabel.set(norm, []);
       }
-      byLabel.get(lbl)!.push(nid);
+      byNormalizedLabel.get(norm)!.push(nid);
     }
   }
 
-  for (const [, ids] of byLabel.entries()) {
+  for (const [, ids] of byNormalizedLabel.entries()) {
     const keys = new Set(
       ids.map((n) => (rm.d(rm.nodes.get(n)).technicalKey || '').trim())
     );
     if (ids.length > 1 && (keys.size > 1 || keys.has(''))) {
+      const originalLabels = Array.from(new Set(ids.map((n) => rm.label(n))));
+      const idsText =
+        originalLabels.length > 1
+          ? ids.map((n) => `#${rm.did(n)}: „${rm.label(n)}“`).join(', ')
+          : ids.map((n) => '#' + rm.did(n)).join(', ');
+
       findings.push({
         level: 'warning',
         message: t('dmn.finding.duplicateLabelDiffKey', {
           label: rm.label(ids[0]),
-          ids: ids.map((n) => '#' + rm.did(n)).join(', '),
+          ids: idsText,
         }),
         nodeIds: ids,
       });
@@ -397,18 +413,24 @@ export function buildDmnTable(
         typeRef,
         typeDerived: false,
         nodeIds: [],
+        notes: [],
       });
       columnValues.set(colKey, new Set());
     }
     const col = columns.get(colKey)!;
     if (!col.nodeIds.includes(nid)) {
       col.nodeIds.push(nid);
+      const note = (data.notes || '').trim();
+      if (note) {
+        col.notes.push(`Notiz #${rm.did(nid)}: ${note}`);
+      }
     }
     return colKey;
   }
 
   const rows: DmnRow[] = [];
   const actionsSeen = new Set<string>();
+  const consequenceNotesSeen = new Set<string>();
 
   for (const path of paths) {
     const cells = new Map<string, string | null>();
@@ -420,11 +442,14 @@ export function buildDmnTable(
       const data = rm.d(rm.nodes.get(nid));
 
       if (nodeType === 'action') {
-        notes.push(`Aktion #${rm.did(nid)}: ${rm.label(nid)}`);
+        const aNote = (data.notes || '').trim();
+        const aLabel = rm.label(nid);
+        if (aNote) {
+          notes.push(`Aktion #${rm.did(nid)}: ${aLabel} (Notiz: ${aNote})`);
+        } else {
+          notes.push(`Aktion #${rm.did(nid)}: ${aLabel}`);
+        }
         actionsSeen.add(nid);
-      }
-      if ((data.notes || '').trim()) {
-        notes.push(`Notiz #${rm.did(nid)}: ${data.notes!.trim()}`);
       }
 
       if (isBranching(rm, nid)) {
@@ -453,8 +478,9 @@ export function buildDmnTable(
     const endLabel = resolvedEnd ? rm.label(resolvedEnd) : '?';
     const endNode = resolvedEnd ? rm.nodes.get(resolvedEnd) : undefined;
     const endNotes = (rm.d(endNode).notes || '').trim();
-    if (endNotes) {
-      notes.push(`Notiz #${resolvedEnd ? rm.did(resolvedEnd) : '?'}: ${endNotes}`);
+    if (endNotes && resolvedEnd && !consequenceNotesSeen.has(resolvedEnd)) {
+      consequenceNotesSeen.add(resolvedEnd);
+      notes.push(`Notiz #${rm.did(resolvedEnd)}: ${endNotes}`);
     }
 
     rows.push({
@@ -463,6 +489,10 @@ export function buildDmnTable(
       notes,
       endId: resolvedEnd ? rm.did(resolvedEnd) : null,
     });
+  }
+
+  for (const col of columns.values()) {
+    col.notes.sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
   }
 
   // Fehlender Typ: aus den Kantenwerten ableiten (deterministisch)

@@ -68,6 +68,16 @@
   font-weight: var(--font-weight-medium);
 }
 
+.help-content__section p a {
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.help-content__section p a:hover {
+  color: var(--color-primary-hover);
+}
+
 /* Tastenkürzel als kompakte Liste */
 .help-content__shortcuts {
   display: flex;
