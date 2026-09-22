@@ -75,25 +75,13 @@ export function MapInfoPanel() {
   };
 
   const handleExportSvg = async () => {
-    // FitView vor dem Export, damit alles sichtbar ist
-    try {
-      reactFlowInstance.fitView({ padding: 0.2, duration: 0 });
-      await new Promise((resolve) => setTimeout(resolve, 200));
-    } catch {}
-
     const mapName = useCanvasStore.getState().mapMeta.name;
-    await exportCanvasAsSvg(mapName);
+    await exportCanvasAsSvg(mapName, reactFlowInstance.getNodes);
   };
 
   const handleExportPng = async () => {
-    // FitView vor dem Export, damit alles sichtbar ist
-    try {
-      reactFlowInstance.fitView({ padding: 0.2, duration: 0 });
-      await new Promise((resolve) => setTimeout(resolve, 200));
-    } catch {}
-
     const mapName = useCanvasStore.getState().mapMeta.name;
-    await exportCanvasAsPng(mapName);
+    await exportCanvasAsPng(mapName, reactFlowInstance.getNodes);
   };
 
   const handleCopyTemplate = async (template: PromptTemplate) => {

@@ -254,7 +254,7 @@ export function RuleNode({ id, data, selected }: NodeProps) {
 
     // Zoom/Fit after layout has run
     setTimeout(() => {
-      fitView({ padding: 0.3, duration: 300 });
+      fitView({ padding: 0.3, duration: 300, minZoom: 0.5 });
     }, 50);
   };
 
@@ -296,7 +296,7 @@ export function RuleNode({ id, data, selected }: NodeProps) {
     setMenuOpen(false);
 
     setTimeout(() => {
-      fitView({ padding: 0.3, duration: 300 });
+      fitView({ padding: 0.3, duration: 300, minZoom: 0.5 });
     }, 50);
   };
 
