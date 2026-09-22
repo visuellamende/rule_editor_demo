@@ -96,6 +96,32 @@ export function RuleNode({ id, data, selected }: NodeProps) {
   const addButtonRef = useRef<HTMLButtonElement>(null);
   const { t } = useI18n();
 
+  const hasNotes = !!nodeData.notes?.trim();
+  const hasSources = (nodeData.knowledgeSources?.length ?? 0) > 0;
+
+  const indicatorRow = (hasNotes || hasSources) && (
+    <div className="rule-node__indicators">
+      {hasNotes && (
+        <span className="rule-node__indicator" title={nodeData.notes}>
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+          </svg>
+        </span>
+      )}
+      {hasSources && (
+        <span
+          className="rule-node__indicator"
+          title={`${nodeData.knowledgeSources!.length} ${t('panel.knowledgeSources' as TranslationKey)}`}
+        >
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+          </svg>
+        </span>
+      )}
+    </div>
+  );
+
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState('');
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -205,6 +231,7 @@ export function RuleNode({ id, data, selected }: NodeProps) {
             ].filter(Boolean).join(' · ')}
           </span>
         )}
+        {indicatorRow}
         {warningBadge}
         <Handle type="source" position={Position.Bottom} className="rule-node__handle" />
       </div>
@@ -344,33 +371,7 @@ export function RuleNode({ id, data, selected }: NodeProps) {
       </div>
 
       {/* Metadaten-Indikatoren */}
-      {(nodeData.inputProvider || (nodeData.knowledgeSources?.length ?? 0) > 0) && (
-        <div className="rule-node__indicators">
-          {nodeData.inputProvider && (
-            <span
-              className="rule-node__indicator"
-              title={t(`panel.inputSource.provider.${nodeData.inputProvider}` as TranslationKey)}
-            >
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <ellipse cx="12" cy="5" rx="9" ry="3" />
-                <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
-                <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
-              </svg>
-            </span>
-          )}
-          {(nodeData.knowledgeSources?.length ?? 0) > 0 && (
-            <span
-              className="rule-node__indicator"
-              title={`${nodeData.knowledgeSources!.length} ${t('panel.knowledgeSources' as TranslationKey)}`}
-            >
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-              </svg>
-            </span>
-          )}
-        </div>
-      )}
+      {indicatorRow}
 
       {/* Source-Handle mit Plus-Button — nicht bei Consequence */}
       {nodeData.nodeType !== 'consequence' && (
