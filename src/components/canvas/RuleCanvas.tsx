@@ -82,7 +82,7 @@ export function RuleCanvas() {
       hasRunRef.current = true;
       applyAutoLayout();
       requestAnimationFrame(() => {
-        fitView({ padding: 0.3, duration: 0 });
+        fitView({ padding: 0.15, duration: 0, minZoom: 0.1, maxZoom: 1 });
         setLayoutReady(true);
       });
     }
@@ -101,7 +101,7 @@ export function RuleCanvas() {
           if (currentNodes.length > 0) {
             const layouted = getAutoLayout(currentNodes, currentEdges);
             setNodes(layouted);
-            fitView({ padding: 0.3, duration: 300 });
+            fitView({ padding: 0.3, duration: 300, minZoom: 0.5 });
           }
         }, 50);
       }
@@ -223,7 +223,7 @@ export function RuleCanvas() {
   const handleAutoLayout = useCallback(() => {
     applyAutoLayout();
     setTimeout(() => {
-      fitView({ padding: 0.3, duration: 300 });
+      fitView({ padding: 0.15, duration: 300, minZoom: 0.1, maxZoom: 1 });
     }, 50);
   }, [applyAutoLayout, fitView]);
 
@@ -250,8 +250,10 @@ export function RuleCanvas() {
               onPaneContextMenu={onPaneContextMenu}
               nodeTypes={nodeTypes}
               edgeTypes={edgeTypes}
+              minZoom={0.1}
+              maxZoom={2}
               fitView
-              fitViewOptions={{ padding: 0.3 }}
+              fitViewOptions={{ padding: 0.15, minZoom: 0.1, maxZoom: 1 }}
               proOptions={{ hideAttribution: true }}
               panOnScroll
               zoomOnScroll={false}

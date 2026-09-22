@@ -209,6 +209,31 @@ export const en: Record<TranslationKey, string> = {
   'template.completeness.desc': 'Analyzes the model for gaps and inconsistencies',
   'template.copied': 'Copied!',
 
+  // DMN Export
+  'dmn.title': 'Export – DMN',
+  'dmn.description': 'Exports the map as a DMN decision table.',
+  'dmn.save': 'Save DMN',
+  'dmn.blocked': 'Export blocked',
+  'dmn.exported': 'Exported',
+  'dmn.errors': 'Errors',
+  'dmn.warnings': 'Warnings',
+  'dmn.hints': 'Hints',
+
+  // DMN Findings
+  'dmn.finding.decisionsCount': 'The map requires exactly one decision, found: {count}.',
+  'dmn.finding.unresolvedRef': 'Reference #{id} points to a node that does not exist.',
+  'dmn.finding.missingEdgeValue': '#{id}: Edge “{label}” has no technical value (data.value).',
+  'dmn.finding.duplicateEdgeValue': '#{id}: Value “{value}” occurs on {count} edges. Violates Hit Policy UNIQUE.',
+  'dmn.finding.noTechnicalKey': '#{id} has no technicalKey. The condition receives its own column.',
+  'dmn.finding.booleanSingleEdge': '#{id} is boolean, but only has one edge. A rule is missing for the other value.',
+  'dmn.finding.duplicateLabelDiffKey': '“{label}” occurs multiple times with differing or missing keys ({ids}). Likely the same check, but creates multiple columns.',
+  'dmn.finding.cycle': 'Cycle in graph: path returns to #{id}.',
+  'dmn.finding.deadEnd': 'Path ends at #{id} without a consequence. The rule would have no output.',
+  'dmn.finding.conflictingValues': 'Path to #{endId} tests “{colLabel}” twice with conflicting values ({val1} / {val2}). The rule can never match.',
+  'dmn.finding.derivedType': 'Column “{colLabel}” has no expectedType, inferred: {type}.',
+  'dmn.finding.actionInPath': 'Action #{id} is in path. DMN does not support side effects, it is recorded as an annotation.',
+  'dmn.finding.notesCount': '{count} note(s) are transferred as annotations.',
+
   // Help
   'help.whatIs': 'What is the Rule Editor?',
   'help.whatIsText': 'A visual editor for decision logic. You build decision trees from business questions and conditions. The result can be exported as JSON (machine-readable for AI agents) or Markdown (for documentation).',
@@ -221,6 +246,8 @@ export const en: Record<TranslationKey, string> = {
   'help.nodeConsequence': 'Endpoint — describes what happens at the end of the path.',
   'help.export': 'Export',
   'help.exportText': "Export your map as JSON (for AI agents) or Markdown (for documentation). You'll find the buttons in the right panel under \"General\".",
+  'help.dmnExport': 'DMN Export',
+  'help.dmnExportText': 'Exports a decision table in the open DMN standard, readable e.g. in Camunda Modeler or at demo.bpmn.io. For clean tables, each condition edge needs a technical value, and conditions that check the same property need the same technical key.',
   'help.inputSource': 'Data Sources',
   'help.inputSourceText': 'Each condition can have a data source describing where the checked value comes from (system, manual, another decision) and whether it needs to be obtained at runtime.',
   'help.knowledgeSources': 'Rule Authority',

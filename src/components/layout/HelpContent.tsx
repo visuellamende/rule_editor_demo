@@ -74,6 +74,12 @@ export function HelpContent({ onBack }: HelpContentProps) {
           <p>{t('help.exportText')}</p>
         </section>
 
+        {/* DMN-Export */}
+        <section className="help-content__section">
+          <h3>{t('help.dmnExport')}</h3>
+          <p>{t('help.dmnExportText')}</p>
+        </section>
+
         {/* Datenquellen */}
         <section className="help-content__section">
           <h3>{t('help.inputSource')}</h3>

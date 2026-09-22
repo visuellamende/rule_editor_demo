@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useCanvasStore } from '../../store/useCanvasStore';
 import { useI18n } from '../../i18n';
 import { CustomSelect } from '../primitives/CustomSelect';
@@ -9,6 +9,8 @@ import { useReactFlow } from '@xyflow/react';
 import { exportCanvasAsSvg, exportCanvasAsPng } from '../../utils/exportSvg';
 import { PROMPT_TEMPLATES, type PromptTemplate } from '../../data/promptTemplates';
 import { buildPrompt } from '../../utils/buildPrompt';
+import { validateDmn, computeContentSignature, type DmnFinding } from '../../utils/validateDmn';
+import { exportDmn } from '../../utils/exportDmn';
 import './MapInfoPanel.css';
 
 const categoryValues: RulemapCategory[] = [
@@ -19,14 +21,35 @@ const categoryValues: RulemapCategory[] = [
   'error-handling',
 ];
 
+interface DmnStatusState {
+  success: boolean;
+  signature: string;
+  findings: DmnFinding[];
+  errors: DmnFinding[];
+  warnings: DmnFinding[];
+  hints: DmnFinding[];
+}
+
 export function MapInfoPanel() {
   const { t } = useI18n();
-  const { mapMeta, updateMapMeta, nodes } = useCanvasStore();
+  const { mapMeta, updateMapMeta, nodes, edges, setSelectedNodeId } = useCanvasStore();
   const warnings = useCanvasStore((state) => state.validationWarnings);
   const errorCount = warnings.filter((w) => w.severity === 'error').length;
   const warningCount = warnings.filter((w) => w.severity === 'warning').length;
   const reactFlowInstance = useReactFlow();
   const [copiedTemplate, setCopiedTemplate] = useState<string | null>(null);
+  const [dmnStatus, setDmnStatus] = useState<DmnStatusState | null>(null);
+
+  const currentContentSignature = useMemo(() => {
+    return computeContentSignature(nodes, edges);
+  }, [nodes, edges]);
+
+  // Sobald sich Knoten oder Kanten inhaltlich ändern, verschwindet der Statusbereich
+  useEffect(() => {
+    if (dmnStatus && dmnStatus.signature !== currentContentSignature) {
+      setDmnStatus(null);
+    }
+  }, [currentContentSignature, dmnStatus]);
 
   const categoryOptions = [
     { value: '', label: t('sidebar.mapCategory.none') },
@@ -75,25 +98,69 @@ export function MapInfoPanel() {
   };
 
   const handleExportSvg = async () => {
-    // FitView vor dem Export, damit alles sichtbar ist
-    try {
-      reactFlowInstance.fitView({ padding: 0.2, duration: 0 });
-      await new Promise((resolve) => setTimeout(resolve, 200));
-    } catch {}
-
     const mapName = useCanvasStore.getState().mapMeta.name;
-    await exportCanvasAsSvg(mapName);
+    await exportCanvasAsSvg(mapName, reactFlowInstance.getNodes);
   };
 
   const handleExportPng = async () => {
-    // FitView vor dem Export, damit alles sichtbar ist
-    try {
-      reactFlowInstance.fitView({ padding: 0.2, duration: 0 });
-      await new Promise((resolve) => setTimeout(resolve, 200));
-    } catch {}
-
     const mapName = useCanvasStore.getState().mapMeta.name;
-    await exportCanvasAsPng(mapName);
+    await exportCanvasAsPng(mapName, reactFlowInstance.getNodes);
+  };
+
+  const handleExportDmn = () => {
+    const { mapMeta, nodes, edges } = useCanvasStore.getState();
+    const signature = computeContentSignature(nodes, edges);
+    const findings = validateDmn(nodes, edges, mapMeta, t);
+    const errors = findings.filter((f) => f.level === 'error');
+    const warnings = findings.filter((f) => f.level === 'warning');
+    const hints = findings.filter((f) => f.level === 'hint');
+
+    if (errors.length > 0) {
+      setDmnStatus({
+        success: false,
+        signature,
+        findings,
+        errors,
+        warnings,
+        hints,
+      });
+      return;
+    }
+
+    const exportResult = exportDmn(mapMeta, nodes, edges, t);
+    if (exportResult.success && exportResult.xml) {
+      const fileName = `${mapMeta.name || 'rulemap'}.dmn`;
+      downloadFile(exportResult.xml, fileName, 'application/xml');
+      setDmnStatus({
+        success: true,
+        signature,
+        findings,
+        errors,
+        warnings,
+        hints,
+      });
+    } else {
+      setDmnStatus({
+        success: false,
+        signature,
+        findings: exportResult.findings,
+        errors: exportResult.findings.filter((f) => f.level === 'error'),
+        warnings: exportResult.findings.filter((f) => f.level === 'warning'),
+        hints: exportResult.findings.filter((f) => f.level === 'hint'),
+      });
+    }
+  };
+
+  const handleSelectAndFocusNode = (nodeIds: string[]) => {
+    if (nodeIds.length === 0) return;
+    setSelectedNodeId(nodeIds[0]);
+    setTimeout(() => {
+      reactFlowInstance.fitView({
+        nodes: nodeIds.map((id) => ({ id })),
+        duration: 300,
+        maxZoom: 1,
+      });
+    }, 50);
   };
 
   const handleCopyTemplate = async (template: PromptTemplate) => {
@@ -218,6 +285,74 @@ export function MapInfoPanel() {
             {t('export.pngFile')}
           </button>
         </div>
+      </div>
+
+      {/* Export – DMN Section */}
+      <div className="map-info-panel__section">
+        <h4 className="map-info-panel__section-title">{t('dmn.title')}</h4>
+        <p className="map-info-panel__section-description">{t('dmn.description')}</p>
+
+        {dmnStatus && (
+          <div
+            className={`map-info-panel__dmn-status ${
+              dmnStatus.success
+                ? 'map-info-panel__dmn-status--exported'
+                : 'map-info-panel__dmn-status--blocked'
+            }`}
+          >
+            <div className="map-info-panel__dmn-status-header">
+              <span className="map-info-panel__dmn-status-title">
+                {dmnStatus.success ? t('dmn.exported') : t('dmn.blocked')}
+              </span>
+              <div className="map-info-panel__dmn-status-counts">
+                {dmnStatus.errors.length > 0 && (
+                  <span className="map-info-panel__dmn-count map-info-panel__dmn-count--error">
+                    {dmnStatus.errors.length} {t('dmn.errors')}
+                  </span>
+                )}
+                {dmnStatus.warnings.length > 0 && (
+                  <span className="map-info-panel__dmn-count map-info-panel__dmn-count--warning">
+                    {dmnStatus.warnings.length} {t('dmn.warnings')}
+                  </span>
+                )}
+                {dmnStatus.hints.length > 0 && (
+                  <span className="map-info-panel__dmn-count map-info-panel__dmn-count--hint">
+                    {dmnStatus.hints.length} {t('dmn.hints')}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {dmnStatus.findings.length > 0 && (
+              <div className="map-info-panel__dmn-findings">
+                {dmnStatus.findings.map((f, idx) => {
+                  const hasNodes = f.nodeIds.length > 0;
+                  return (
+                    <div
+                      key={idx}
+                      className={`map-info-panel__dmn-finding map-info-panel__dmn-finding--${f.level} ${
+                        hasNodes ? 'map-info-panel__dmn-finding--clickable' : ''
+                      }`}
+                      onClick={() => hasNodes && handleSelectAndFocusNode(f.nodeIds)}
+                      title={hasNodes ? `${f.message} (Klicken zum Fokussieren)` : f.message}
+                    >
+                      <span className={`map-info-panel__dmn-dot map-info-panel__dmn-dot--${f.level}`} />
+                      <span className="map-info-panel__dmn-finding-text">{f.message}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        <button
+          className="map-info-panel__export-button map-info-panel__export-button--full"
+          onClick={handleExportDmn}
+          title={t('dmn.save')}
+        >
+          {t('dmn.save')}
+        </button>
       </div>
 
       {/* Prompt Templates Section */}

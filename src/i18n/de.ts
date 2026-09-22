@@ -207,6 +207,31 @@ export const de = {
   'template.completeness.desc': 'Analysiert das Modell auf Lücken und Inkonsistenzen',
   'template.copied': 'Kopiert!',
 
+  // DMN Export
+  'dmn.title': 'Export – DMN',
+  'dmn.description': 'Exportiert die Map als DMN-Entscheidungstabelle.',
+  'dmn.save': 'DMN speichern',
+  'dmn.blocked': 'Export gesperrt',
+  'dmn.exported': 'Exportiert',
+  'dmn.errors': 'Fehler',
+  'dmn.warnings': 'Warnungen',
+  'dmn.hints': 'Hinweise',
+
+  // DMN Findings
+  'dmn.finding.decisionsCount': 'Die Map braucht genau eine Decision, gefunden: {count}.',
+  'dmn.finding.unresolvedRef': 'Referenz #{id} verweist auf einen Knoten, der nicht existiert.',
+  'dmn.finding.missingEdgeValue': '#{id}: Kante „{label}“ hat keinen technischen Wert (data.value).',
+  'dmn.finding.duplicateEdgeValue': '#{id}: Wert „{value}“ kommt an {count} Kanten vor. Verletzt Hit Policy UNIQUE.',
+  'dmn.finding.noTechnicalKey': '#{id} hat keinen technicalKey. Die Condition bekommt eine eigene Spalte.',
+  'dmn.finding.booleanSingleEdge': '#{id} ist boolesch, hat aber nur eine Kante. Für den anderen Wert fehlt eine Regel.',
+  'dmn.finding.duplicateLabelDiffKey': '„{label}“ kommt mehrfach mit abweichendem oder fehlendem Key vor ({ids}). Vermutlich dieselbe Prüfung, ergibt aber mehrere Spalten.',
+  'dmn.finding.cycle': 'Zyklus im Graphen: Pfad kehrt zu #{id} zurück.',
+  'dmn.finding.deadEnd': 'Pfad endet bei #{id} ohne Consequence. Die Zeile hätte keinen Output.',
+  'dmn.finding.conflictingValues': 'Pfad nach #{endId} prüft „{colLabel}“ zweimal mit widersprüchlichen Werten ({val1} / {val2}). Die Zeile kann nie zutreffen.',
+  'dmn.finding.derivedType': 'Spalte „{colLabel}“ hat keinen expectedType, abgeleitet: {type}.',
+  'dmn.finding.actionInPath': 'Action #{id} liegt im Pfad. DMN kennt keine Seiteneffekte, sie wird als Annotation geführt.',
+  'dmn.finding.notesCount': '{count} Notiz(en) werden als Annotation übernommen.',
+
   // Help
   'help.whatIs': 'Was ist der Rule Editor?',
   'help.whatIsText': 'Ein visueller Editor für Entscheidungslogik. Du baust Entscheidungsbäume aus fachlichen Fragen und Bedingungen. Das Ergebnis lässt sich als JSON (maschinenlesbar für KI-Agenten) oder Markdown (für Dokumentation) exportieren.',
@@ -219,6 +244,8 @@ export const de = {
   'help.nodeConsequence': 'Endpunkt — beschreibt was am Ende des Pfades passiert.',
   'help.export': 'Export',
   'help.exportText': 'Exportiere deine Map als JSON (für KI-Agenten) oder Markdown (für Dokumentation). Du findest die Buttons im rechten Panel unter "Allgemein".',
+  'help.dmnExport': 'DMN-Export',
+  'help.dmnExportText': 'Der Export erzeugt eine Entscheidungstabelle im offenen DMN-Standard, lesbar z. B. in Camunda Modeler oder auf demo.bpmn.io. Für saubere Tabellen braucht jede Condition-Kante einen technischen Wert, und Conditions, die dasselbe prüfen, denselben technischen Key.',
   'help.inputSource': 'Datenquellen',
   'help.inputSourceText': 'Jede Bedingung kann eine Datenquelle haben, die beschreibt woher der geprüfte Wert kommt (System, manuell, andere Entscheidung) und ob er zur Laufzeit beschafft werden muss.',
   'help.knowledgeSources': 'Regelautorität',

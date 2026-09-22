@@ -9,7 +9,7 @@ const translations: Record<Locale, Record<TranslationKey, string>> = { de, en };
 interface I18nContextValue {
   locale: Locale;
   setLocale: (locale: Locale) => void;
-  t: (key: TranslationKey) => string;
+  t: (key: TranslationKey, params?: Record<string, string | number>) => string;
 }
 
 const I18nContext = createContext<I18nContextValue | null>(null);
@@ -31,8 +31,14 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('locale', newLocale);
   };
 
-  const t = (key: TranslationKey): string => {
-    return translations[locale][key] ?? key;
+  const t = (key: TranslationKey, params?: Record<string, string | number>): string => {
+    let str = translations[locale][key] ?? key;
+    if (params) {
+      for (const [k, v] of Object.entries(params)) {
+        str = str.split(`{${k}}`).join(String(v));
+      }
+    }
+    return str;
   };
 
   return (
