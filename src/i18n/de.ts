@@ -245,7 +245,7 @@ export const de = {
   'help.export': 'Export',
   'help.exportText': 'Exportiere deine Map als JSON (für KI-Agenten) oder Markdown (für Dokumentation). Du findest die Buttons im rechten Panel unter "Allgemein".',
   'help.dmnExport': 'DMN-Export',
-  'help.dmnExportText': 'Der Export erzeugt eine Entscheidungstabelle im offenen DMN-Standard, lesbar z. B. in Camunda Modeler oder auf demo.bpmn.io. Für saubere Tabellen braucht jede Condition-Kante einen technischen Wert, und Conditions, die dasselbe prüfen, denselben technischen Key.',
+  'help.dmnExportText': 'Der Export erzeugt eine Entscheidungstabelle im offenen DMN-Standard, lesbar z. B. in Camunda Modeler oder auf https://demo.bpmn.io/dmn/new. Für saubere Tabellen braucht jede Condition-Kante einen technischen Wert, und Conditions, die dasselbe prüfen, denselben technischen Key.',
   'help.inputSource': 'Datenquellen',
   'help.inputSourceText': 'Jede Bedingung kann eine Datenquelle haben, die beschreibt woher der geprüfte Wert kommt (System, manuell, andere Entscheidung) und ob er zur Laufzeit beschafft werden muss.',
   'help.knowledgeSources': 'Regelautorität',
