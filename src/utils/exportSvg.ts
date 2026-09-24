@@ -42,6 +42,46 @@ function getExportOptions(getNodes: () => Node[]) {
   };
 }
 
+/** Schreibt berechnete Linien-Styles inline auf alle SVG-Pfade. Gibt eine Aufräumfunktion zurück. */
+function pinSvgStyles(root: HTMLElement): () => void {
+  const selector = '.react-flow__edge-path, .react-flow__connection-path, marker path, marker polyline';
+  const restore: Array<() => void> = [];
+
+  // Falls <defs> mit Markern außerhalb des Viewports liegen, temporär in den Viewport klonen
+  const flowContainer = root.closest('.react-flow') || document;
+  const externalDefs = Array.from(flowContainer.querySelectorAll('defs')).filter(
+    (defs) => !root.contains(defs),
+  );
+
+  externalDefs.forEach((defs) => {
+    const svgWrapper = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svgWrapper.setAttribute('style', 'position: absolute; width: 0; height: 0; pointer-events: none;');
+    svgWrapper.appendChild(defs.cloneNode(true));
+    root.appendChild(svgWrapper);
+    restore.push(() => {
+      svgWrapper.remove();
+    });
+  });
+
+  root.querySelectorAll<SVGElement>(selector).forEach((el) => {
+    const computed = getComputedStyle(el);
+    const previous = el.getAttribute('style');
+
+    el.style.stroke = computed.stroke;
+    el.style.strokeWidth = computed.strokeWidth;
+    el.style.strokeDasharray = computed.strokeDasharray;
+    el.style.strokeLinecap = computed.strokeLinecap;
+    el.style.fill = computed.fill;
+
+    restore.push(() => {
+      if (previous === null) el.removeAttribute('style');
+      else el.setAttribute('style', previous);
+    });
+  });
+
+  return () => restore.reverse().forEach((fn) => fn());
+}
+
 export async function exportCanvasAsSvg(
   mapName: string,
   getNodes: () => Node[],
@@ -58,6 +98,7 @@ export async function exportCanvasAsSvg(
     return;
   }
 
+  const restore = pinSvgStyles(viewportEl);
   try {
     const dataUrl = await toSvg(viewportEl, options);
 
@@ -74,6 +115,8 @@ export async function exportCanvasAsSvg(
     URL.revokeObjectURL(url);
   } catch (error) {
     console.error('SVG-Export fehlgeschlagen:', error);
+  } finally {
+    restore();
   }
 }
 
@@ -93,6 +136,7 @@ export async function exportCanvasAsPng(
     return;
   }
 
+  const restore = pinSvgStyles(viewportEl);
   try {
     const dataUrl = await toPng(viewportEl, { ...options, pixelRatio: 2 });
 
@@ -109,5 +153,8 @@ export async function exportCanvasAsPng(
     URL.revokeObjectURL(url);
   } catch (error) {
     console.error('PNG-Export fehlgeschlagen:', error);
+  } finally {
+    restore();
   }
 }
+
