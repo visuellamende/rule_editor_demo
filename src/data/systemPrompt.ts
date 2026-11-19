@@ -29,7 +29,10 @@ Regelautorität (knowledgeSources):
 - verbindlichkeit "verbindlich": Semantik NICHT verändern. Jede Regel muss exakt umgesetzt werden.
 - verbindlichkeit "empfohlen": Alternativen sind zulässig, als änderbar markieren.
 - verbindlichkeit "optional": Darf hinterfragt und optimiert werden.
-- referenz: Auflösbarer Verweis auf die fachliche Grundlage (Paragraph, Dokument-ID, Link).
+- referenz: Das menschenlesbare Zitat der fachlichen Grundlage (Paragraph, Dokument-ID).
+- uri: Der auflösbare Verweis darauf, bei Gesetzen bevorzugt ein ELI. Erfinde ihn NICHT — fehlt er, sage das.
+- fassung: Welcher Stand gemeint ist (JJJJ-MM-TT). Ohne Fassung ist der Verweis nicht eindeutig; bei Gesetzen ist das relevant, weil sich der Wortlaut ändert.
+- eid: Das Element innerhalb der Quelle, etwa ein Absatz. Nur zusammen mit uri sinnvoll.
 
 Referenz-Knoten (consequence-ref, input-ref):
 - Ein Knoten mit type "consequence-ref" oder "input-ref" ist KEIN eigenständiger Knoten. Er ist ein Verweis auf einen anderen Knoten (angegeben durch refId).

@@ -27,6 +27,17 @@ function edge(from: number, to: number, label?: string, value?: string): Edge {
   };
 }
 
+type KS = Record<string, unknown>;
+const ks = (partial: KS): KS => ({
+  id: 'k1',
+  art: 'gesetz',
+  verbindlichkeit: 'verbindlich',
+  referenz: '§ 536 Abs. 1 BGB',
+  eigner: null,
+  beschreibung: null,
+  ...partial,
+});
+
 const end = (id: number, business = 'Fachliche Folge.') =>
   node(id, 'consequence', 'Endpunkt', { consequence: { business } });
 
@@ -425,6 +436,129 @@ const cases: Case[] = [
       node(4, 'consequence-ref', '', { refNodeId: 3 }),
     ],
     edges: [edge(1, 2), edge(2, 3, 'A', 'a'), edge(2, 4, 'B', 'b')],
+  },
+  {
+    name: 'KS-04: Gesetz ohne auflösbaren Verweis',
+    expect: ['KS-04'],
+    nodes: [
+      node(1, 'decision', 'Start', { knowledgeSources: [ks({ fassung: '2013-05-01' })] as never }),
+      end(2),
+    ],
+    edges: [edge(1, 2)],
+  },
+  {
+    name: 'KS-05: Verweis ist keine absolute URI',
+    expect: ['KS-05'],
+    nodes: [
+      node(1, 'decision', 'Start', {
+        knowledgeSources: [ks({ uri: 'bgb/__536.html', fassung: '2013-05-01' })] as never,
+      }),
+      end(2),
+    ],
+    edges: [edge(1, 2)],
+  },
+  {
+    name: 'KS-06: Gesetz ohne ELI',
+    expect: ['KS-06'],
+    nodes: [
+      node(1, 'decision', 'Start', {
+        knowledgeSources: [
+          ks({ uri: 'https://www.gesetze-im-internet.de/bgb/__536.html', fassung: '2013-05-01' }),
+        ] as never,
+      }),
+      end(2),
+    ],
+    edges: [edge(1, 2)],
+  },
+  {
+    name: 'KS-07: Fassung ist kein Datum',
+    expect: ['KS-07'],
+    nodes: [
+      node(1, 'decision', 'Start', {
+        knowledgeSources: [ks({ uri: 'https://example.org/eli/bund/x', fassung: 'Mai 2013' })] as never,
+      }),
+      end(2),
+    ],
+    edges: [edge(1, 2)],
+  },
+  {
+    name: 'KS-07: der 31. Februar ist kein Datum',
+    expect: ['KS-07'],
+    nodes: [
+      node(1, 'decision', 'Start', {
+        knowledgeSources: [ks({ uri: 'https://example.org/eli/bund/x', fassung: '2013-02-31' })] as never,
+      }),
+      end(2),
+    ],
+    edges: [edge(1, 2)],
+  },
+  {
+    name: 'KS-08: Gesetz ohne Fassung',
+    expect: ['KS-08'],
+    nodes: [
+      node(1, 'decision', 'Start', {
+        knowledgeSources: [ks({ uri: 'https://example.org/eli/bund/x' })] as never,
+      }),
+      end(2),
+    ],
+    edges: [edge(1, 2)],
+  },
+  {
+    name: 'KS-09: Element ohne Quelle',
+    expect: ['KS-09'],
+    nodes: [
+      node(1, 'decision', 'Start', {
+        knowledgeSources: [ks({ eid: 'art-z1_abs-z2', fassung: '2013-05-01' })] as never,
+      }),
+      end(2),
+    ],
+    edges: [edge(1, 2)],
+  },
+  {
+    name: 'KS-10: Abrufdatum ist kein Datum',
+    expect: ['KS-10'],
+    nodes: [
+      node(1, 'decision', 'Start', {
+        knowledgeSources: [
+          ks({ uri: 'https://example.org/eli/bund/x', fassung: '2013-05-01', abgerufen: 'gestern' }),
+        ] as never,
+      }),
+      end(2),
+    ],
+    edges: [edge(1, 2)],
+  },
+  {
+    name: 'Vollständiger ELI-Verweis erzeugt keinen Befund',
+    expect: [],
+    forbid: ['KS-04', 'KS-05', 'KS-06', 'KS-07', 'KS-08', 'KS-09', 'KS-10'],
+    nodes: [
+      node(1, 'decision', 'Start', {
+        knowledgeSources: [
+          ks({
+            uri: 'https://testphase.rechtsinformationen.bund.de/v1/legislation/eli/bund/bgbl-1/2004/s788/2025-12-08/2/deu',
+            eid: 'art-z1_abs-z2',
+            fassung: '2013-05-01',
+            abgerufen: '2026-11-19',
+          }),
+        ] as never,
+      }),
+      end(2),
+    ],
+    edges: [edge(1, 2)],
+  },
+  {
+    name: 'Fachwissen braucht weder Verweis noch Fassung',
+    expect: [],
+    forbid: ['KS-04', 'KS-06', 'KS-08'],
+    nodes: [
+      node(1, 'decision', 'Start', {
+        knowledgeSources: [
+          ks({ art: 'fachwissen', verbindlichkeit: 'empfohlen', referenz: 'Minderungstabelle' }),
+        ] as never,
+      }),
+      end(2),
+    ],
+    edges: [edge(1, 2)],
   },
   // --- Austauschdokument, Gruppe FMT ---
   {

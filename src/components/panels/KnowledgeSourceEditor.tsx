@@ -84,6 +84,52 @@ export function KnowledgeSourceEditor({ sources, onChange }: KnowledgeSourceEdit
                 />
               </div>
 
+              {/* Auflösbarer Verweis — bei Normen der eigentliche Punkt */}
+              <div className="ks-editor__field">
+                <label className="ks-editor__label">{t('ks.uri')}</label>
+                <input
+                  className="ks-editor__input"
+                  type="text"
+                  value={source.uri ?? ''}
+                  onChange={(e) => handleUpdate(source.id, { uri: e.target.value || null })}
+                  placeholder={t('ks.uri.placeholder')}
+                />
+                <p className="ks-editor__hint">{t('ks.uri.hint')}</p>
+              </div>
+
+              {/* Element innerhalb der Quelle */}
+              <div className="ks-editor__field">
+                <label className="ks-editor__label">{t('ks.eid')}</label>
+                <input
+                  className="ks-editor__input"
+                  type="text"
+                  value={source.eid ?? ''}
+                  onChange={(e) => handleUpdate(source.id, { eid: e.target.value || null })}
+                  placeholder={t('ks.eid.placeholder')}
+                />
+              </div>
+
+              {/* Fassung und Abruf */}
+              <div className="ks-editor__field">
+                <label className="ks-editor__label">{t('ks.fassung')}</label>
+                <input
+                  className="ks-editor__input"
+                  type="date"
+                  value={source.fassung ?? ''}
+                  onChange={(e) => handleUpdate(source.id, { fassung: e.target.value || null })}
+                />
+              </div>
+
+              <div className="ks-editor__field">
+                <label className="ks-editor__label">{t('ks.abgerufen')}</label>
+                <input
+                  className="ks-editor__input"
+                  type="date"
+                  value={source.abgerufen ?? ''}
+                  onChange={(e) => handleUpdate(source.id, { abgerufen: e.target.value || null })}
+                />
+              </div>
+
               {/* Eigner */}
               <div className="ks-editor__field">
                 <label className="ks-editor__label">{t('ks.eigner')}</label>
@@ -140,6 +186,14 @@ export function KnowledgeSourceEditor({ sources, onChange }: KnowledgeSourceEdit
               </div>
               <span className="ks-editor__compact-ref">
                 {source.referenz || t('ks.referenz.empty')}
+                {source.uri && (
+                  <span className="ks-editor__link-badge" title={source.uri}>
+                    {t('ks.uri.badge')}
+                  </span>
+                )}
+                {source.fassung && (
+                  <span className="ks-editor__version">{source.fassung}</span>
+                )}
               </span>
               {source.eigner && (
                 <span className="ks-editor__compact-eigner">{source.eigner}</span>

@@ -88,6 +88,10 @@ const exportKnowledgeSources = (sources?: KnowledgeSource[]): KnowledgeSource[] 
     art: s.art,
     verbindlichkeit: s.verbindlichkeit,
     referenz: cleanText(s.referenz) ?? '',
+    uri: cleanText(s.uri),
+    eid: cleanText(s.eid),
+    fassung: cleanText(s.fassung),
+    abgerufen: cleanText(s.abgerufen),
     eigner: cleanText(s.eigner),
     beschreibung: cleanText(s.beschreibung),
   }));

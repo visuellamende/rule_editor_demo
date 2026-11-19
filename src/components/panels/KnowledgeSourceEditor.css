@@ -162,3 +162,26 @@
   font-weight: var(--font-weight-medium);
   margin-left: auto;
 }
+
+.ks-editor__hint {
+  margin: 2px 0 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
+.ks-editor__link-badge {
+  margin-left: var(--space-xs);
+  padding: 0 4px;
+  font-size: var(--font-size-xs);
+  color: #10b981;
+  border: 1px solid #10b98140;
+  border-radius: var(--radius-sm);
+}
+
+.ks-editor__version {
+  margin-left: var(--space-xs);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}

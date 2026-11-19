@@ -63,7 +63,7 @@ Im Export-Format werden Knoten flach ohne React-Flow-Hülle exportiert. Ausgehen
 - \`outputs\`: Array<ExportEdge> — Ausgehende Verbindungen (siehe unten). Bei \`consequence-ref\` entfällt \`outputs\` (Endpunkt).
 - \`refId\`: number (optional) — Nur bei \`consequence-ref\` und \`input-ref\`: ID des referenzierten Originalknotens.
 - \`inputSource\`: Object | null — Nur bei Knoten mit Datenquelle (siehe unten).
-- \`knowledgeSources\`: Array<KnowledgeSource> | null — Fachliche Quellen/Regelautoritäten.
+- \`knowledgeSources\`: Array<KnowledgeSource> | null — Fachliche Quellen/Regelautoritäten. Jede Quelle: \`art\`, \`verbindlichkeit\`, \`referenz\` (menschenlesbares Zitat) und optional \`uri\` (auflösbarer Verweis, bei Gesetzen bevorzugt ein ELI), \`eid\` (Element innerhalb der Quelle), \`fassung\` und \`abgerufen\` (jeweils JJJJ-MM-TT).
 
 ---
 

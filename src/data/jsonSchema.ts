@@ -132,6 +132,10 @@ Die Datenquelle ist DIESELBE — nicht eine zweite Instanz.
       "art": "gesetz | norm_standard | interne_richtlinie | vertrag | fachwissen",
       "verbindlichkeit": "verbindlich | empfohlen | optional",
       "referenz": "§28a Abs. 1 JuSchG",
+      "uri": "https://… auflösbarer Verweis (optional, bei Gesetzen bevorzugt ein ELI)",
+      "eid": "Element innerhalb der Quelle, z.B. art-z1_abs-z2 (optional, nur mit uri)",
+      "fassung": "JJJJ-MM-TT, welche Fassung gemeint ist (optional)",
+      "abgerufen": "JJJJ-MM-TT, wann uri zuletzt aufgelöst wurde (optional)",
       "eigner": "Recht/Compliance (optional)",
       "beschreibung": "Kurzbeschreibung (optional)"
     }

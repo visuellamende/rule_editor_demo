@@ -76,6 +76,11 @@ export type ValidationWarningType =
   | 'test_mismatch'               // TC-06
   // --- Wissensquellen ---
   | 'invalid_knowledge_source'    // KS-01, KS-02, KS-03
+  | 'missing_source_uri'          // KS-04
+  | 'invalid_source_uri'          // KS-05, KS-09
+  | 'unresolvable_reference'      // KS-06
+  | 'invalid_source_date'         // KS-07, KS-10
+  | 'missing_source_version'      // KS-08
   ;
 
 const PROVIDERS = ['system', 'manuell', 'komposition'] as const;
@@ -90,6 +95,23 @@ const INPUT_TYPES = ['input', 'input-ref'];
 
 function dataOf(node: Node): RuleNodeData {
   return node.data as unknown as RuleNodeData;
+}
+
+/** ISO-8601-Datum in der Form JJJJ-MM-TT, und es muss dieses Datum geben. */
+function isIsoDate(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const d = new Date(`${value}T00:00:00Z`);
+  return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === value;
+}
+
+/** Absolute URI: ein Schema, gefolgt von einem Doppelpunkt. */
+function isAbsoluteUri(value: string): boolean {
+  return /^[a-z][a-z0-9+.-]*:/i.test(value);
+}
+
+/** Erkennt einen ELI am Pfadsegment, gleich unter welcher Domain er liegt. */
+function looksLikeEli(value: string): boolean {
+  return /(^|\/)eli\//i.test(value);
 }
 
 function isLoopBack(edge: Edge): boolean {
@@ -484,7 +506,7 @@ export function validateDecisionMap(nodes: Node[], edges: Edge[]): ValidationWar
       }
     }
 
-    // --- KS-01 bis KS-03: Wissensquellen ---
+    // --- KS-01 bis KS-10: Wissensquellen und Normverweise ---
     for (const ks of data.knowledgeSources ?? []) {
       const problems: string[] = [];
       if (!KS_ART.includes(ks.art as (typeof KS_ART)[number])) problems.push(`unbekannte Art "${ks.art}"`);
@@ -498,6 +520,85 @@ export function validateDecisionMap(nodes: Node[], edges: Edge[]): ValidationWar
           'KS-01',
           'invalid_knowledge_source',
           `Wissensquelle an Knoten #${id}: ${problems.join(', ')}.`,
+          'error'
+        );
+      }
+
+      const quelle = ks.referenz?.trim() || `an Knoten #${id}`;
+      const uri = ks.uri?.trim();
+      const istNorm = ks.art === 'gesetz' || ks.art === 'norm_standard';
+
+      // --- KS-04: Normen brauchen einen auflösbaren Verweis ---
+      if (istNorm && !uri) {
+        push(
+          node,
+          'KS-04',
+          'missing_source_uri',
+          `"${quelle}" nennt keinen auflösbaren Verweis. Ein Zitat allein lässt sich nicht nachschlagen.`,
+          'warning'
+        );
+      }
+
+      // --- KS-05: absolute URI ---
+      if (uri && !isAbsoluteUri(uri)) {
+        push(
+          node,
+          'KS-05',
+          'invalid_source_uri',
+          `Der Verweis von "${quelle}" ist keine absolute URI ("${uri}").`,
+          'error'
+        );
+      }
+
+      // --- KS-06: ELI bevorzugt ---
+      if (ks.art === 'gesetz' && uri && !looksLikeEli(uri)) {
+        push(
+          node,
+          'KS-06',
+          'unresolvable_reference',
+          `"${quelle}" verweist nicht über einen ELI. Wo es einen gibt, ist er der stabilere Verweis.`,
+          'hint'
+        );
+      }
+
+      // --- KS-07 / KS-10: Datumsangaben ---
+      if (ks.fassung && !isIsoDate(ks.fassung.trim())) {
+        push(
+          node,
+          'KS-07',
+          'invalid_source_date',
+          `Die Fassung von "${quelle}" ist kein Datum der Form JJJJ-MM-TT ("${ks.fassung}").`,
+          'error'
+        );
+      }
+      if (ks.abgerufen && !isIsoDate(ks.abgerufen.trim())) {
+        push(
+          node,
+          'KS-10',
+          'invalid_source_date',
+          `Das Abrufdatum von "${quelle}" ist kein Datum der Form JJJJ-MM-TT ("${ks.abgerufen}").`,
+          'error'
+        );
+      }
+
+      // --- KS-08: Fassung bei Gesetzen ---
+      if (ks.art === 'gesetz' && !ks.fassung) {
+        push(
+          node,
+          'KS-08',
+          'missing_source_version',
+          `"${quelle}" nennt keine Fassung. Ohne sie ist offen, welcher Gesetzesstand gemeint war.`,
+          'warning'
+        );
+      }
+
+      // --- KS-09: eid ohne uri ---
+      if (ks.eid && !uri) {
+        push(
+          node,
+          'KS-09',
+          'invalid_source_uri',
+          `"${quelle}" nennt ein Element ("${ks.eid}"), aber keine Quelle, in der es steht.`,
           'error'
         );
       }

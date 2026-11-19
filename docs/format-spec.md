@@ -1,6 +1,6 @@
 # Decision Map Format — Spezifikation
 
-**Version:** 0.4 (Entwurf)
+**Version:** 0.5 (Entwurf)
 **Stand:** 19.11.2026
 
 Dieses Dokument beschreibt das **Decision Map Format** normativ, das
@@ -58,9 +58,8 @@ Ziel. Konkret bedeutet das in dieser Reihenfolge:
 3. Jede Berechnung in einem Endpunkt ist ein auswertbarer Ausdruck, keine Prosa.
 4. Jeder Verweis nach außen ist auflösbar.
 
-Punkte 1 und 2 sind erfüllt und werden geprüft. Punkt 3 ist offen
-(Abschnitt 12). Punkt 4 ist angelegt, aber nicht durchgesetzt: Die Felder aus
-Abschnitt 8 existieren, nur ihre Auflösung prüft niemand.
+Punkte 1, 2 und 4 sind erfüllt und werden geprüft. Punkt 3 ist offen
+(Abschnitt 12).
 
 Hinzu kommt, was aus diesen vier Punkten erst einen Nutzen macht: Eine Decision
 Map muss **auswertbar** sein, also mit gegebenen Eingaben zu einem Ergebnis
@@ -559,7 +558,7 @@ Jeder Befund trägt die Regel-ID aus diesem Dokument, auch im Export
 | EDGE | 01–05, 08, 09 | — (06, 07 sind Erlaubnisse) |
 | CONS | 02, 05, 06, 07; 01 über 02 mitgeprüft | 03, 04 (bewusst keine Hinweise, zu viel Rauschen) |
 | IN | 01–11 | — |
-| KS | 01–03 | 04–10 (hängen an den Feldern aus Abschnitt 12) |
+| KS | 01–10 | — |
 | EVAL | 01–07 | — |
 | TC | 02–06 | 01 (gehört ans Dokument) |
 
@@ -571,11 +570,17 @@ Testfälle werden nachgerechnet (TC-06): Jeder Testfall wird durch den Graphen
 geschickt und mit dem Endpunkt verglichen, an dem er hängt. Weicht das Ergebnis
 ab, ist das ein Fehler, kein Hinweis.
 
+Normverweise werden geprüft (KS-04 bis KS-10): ob ein Gesetz überhaupt einen
+auflösbaren Verweis trägt, ob dieser eine absolute URI ist, ob eine Fassung
+genannt wird und ob die Datumsangaben welche sind. Dass ein Verweis tatsächlich
+auflöst, prüft der Editor nicht — das setzte einen Netzzugriff voraus, den eine
+Prüfung bei jeder Änderung nicht haben soll. Dafür gibt es `abgerufen`.
+
 Offen im Sinne von Abschnitt 1.3 bleibt Punkt 3: Was ein `action`-Knoten
 erzeugt und was ein Endpunkt rechnet, steht als Prosa da. Die Auswertung findet
 den Weg, nicht den Betrag.
 
-Geprüft wird die Prüfung selbst mit `npm run check-rules`: 42 Fälle — Decision
+Geprüft wird die Prüfung selbst mit `npm run check-rules`: 52 Fälle — Decision
 Maps mit je einem gezielten Verstoß, eine fehlerfreie Map als Gegenprobe und ein
 als Rücksprung gekennzeichneter Zyklus, der keinen Befund auslösen darf.
 
@@ -620,6 +625,7 @@ erzeugten Ausdrücken aussieht.
 
 | Version | Datum | Änderung |
 |---|---|---|
+| 0.5 | 19.11.2026 | Die Felder aus Abschnitt 8 (`uri`, `eid`, `fassung`, `abgerufen`) sind umgesetzt, die Regeln KS-04 bis KS-10 werden geprüft. Keine Änderung an den Regeln selbst. |
 | 0.4 | 19.11.2026 | Die Auswertung ist normativ beschrieben (Abschnitt 10, Regeln EVAL-01 bis EVAL-07) und umgesetzt. Testfälle werden damit nachgerechnet (TC-06). Abschnitte ab 10 neu nummeriert. |
 | 0.3 | 19.11.2026 | Geschlossene Wertebereiche sind normativ (Abschnitt 7.1, Regeln IN-10, IN-11, EDGE-08, EDGE-09) und umgesetzt. Sie standen vorher unter den geplanten Erweiterungen. |
 | 0.2 | 19.11.2026 | Den Abschnitt zum Umsetzungsstand auf die Wirklichkeit gebracht. Befunde tragen jetzt die Regel-ID, auch im Export. Keine Änderung an den Regeln selbst. |
