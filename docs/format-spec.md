@@ -663,6 +663,9 @@ sondern auch den Betrag.
 Geprüft wird die Prüfung selbst mit `npm run check-rules`: 58 Fälle — Decision
 Maps mit je einem gezielten Verstoß, eine fehlerfreie Map als Gegenprobe und ein
 als Rücksprung gekennzeichneter Zyklus, der keinen Befund auslösen darf.
+Die Teilsprache aus Abschnitt 10.4 prüft `npm run check-feel` mit 42 Fällen:
+Rechenfälle mit erwartetem Ergebnis, Fehlerfälle mit erwarteter Meldung und
+die statische Analyse, auf der EXPR-02 und EXPR-03 beruhen.
 
 ### 11.3 Abgrenzung zur DMN-Prüfung
 
