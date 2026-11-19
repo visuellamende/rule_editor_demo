@@ -1,6 +1,6 @@
 # Decision Map Format — Spezifikation
 
-**Version:** 0.5 (Entwurf)
+**Version:** 0.6 (Entwurf)
 **Stand:** 19.11.2026
 
 Dieses Dokument beschreibt das **Decision Map Format** normativ, das
@@ -58,8 +58,9 @@ Ziel. Konkret bedeutet das in dieser Reihenfolge:
 3. Jede Berechnung in einem Endpunkt ist ein auswertbarer Ausdruck, keine Prosa.
 4. Jeder Verweis nach außen ist auflösbar.
 
-Punkte 1, 2 und 4 sind erfüllt und werden geprüft. Punkt 3 ist offen
-(Abschnitt 12).
+Alle vier Punkte sind angelegt und werden geprüft. Was offen bleibt, steht in
+Abschnitt 12; der Reihe nach fehlt vor allem die Datums- und Zeitarithmetik in
+Ausdrücken.
 
 Hinzu kommt, was aus diesen vier Punkten erst einen Nutzen macht: Eine Decision
 Map muss **auswertbar** sein, also mit gegebenen Eingaben zu einem Ergebnis
@@ -157,7 +158,7 @@ erkennbar macht.
 |---|---|---|
 | `decision` | Einstiegsknoten; formuliert die Frage, die die Decision Map beantwortet. | genau einer |
 | `condition` | Verzweigung anhand eines Wertes. | einer oder mehrere |
-| `action` | Erzeugt einen Wert oder verändert den Zustand; verzweigt nicht. | genau einer |
+| `action` | Erzeugt einen Wert (siehe `expression`, Abschnitt 10.4); verzweigt nicht. | genau einer |
 | `consequence` | Endpunkt mit benannter Folge. | keine |
 | `consequence-ref` | Verweis auf einen bestehenden Endpunkt. | keine |
 | `input` | Datenfeld mit Herkunftsangabe. | genau einer |
@@ -232,7 +233,8 @@ Diese Prüfung ist der Grund, warum `expectedType` nicht nur Dokumentation ist.
   "label": "Angemessen herabgesetzte Miete",
   "consequence": {
     "business": "Der Mieter schuldet für diese Zeit nur eine herabgesetzte Miete.",
-    "technical": "mietforderung = grundmiete * (1 - minderungsquoteProzent / 100)",
+    "technical": "Miete anteilig um die Quote senken.",
+    "expression": "round(grundmiete * (1 - minderungsquoteProzent / 100), 2)",
     "reference": "§ 536 Abs. 1 S. 2 BGB"
   }
 }
@@ -243,6 +245,7 @@ Diese Prüfung ist der Grund, warum `expectedType` nicht nur Dokumentation ist.
 | CONS-01 | Ein `consequence`-Knoten MUSS ein Objekt `consequence` haben. | Warnung |
 | CONS-02 | `consequence.business` MUSS eine nicht leere Zeichenkette sein. | Warnung |
 | CONS-03 | `consequence.technical` SOLLTE beschreiben, was technisch geschieht. | Hinweis |
+| CONS-08 | Rechnet ein Endpunkt, SOLLTE die Rechnung als `expression` dastehen und nicht nur als Prosa in `technical`. | Hinweis |
 | CONS-04 | `consequence.reference` SOLLTE auf die Stelle verweisen, die die Folge anordnet. | Hinweis |
 | CONS-05 | Jede Decision Map MUSS mindestens einen `consequence`-Knoten enthalten. | Fehler |
 | CONS-06 | Zwei `consequence`-Knoten mit identischem `business` SOLLTEN zu einem Knoten und einem `consequence-ref` zusammengefasst werden. | Hinweis |
@@ -481,10 +484,12 @@ Beachtung der Groß- und Kleinschreibung. Trägt keiner der Ausgänge einen
 `value`, wird ersatzweise das `label` verglichen — eine Rückfalloption für
 Maps, die vor EDGE-03 entstanden sind, kein zulässiger Entwurf.
 
-**`action`-Knoten** werden durchlaufen wie jeder Knoten mit einem Ausgang. Der
-Wert, den sie erzeugen, wird in dieser Version **nicht berechnet**
-(Abschnitt 12). Das Ergebnis MUSS die durchlaufenen `action`-Knoten nennen,
-damit erkennbar bleibt, an welcher Stelle etwas fehlt.
+**`action`-Knoten** werden durchlaufen wie jeder Knoten mit einem Ausgang.
+Trägt der Knoten einen Ausdruck (Abschnitt 10.4), wird dieser ausgewertet und
+das Ergebnis unter seinem `technicalKey` abgelegt; es steht allen späteren
+Ausdrücken zur Verfügung und geht einem gleichnamigen Eingabewert vor. Ohne
+Ausdruck bleibt der Wert offen, und das Ergebnis MUSS den Knoten nennen, damit
+erkennbar bleibt, an welcher Stelle etwas fehlt.
 
 ### 10.2 Ergebnis
 
@@ -499,7 +504,10 @@ damit erkennbar bleibt, an welcher Stelle etwas fehlt.
 | `cycle` | Ein Knoten wurde zweimal betreten. |
 
 Das Ergebnis MUSS außerdem den gegangenen Weg als Folge von Knoten-IDs
-enthalten. Ohne ihn ist ein abweichendes Ergebnis nicht nachvollziehbar.
+enthalten. Ohne ihn ist ein abweichendes Ergebnis nicht nachvollziehbar. Dazu
+kommen die Werte, die Ausdrücke unterwegs erzeugt haben, das Ergebnis des
+Ausdrucks am erreichten Endpunkt, die `action`-Knoten ohne Ausdruck und die
+Ausdrücke, die nicht auswertbar waren.
 
 ### 10.3 Regeln
 
@@ -511,12 +519,83 @@ enthalten. Ohne ihn ist ein abweichendes Ergebnis nicht nachvollziehbar.
 | EVAL-04 | Ein `consequence-ref` MUSS als sein Ziel gelten. | Fehler |
 | EVAL-05 | Ein Knoten DARF NICHT zweimal betreten werden; die Auswertung bricht mit `cycle` ab. | Fehler |
 | EVAL-06 | Die Auswertung MUSS die Abbruchgründe aus 10.2 unterscheiden. Ein pauschales „kein Ergebnis" genügt nicht. | Fehler |
-| EVAL-07 | Durchlaufene `action`-Knoten MÜSSEN im Ergebnis genannt werden. | Fehler |
+| EVAL-07 | Durchlaufene `action`-Knoten ohne Ausdruck MÜSSEN im Ergebnis genannt werden. | Fehler |
+| EVAL-08 | Der Wert eines `action`-Knotens MUSS allen späteren Ausdrücken zur Verfügung stehen und einem gleichnamigen Eingabewert vorgehen. | Fehler |
 
 Zu EVAL-06: Der Unterschied zwischen „kein Wert übergeben" und „kein Ausgang
 passt" ist der Unterschied zwischen einer unvollständigen Anfrage und einer
 unvollständigen Decision Map. Wer beides zu `undefined` zusammenfasst, nimmt
 dem Ergebnis genau die Information, wegen der man es ausgewertet hat.
+
+---
+
+### 10.4 Ausdrücke
+
+Ein `action`-Knoten und ein Endpunkt können sagen, **was sie rechnen** — als
+Ausdruck in einer Teilsprache von **FEEL** (Friendly Enough Expression
+Language, Teil von DMN 1.3).
+
+```json
+{ "type": "action", "technicalKey": "quote", "expectedType": "number",
+  "expression": "max(0, min(100, bewerteteQuote))" }
+```
+
+```json
+"consequence": {
+  "business": "Der Mieter schuldet eine herabgesetzte Miete.",
+  "technical": "Miete anteilig um die Quote senken.",
+  "expression": "round(grundmiete * (1 - quote / 100), 2)"
+}
+```
+
+`technical` bleibt die Beschreibung für Menschen, `expression` ist die
+Rechnung für Maschinen. Beide dürfen nebeneinander stehen; sie ersetzen
+einander nicht.
+
+**FEEL und keine andere Sprache**, weil der DMN-Export bereits FEEL erzeugt.
+Zwei Ausdruckssprachen nebeneinander wären eine Quelle stiller Abweichungen.
+
+#### Umfang der Teilsprache
+
+| | |
+|---|---|
+| Arithmetik | `+` `-` `*` `/` `**` |
+| Vergleich | `=` `!=` `<` `<=` `>` `>=` |
+| Logik | `and` `or` `not(…)` |
+| Bedingung | `if … then … else …` |
+| Bereiche | `x in [a..b]`, `(a..b]`, `[a..b)`, `(a..b)` |
+| Listen | `x in ("a", "b")` |
+| Literale | Zahlen, Zeichenketten, `true`, `false`, `null` |
+| Funktionen | `abs` `ceiling` `floor` `round` `min` `max` `sum` `count` `contains` `starts with` `string length` `upper` `lower` |
+
+Nicht enthalten: Kontexte, Listenkomprehensionen, Schleifen (`for`, `some`,
+`every`), Funktionsdefinitionen, Datums- und Zeitarithmetik. Die Auslassungen
+sind Absicht: Was eine Rechtsfolge rechnet, sind Beträge, Quoten und Schwellen.
+Datums- und Zeitarithmetik fehlt und ist die spürbarste Lücke (Abschnitt 12).
+
+#### Der Auswertungskontext
+
+Die Namen eines Ausdrucks sind die `technicalKey`s der Decision Map. Ihre
+Werte kommen als Zeichenketten herein und werden **nach dem typisiert, was die
+Map selbst über sie sagt**: `expectedType: "number"` macht eine Zahl daraus,
+`"boolean"` einen Wahrheitswert, alles andere bleibt Zeichenkette. Damit trägt
+`expectedType` zur Auswertung bei, statt Dokumentation zu sein.
+
+Werte, die ein `action`-Knoten unterwegs erzeugt, stehen allen späteren
+Ausdrücken unter seinem `technicalKey` zur Verfügung und gehen einem
+gleichnamigen Eingabewert vor.
+
+#### Regeln
+
+| ID | Regel | Stufe |
+|---|---|---|
+| EXPR-01 | Ein `expression` MUSS in der Teilsprache lesbar sein. | Fehler |
+| EXPR-02 | Jeder Name in einem Ausdruck SOLLTE ein `technicalKey` der Decision Map sein. | Warnung |
+| EXPR-03 | Aufgerufene Funktionen MÜSSEN zur Teilsprache gehören und die richtige Zahl von Argumenten bekommen. | Fehler |
+| EXPR-04 | Ein `action`-Knoten SOLLTE einen Ausdruck haben. Ohne ihn bleibt sein Wert offen. | Hinweis |
+
+Zu EXPR-02: nur eine Warnung, weil ein Ausdruck auf einen Wert zeigen darf,
+den die Map noch nicht führt — beim Entwurf ist das der Normalfall.
 
 ---
 
@@ -556,11 +635,12 @@ Jeder Befund trägt die Regel-ID aus diesem Dokument, auch im Export
 | NODE | 03–10 | 01, 02 (Feldtypen am Dokument) |
 | REF | 01–04; 05 im Konverter | — |
 | EDGE | 01–05, 08, 09 | — (06, 07 sind Erlaubnisse) |
-| CONS | 02, 05, 06, 07; 01 über 02 mitgeprüft | 03, 04 (bewusst keine Hinweise, zu viel Rauschen) |
+| CONS | 02, 05, 06, 07; 01 über 02 mitgeprüft | 03, 04, 08 (bewusst keine Hinweise, zu viel Rauschen) |
 | IN | 01–11 | — |
 | KS | 01–10 | — |
-| EVAL | 01–07 | — |
+| EVAL | 01–08 | — |
 | TC | 02–06 | 01 (gehört ans Dokument) |
+| EXPR | 01–04 | — |
 
 Damit ist der Editor **strukturkonform** für die Regeln, die am Graphen prüfbar
 sind, und **graphkonform**: NODE-10 (Zyklenfreiheit) und CONS-07
@@ -576,11 +656,11 @@ genannt wird und ob die Datumsangaben welche sind. Dass ein Verweis tatsächlich
 auflöst, prüft der Editor nicht — das setzte einen Netzzugriff voraus, den eine
 Prüfung bei jeder Änderung nicht haben soll. Dafür gibt es `abgerufen`.
 
-Offen im Sinne von Abschnitt 1.3 bleibt Punkt 3: Was ein `action`-Knoten
-erzeugt und was ein Endpunkt rechnet, steht als Prosa da. Die Auswertung findet
-den Weg, nicht den Betrag.
+Ausdrücke werden beim Tippen geprüft (EXPR-01 bis EXPR-03) und bei der
+Auswertung gerechnet. Die Auswertung findet damit nicht mehr nur den Weg,
+sondern auch den Betrag.
 
-Geprüft wird die Prüfung selbst mit `npm run check-rules`: 52 Fälle — Decision
+Geprüft wird die Prüfung selbst mit `npm run check-rules`: 58 Fälle — Decision
 Maps mit je einem gezielten Verstoß, eine fehlerfreie Map als Gegenprobe und ein
 als Rücksprung gekennzeichneter Zyklus, der keinen Befund auslösen darf.
 
@@ -593,31 +673,25 @@ weil sie `action`-Knoten enthält, für die DMN keine Entsprechung kennt.
 
 ---
 
-## 12. Geplante Erweiterungen
+## 12. Offene Punkte
 
-Die folgenden Punkte sind beschlossen, aber in dieser Version noch nicht Teil
-des Formats. Sie stehen hier, damit Implementierungen sie einplanen können.
+**Datums- und Zeitarithmetik in Ausdrücken.** Die Teilsprache rechnet mit
+Zahlen und Zeichenketten, nicht mit Daten und Fristen. Damit lässt sich eine
+Quote berechnen, aber kein Zeitraum kürzen und keine Frist nach § 188 BGB
+bestimmen. Das ist die spürbarste Lücke: Ein `action`-Knoten, der einen
+Zeitraum verändert, bleibt ohne Ausdruck und sein Wert offen. FEEL hat dafür
+`date`, `duration` und die zugehörige Arithmetik; sie fehlen hier.
 
-### 12.1 Auswertbare Ausdrücke (FEEL)
+**Auflösung von Verweisen.** Dass eine `uri` tatsächlich antwortet, prüft
+niemand. Das gehört nicht in eine Prüfung, die bei jeder Änderung läuft,
+sondern in einen Vorgang, den jemand anstößt.
 
-`consequence.technical` enthält Prosa. Geplant ist ein zusätzliches Feld mit
-einem Ausdruck in **FEEL** (Friendly Enough Expression Language, Teil von
-DMN 1.3):
+**Strukturregeln am Dokument.** NODE-01, NODE-02 und TC-01 beschreiben
+Feldtypen und Referenzziele des Austauschdokuments und werden noch nicht
+geprüft.
 
-```json
-"consequence": {
-  "business": "Der Mieter schuldet eine herabgesetzte Miete.",
-  "technical": "Miete anteilig um die Quote senken.",
-  "expression": "grundmiete * (1 - minderungsquoteProzent / 100)"
-}
-```
-
-FEEL und nicht eine andere Ausdruckssprache, weil der DMN-Export bereits
-FEEL erzeugt und FEEL von gängigen Entscheidungsmaschinen unmittelbar
-ausgeführt wird. Offen und vor der Umsetzung zu entscheiden: welcher
-Sprachumfang zugelassen ist, ob Ausdrücke validiert oder nur transportiert
-werden, und wie das Verhältnis zu den im DMN-Export aus Kantenwerten
-erzeugten Ausdrücken aussieht.
+**Erhalt unbekannter Felder (FMT-10).** Unbekannte Wurzelfelder werden beim
+Import gemeldet, aber nicht übernommen. Ein Round-Trip verliert sie.
 
 ---
 
@@ -625,6 +699,7 @@ erzeugten Ausdrücken aussieht.
 
 | Version | Datum | Änderung |
 |---|---|---|
+| 0.6 | 19.11.2026 | Ausdrücke in einer Teilsprache von FEEL (Abschnitt 10.4, Regeln EXPR-01 bis EXPR-04, CONS-08, EVAL-08), umgesetzt und ausgewertet. Abschnitt 12 nennt jetzt die offenen Punkte statt geplanter Erweiterungen. |
 | 0.5 | 19.11.2026 | Die Felder aus Abschnitt 8 (`uri`, `eid`, `fassung`, `abgerufen`) sind umgesetzt, die Regeln KS-04 bis KS-10 werden geprüft. Keine Änderung an den Regeln selbst. |
 | 0.4 | 19.11.2026 | Die Auswertung ist normativ beschrieben (Abschnitt 10, Regeln EVAL-01 bis EVAL-07) und umgesetzt. Testfälle werden damit nachgerechnet (TC-06). Abschnitte ab 10 neu nummeriert. |
 | 0.3 | 19.11.2026 | Geschlossene Wertebereiche sind normativ (Abschnitt 7.1, Regeln IN-10, IN-11, EDGE-08, EDGE-09) und umgesetzt. Sie standen vorher unter den geplanten Erweiterungen. |

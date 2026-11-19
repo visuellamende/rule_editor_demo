@@ -2,6 +2,7 @@ import type { Node, Edge } from '@xyflow/react';
 import type { RuleNodeData } from '../types/nodes';
 import { resolveAllowedValues } from './allowedValues';
 import { evaluateDecisionMap, describeResult } from './evaluateDecisionMap';
+import { parseFeel, collectNames, collectCallProblems } from './feel';
 
 /**
  * Pruefung einer Decision Map gegen die Regeln aus docs/format-spec.md.
@@ -74,6 +75,10 @@ export type ValidationWarningType =
   | 'missing_test_name'           // TC-04
   | 'untested_consequence'        // TC-05
   | 'test_mismatch'               // TC-06
+  // --- Ausdrücke ---
+  | 'invalid_expression'          // EXPR-01, EXPR-03
+  | 'unknown_expression_name'     // EXPR-02
+  | 'action_without_expression'   // EXPR-04
   // --- Wissensquellen ---
   | 'invalid_knowledge_source'    // KS-01, KS-02, KS-03
   | 'missing_source_uri'          // KS-04
@@ -168,6 +173,14 @@ export function validateDecisionMap(nodes: Node[], edges: Edge[]): ValidationWar
     if ((d.nodeType === 'input' || d.nodeType === 'condition') && d.technicalKey) {
       availableKeys.add(d.technicalKey);
     }
+  }
+
+  // Schluessel, die action-Knoten erzeugen. Sie stehen Ausdruecken zur
+  // Verfuegung, auch wenn sie von keinem Input kommen.
+  const computedKeys = new Set<string>();
+  for (const n of nodes) {
+    const d = dataOf(n);
+    if (d.nodeType === 'action' && d.technicalKey) computedKeys.add(d.technicalKey);
   }
 
   const entryNodes = nodes.filter((n) => !incoming.has(n.id));
@@ -458,8 +471,11 @@ export function validateDecisionMap(nodes: Node[], edges: Edge[]): ValidationWar
           );
         }
         // --- IN-09: Schluessel passen zusammen ---
+        // Nur bei Bedingungen: Die verzweigt ueber genau den Wert des Inputs.
+        // Eine action verbraucht Eingaben und erzeugt einen anders benannten
+        // Wert; dort waeren verschiedene Schluessel der Normalfall.
         const targetKey = dataOf(target).technicalKey;
-        if (data.technicalKey && targetKey && data.technicalKey !== targetKey) {
+        if (t === 'condition' && data.technicalKey && targetKey && data.technicalKey !== targetKey) {
           push(
             node,
             'IN-09',
@@ -504,6 +520,55 @@ export function validateDecisionMap(nodes: Node[], edges: Edge[]): ValidationWar
         if (!seenKeys.has(data.technicalKey)) seenKeys.set(data.technicalKey, []);
         seenKeys.get(data.technicalKey)!.push(id);
       }
+    }
+
+    // --- EXPR-01 bis EXPR-04: Ausdrücke ---
+    const expressions: Array<{ source: string; wo: string }> = [];
+    if (data.nodeType === 'action' && data.expression?.trim()) {
+      expressions.push({ source: data.expression.trim(), wo: `Action #${id}` });
+    }
+    if (data.nodeType === 'consequence' && data.consequence?.expression?.trim()) {
+      expressions.push({ source: data.consequence.expression.trim(), wo: `Endpunkt #${id}` });
+    }
+
+    for (const { source, wo } of expressions) {
+      const parsed = parseFeel(source);
+      if (!parsed.ok || !parsed.node) {
+        push(
+          node,
+          'EXPR-01',
+          'invalid_expression',
+          `${wo}: Der Ausdruck ist nicht lesbar — ${parsed.error?.message ?? 'Syntaxfehler'} (Zeichen ${(parsed.error?.position ?? 0) + 1}).`,
+          'error'
+        );
+        continue;
+      }
+
+      const callProblems = collectCallProblems(parsed.node);
+      if (callProblems.length > 0) {
+        push(node, 'EXPR-03', 'invalid_expression', `${wo}: ${callProblems.join(', ')}.`, 'error');
+      }
+
+      const unknown = [...collectNames(parsed.node)].filter((n) => !availableKeys.has(n) && !computedKeys.has(n));
+      if (unknown.length > 0) {
+        push(
+          node,
+          'EXPR-02',
+          'unknown_expression_name',
+          `${wo}: ${unknown.map((n) => `"${n}"`).join(', ')} ${unknown.length === 1 ? 'ist kein Wert' : 'sind keine Werte'}, den die Decision Map kennt.`,
+          'warning'
+        );
+      }
+    }
+
+    if (data.nodeType === 'action' && !data.expression?.trim()) {
+      push(
+        node,
+        'EXPR-04',
+        'action_without_expression',
+        `Action #${id} sagt nicht, wie ihr Wert entsteht. Die Auswertung kann ihn nicht berechnen.`,
+        'hint'
+      );
     }
 
     // --- KS-01 bis KS-10: Wissensquellen und Normverweise ---

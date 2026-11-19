@@ -51,6 +51,8 @@ export interface DmnColumn {
 export interface DmnRow {
   cells: Map<string, string | null>;
   output: string;
+  /** FEEL-Ausdruck des Endpunkts, falls er einen hat (zweite Ausgabespalte). */
+  expression?: string | null;
   notes: string[];
   endId: string | number | null;
 }
@@ -486,6 +488,7 @@ export function buildDmnTable(
     rows.push({
       cells,
       output: endLabel,
+      expression: (rm.d(endNode).consequence?.expression || '').trim() || null,
       notes,
       endId: resolvedEnd ? rm.did(resolvedEnd) : null,
     });

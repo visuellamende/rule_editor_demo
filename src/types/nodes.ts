@@ -6,6 +6,7 @@ export interface ConsequenceData {
   business: string;
   technical?: string;
   reference?: string;
+  expression?: string;               // Was der Endpunkt rechnet, als FEEL-Ausdruck
 }
 
 export interface KnowledgeSource {
@@ -45,6 +46,7 @@ export interface RuleNodeData {
   technicalKey?: string;
   expectedType?: string;
   allowedValues?: AllowedValue[];   // Nur bei expectedType "enum": geschlossener Wertebereich
+  expression?: string;              // Nur bei action-Knoten: wie der Wert entsteht, als FEEL-Ausdruck
   refNodeId?: number;       // NEU: ID des referenzierten Consequence-Knotens
   knowledgeSources?: KnowledgeSource[];   // NEU
   examples?: GoldenExample[];          // NEU — nur bei consequence-Knoten

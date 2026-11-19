@@ -282,6 +282,19 @@ export function buildDmnXml(
   output.appendChild(ov);
   table.appendChild(output);
 
+  // Zweite Ausgabespalte, sobald irgendein Endpunkt rechnet. Der Inhalt ist
+  // der FEEL-Ausdruck selbst, nicht seine Beschreibung — eine Maschine kann
+  // ihn auswerten.
+  const hasExpressions = rows.some((r) => !!r.expression);
+  if (hasExpressions) {
+    const calcOutput = helper.createElementNS(DMN_NS, 'output');
+    calcOutput.setAttribute('id', 'Output_2');
+    calcOutput.setAttribute('name', 'berechnung');
+    calcOutput.setAttribute('label', 'Berechnung');
+    calcOutput.setAttribute('typeRef', 'Any');
+    table.appendChild(calcOutput);
+  }
+
   const annotation = helper.createElementNS(DMN_NS, 'annotation');
   annotation.setAttribute('name', 'Hinweise');
   table.appendChild(annotation);
@@ -307,6 +320,15 @@ export function buildDmnXml(
     outText.textContent = feelString(row.output);
     outEntry.appendChild(outText);
     rule.appendChild(outEntry);
+
+    if (hasExpressions) {
+      const calcEntry = helper.createElementNS(DMN_NS, 'outputEntry');
+      calcEntry.setAttribute('id', `OutputEntry_${rI}_2`);
+      const calcText = helper.createElementNS(DMN_NS, 'text');
+      calcText.textContent = row.expression || 'null';
+      calcEntry.appendChild(calcText);
+      rule.appendChild(calcEntry);
+    }
 
     const annEntry = helper.createElementNS(DMN_NS, 'annotationEntry');
     const annText = helper.createElementNS(DMN_NS, 'text');
@@ -356,6 +378,9 @@ export function buildDmnXml(
     const el = helper.createElementNS(DMN_NS, 'knowledgeSource');
     el.setAttribute('id', ksIds[key]);
     el.setAttribute('name', ks.referenz || ks.art || 'Quelle');
+    if (ks.uri) {
+      el.setAttribute('locationURI', String(ks.uri));
+    }
 
     if (desc.length > 0) {
       const dEl = helper.createElementNS(DMN_NS, 'description');

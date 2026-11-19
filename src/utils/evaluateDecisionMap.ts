@@ -1,13 +1,14 @@
 import type { Node, Edge } from '@xyflow/react';
 import type { RuleNodeData } from '../types/nodes';
+import { evaluateFeel, type FeelValue } from './feel';
 
 /**
  * Auswertung einer Decision Map: Welchen Weg nimmt ein Fall mit gegebenen
  * Eingaben, und in welchem Endpunkt endet er?
  *
- * Die Auswertung ist bewusst eng: Sie folgt Kanten anhand ihrer Werte und
- * rechnet nichts. Ausdrücke in Endpunkten und die Werte, die `action`-Knoten
- * erzeugen, liegen ausserhalb (Abschnitt 12 der Spezifikation). Fuer die
+ * Die Auswertung folgt Kanten anhand ihrer Werte und rechnet, wo ein Ausdruck
+ * steht. Ausdrücke in Endpunkten und die Werte, die `action`-Knoten
+ * werden ueber FEEL-Ausdruecke berechnet (Abschnitt 10.4 der Spezifikation). Fuer die
  * Wegfindung genuegt das, denn verzweigt wird ueber Kantenwerte.
  *
  * Alle Eingaben sind Zeichenketten, so wie sie in `testCases[].inputs` stehen.
@@ -34,8 +35,43 @@ export interface EvaluationResult {
   key?: string;
   /** Wert, zu dem kein Ausgang passte. */
   value?: string;
-  /** Durchlaufene action-Knoten; ihre Werte werden nicht berechnet. */
+  /** Durchlaufene action-Knoten ohne Ausdruck; ihr Wert bleibt offen. */
   uncomputedActions: number[];
+  /** Werte, die Ausdrücke unterwegs erzeugt haben, nach technischem Schlüssel. */
+  computed: Record<string, FeelValue>;
+  /** Ergebnis des Ausdrucks am erreichten Endpunkt, falls er einen hat. */
+  outcome?: FeelValue;
+  /** Ausdrücke, die nicht ausgewertet werden konnten. */
+  expressionErrors: Array<{ nodeId: number; message: string }>;
+}
+
+/**
+ * Baut den Auswertungskontext: die uebergebenen Zeichenketten, typisiert nach
+ * dem, was die Map selbst ueber sie sagt. Ein Schluessel mit expectedType
+ * "number" wird zur Zahl, "boolean" zum Wahrheitswert, alles andere bleibt
+ * Zeichenkette. Dadurch traegt expectedType zur Auswertung bei, statt nur
+ * Dokumentation zu sein.
+ */
+export function buildContext(nodes: Node[], inputs: Record<string, string>): Record<string, FeelValue> {
+  const types = new Map<string, string>();
+  for (const n of nodes) {
+    const d = dataOf(n);
+    if (d.technicalKey && d.expectedType) types.set(d.technicalKey, d.expectedType);
+  }
+
+  const context: Record<string, FeelValue> = {};
+  for (const [key, raw] of Object.entries(inputs)) {
+    const type = types.get(key);
+    if (type === 'number' || type === 'integer') {
+      const n = Number(raw);
+      context[key] = Number.isFinite(n) ? n : raw;
+    } else if (type === 'boolean') {
+      context[key] = raw === 'true' ? true : raw === 'false' ? false : raw;
+    } else {
+      context[key] = raw;
+    }
+  }
+  return context;
 }
 
 function dataOf(node: Node): RuleNodeData {
@@ -104,7 +140,10 @@ export function evaluateDecisionMap(
 ): EvaluationResult {
   const path: number[] = [];
   const uncomputedActions: number[] = [];
+  const computed: Record<string, FeelValue> = {};
+  const expressionErrors: Array<{ nodeId: number; message: string }> = [];
   const visited = new Set<string>();
+  const context = buildContext(nodes, inputs);
 
   const nodeMap = new Map<string, Node>();
   nodes.forEach((n) => nodeMap.set(n.id, n));
@@ -119,35 +158,65 @@ export function evaluateDecisionMap(
   }
 
   let current = findEntryNode(nodes, edges);
-  if (!current) return { status: 'no_entry', path, uncomputedActions };
+  if (!current) return { status: 'no_entry', path, uncomputedActions, computed, expressionErrors };
 
   for (;;) {
     const data = dataOf(current);
 
     if (visited.has(current.id)) {
-      return { status: 'cycle', path, stoppedAt: data.displayId, uncomputedActions };
+      return { status: 'cycle', path, stoppedAt: data.displayId, uncomputedActions, computed, expressionErrors };
     }
     visited.add(current.id);
     path.push(data.displayId);
 
     // --- Endpunkte ---
-    if (data.nodeType === 'consequence') {
-      return { status: 'consequence', path, consequenceId: data.displayId, uncomputedActions };
-    }
+    const finish = (endpoint: Node): EvaluationResult => {
+      const d = dataOf(endpoint);
+      const expression = d.consequence?.expression?.trim();
+      let outcome: FeelValue | undefined;
+      if (expression) {
+        const r = evaluateFeel(expression, { ...context, ...computed });
+        if (r.ok) outcome = r.value;
+        else expressionErrors.push({ nodeId: d.displayId, message: r.error ?? 'Ausdruck nicht auswertbar' });
+      }
+      return {
+        status: 'consequence',
+        path,
+        consequenceId: d.displayId,
+        uncomputedActions,
+        computed,
+        expressionErrors,
+        ...(outcome !== undefined ? { outcome } : {}),
+      };
+    };
+
+    if (data.nodeType === 'consequence') return finish(current);
     if (data.nodeType === 'consequence-ref') {
       const target = data.refNodeId !== undefined ? byDisplayId.get(data.refNodeId) : undefined;
-      if (target && dataOf(target).nodeType === 'consequence') {
-        return { status: 'consequence', path, consequenceId: dataOf(target).displayId, uncomputedActions };
-      }
-      return { status: 'dead_end', path, stoppedAt: data.displayId, uncomputedActions };
+      if (target && dataOf(target).nodeType === 'consequence') return finish(target);
+      return { status: 'dead_end', path, stoppedAt: data.displayId, uncomputedActions, computed, expressionErrors };
     }
 
-    if (data.nodeType === 'action') uncomputedActions.push(data.displayId);
+    // --- action: Wert berechnen, wenn ein Ausdruck da ist ---
+    if (data.nodeType === 'action') {
+      const expression = data.expression?.trim();
+      if (expression && data.technicalKey) {
+        const r = evaluateFeel(expression, { ...context, ...computed });
+        if (r.ok) {
+          computed[data.technicalKey] = r.value as FeelValue;
+        } else {
+          expressionErrors.push({ nodeId: data.displayId, message: r.error ?? 'Ausdruck nicht auswertbar' });
+          uncomputedActions.push(data.displayId);
+        }
+      } else {
+        uncomputedActions.push(data.displayId);
+      }
+    }
 
     // --- Weitergehen ---
     const outEdges = (outgoing.get(current.id) ?? []).filter((e) => nodeMap.has(e.target));
     if (outEdges.length === 0) {
-      return { status: 'dead_end', path, stoppedAt: data.displayId, uncomputedActions };
+      return { status: 'dead_end', path, stoppedAt: data.displayId, uncomputedActions, computed, expressionErrors };
     }
 
     let next: Edge | null;
@@ -156,21 +225,22 @@ export function evaluateDecisionMap(
     } else {
       const key = branchKey(current, nodes, edges);
       if (!key) {
-        return { status: 'no_key', path, stoppedAt: data.displayId, uncomputedActions };
+        return { status: 'no_key', path, stoppedAt: data.displayId, uncomputedActions, computed, expressionErrors };
       }
-      const value = inputs[key];
+      const computedValue = computed[key];
+      const value = computedValue !== undefined ? String(computedValue) : inputs[key];
       if (value === undefined) {
-        return { status: 'missing_value', path, stoppedAt: data.displayId, key, uncomputedActions };
+        return { status: 'missing_value', path, stoppedAt: data.displayId, key, uncomputedActions, computed, expressionErrors };
       }
       next = selectEdge(outEdges, value);
       if (!next) {
-        return { status: 'no_branch', path, stoppedAt: data.displayId, key, value, uncomputedActions };
+        return { status: 'no_branch', path, stoppedAt: data.displayId, key, value, uncomputedActions, computed, expressionErrors };
       }
     }
 
     const target = nodeMap.get(next.target);
     if (!target) {
-      return { status: 'dead_end', path, stoppedAt: data.displayId, uncomputedActions };
+      return { status: 'dead_end', path, stoppedAt: data.displayId, uncomputedActions, computed, expressionErrors };
     }
     current = target;
   }

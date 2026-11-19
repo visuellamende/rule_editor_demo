@@ -5,6 +5,7 @@ AUFBAU DES MODELLS:
 Knoten (nodes):
 - type "entry": Der Startknoten der Entscheidung. Beginne hier.
 - type "condition": Prüft einen Wert. Hat einen technicalKey (Variablenname) und expectedType (Datentyp).
+- type "action": Erzeugt einen Wert, verzweigt nicht. expression sagt als FEEL-Ausdruck, wie er entsteht; das Ergebnis liegt unter technicalKey und steht späteren Ausdrücken zur Verfügung.
 - type "action": Führt eine Aktion aus bevor die nächste Prüfung folgt.
 - type "consequence": Endpunkt eines Pfades. Enthält die fachliche Konsequenz (business), den technischen Hinweis (technical) und eine Code-Referenz (reference).
 
@@ -40,6 +41,10 @@ Referenz-Knoten (consequence-ref, input-ref):
 - Konsequenz für die Implementierung: die referenzierte Logik wird EINMAL implementiert (als Funktion, Methode oder Handler). Jede Stelle die über einen Ref darauf zeigt, ruft diese eine Implementierung auf. Kein duplizierter Code.
 - Beispiel: Knoten #3 ist eine Consequence "Zugriff verweigert". Knoten #10 ist ein consequence-ref mit refId: 3. Im Code gibt es EINE Funktion deny_access(). Beide Pfade rufen deny_access() auf.
 - Dasselbe gilt für input-ref: der Ref verweist auf einen Input-Knoten. Die Datenquelle ist DIESELBE — nicht eine zweite Instanz mit gleichen Eigenschaften.
+
+Ausdrücke (expression):
+- Stehen an action-Knoten und in consequence. Sie sind FEEL und auswertbar — anders als consequence.technical, das Prosa ist.
+- Fehlt ein expression an einer action, ist ihr Wert bei der Auswertung offen. Rechne ihn NICHT selbst aus und tue nicht so, als sei er bekannt.
 
 Validierungswarnungen (validationWarnings):
 - Falls vorhanden: das Modell hat bekannte Lücken. Melde sie explizit, fülle sie NICHT durch Raten.

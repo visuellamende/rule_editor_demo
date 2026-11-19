@@ -25,6 +25,7 @@ interface RawExportNode {
   technicalKey?: string | null;
   expectedType?: string | null;
   allowedValues?: AllowedValue[] | null;
+  expression?: string | null;
   notes?: string | null;
   consequence?: ConsequenceData | null;
   refId?: number;
@@ -113,6 +114,7 @@ export function convertExportToDecisionMap(exportData: RawExportData): DecisionM
       ...(Array.isArray(rawNode.allowedValues) && rawNode.allowedValues.length > 0
         ? { allowedValues: rawNode.allowedValues }
         : {}),
+      ...(rawNode.expression ? { expression: rawNode.expression } : {}),
       ...(rawNode.notes ? { notes: rawNode.notes } : {}),
       ...(rawNode.consequence ? { consequence: rawNode.consequence } : {}),
       ...(rawNode.knowledgeSources ? { knowledgeSources: rawNode.knowledgeSources } : {}),

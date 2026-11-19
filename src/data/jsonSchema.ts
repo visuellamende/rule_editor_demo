@@ -126,6 +126,7 @@ Die Datenquelle ist DIESELBE — nicht eine zweite Instanz.
   "expectedType": "string (optional, z.B. 'boolean', 'enum', 'number')",
   "allowedValues": "Array<{ value, label? }> (optional, nur bei expectedType 'enum': der vollständige Wertebereich)",
   "notes": "string (optional, Notizen)",
+  "expression": "string (optional, nur bei action: FEEL-Ausdruck, wie der Wert entsteht)",
   "knowledgeSources": [
     {
       "id": "string",

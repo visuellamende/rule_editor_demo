@@ -174,3 +174,19 @@
 }
 
 
+
+.attribute-panel__textarea--mono {
+  font-family: var(--font-family-mono, monospace);
+  font-size: var(--font-size-xs);
+}
+
+.attribute-panel__expression-hint {
+  margin: 2px 0 0;
+  font-size: var(--font-size-xs);
+  line-height: 1.4;
+  color: var(--color-text-secondary);
+}
+
+.attribute-panel__expression-hint--error {
+  color: #ef4444;
+}

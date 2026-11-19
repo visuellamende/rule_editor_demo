@@ -438,6 +438,26 @@ const cases: Case[] = [
     edges: [edge(1, 2), edge(2, 3, 'A', 'a'), edge(2, 4, 'B', 'b')],
   },
   {
+    name: 'IN-09: Input mit anderem Schlüssel an einer Action ist kein Befund',
+    expect: [],
+    forbid: ['IN-09'],
+    nodes: [
+      node(1, 'decision', 'Start'),
+      node(2, 'action', 'Quote bestimmen', {
+        technicalKey: 'quote',
+        expectedType: 'number',
+        expression: 'grundmiete / 100',
+      }),
+      end(3),
+      node(4, 'input', 'Grundmiete', {
+        technicalKey: 'grundmiete',
+        expectedType: 'number',
+        inputProvider: 'system',
+      }),
+    ],
+    edges: [edge(1, 2), edge(2, 3), edge(4, 2)],
+  },
+  {
     name: 'KS-04: Gesetz ohne auflösbaren Verweis',
     expect: ['KS-04'],
     nodes: [
@@ -559,6 +579,88 @@ const cases: Case[] = [
       end(2),
     ],
     edges: [edge(1, 2)],
+  },
+  {
+    name: 'EXPR-01: Ausdruck ist nicht lesbar',
+    expect: ['EXPR-01'],
+    nodes: [
+      node(1, 'decision', 'Start'),
+      node(2, 'action', 'Quote bestimmen', {
+        technicalKey: 'quote',
+        expectedType: 'number',
+        expression: 'grundmiete * (1 -',
+      }),
+      end(3),
+      node(4, 'input', 'Grundmiete', {
+        technicalKey: 'grundmiete',
+        expectedType: 'number',
+        inputProvider: 'system',
+      }),
+    ],
+    edges: [edge(1, 2), edge(2, 3), edge(4, 2)],
+  },
+  {
+    name: 'EXPR-02: Ausdruck nennt einen unbekannten Wert',
+    expect: ['EXPR-02'],
+    nodes: [
+      node(1, 'decision', 'Start'),
+      node(2, 'action', 'Quote bestimmen', {
+        technicalKey: 'quote',
+        expectedType: 'number',
+        expression: 'gibtsNicht * 2',
+      }),
+      end(3),
+    ],
+    edges: [edge(1, 2), edge(2, 3)],
+  },
+  {
+    name: 'EXPR-03: unbekannte Funktion',
+    expect: ['EXPR-03'],
+    nodes: [
+      node(1, 'decision', 'Start'),
+      node(2, 'action', 'Quote bestimmen', {
+        technicalKey: 'quote',
+        expectedType: 'number',
+        expression: 'wurzel(4)',
+      }),
+      end(3),
+    ],
+    edges: [edge(1, 2), edge(2, 3)],
+  },
+  {
+    name: 'EXPR-04: Action ohne Ausdruck',
+    expect: ['EXPR-04'],
+    nodes: [
+      node(1, 'decision', 'Start'),
+      node(2, 'action', 'Quote bestimmen', { technicalKey: 'quote', expectedType: 'number' }),
+      end(3),
+    ],
+    edges: [edge(1, 2), edge(2, 3)],
+  },
+  {
+    name: 'Ausdruck an Action und Endpunkt erzeugt keinen Befund',
+    expect: [],
+    forbid: ['EXPR-01', 'EXPR-02', 'EXPR-03', 'EXPR-04'],
+    nodes: [
+      node(1, 'decision', 'Start'),
+      node(2, 'action', 'Quote bestimmen', {
+        technicalKey: 'quote',
+        expectedType: 'number',
+        expression: 'if grundmiete > 1000 then 30 else 20',
+      }),
+      node(3, 'consequence', 'Herabgesetzte Miete', {
+        consequence: {
+          business: 'Der Mieter schuldet eine herabgesetzte Miete.',
+          expression: 'round(grundmiete * (1 - quote / 100), 2)',
+        },
+      }),
+      node(4, 'input', 'Grundmiete', {
+        technicalKey: 'grundmiete',
+        expectedType: 'number',
+        inputProvider: 'system',
+      }),
+    ],
+    edges: [edge(1, 2), edge(2, 3), edge(4, 2)],
   },
   // --- Austauschdokument, Gruppe FMT ---
   {

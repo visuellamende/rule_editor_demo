@@ -12,6 +12,7 @@ interface ExportNode {
   technicalKey?: string | null;
   expectedType?: string | null;
   allowedValues?: Array<{ value: string; label?: string }> | null;
+  expression?: string | null;
   notes?: string | null;
   consequence?: ExportConsequence | null;
   outputs?: ExportEdge[];
@@ -31,6 +32,7 @@ interface ExportConsequence {
   business?: string | null;
   technical?: string | null;
   reference?: string | null;
+  expression?: string | null;
 }
 
 interface ExportEdge {
@@ -145,6 +147,7 @@ export function exportAsJSON(
       technicalKey: cleanText(data?.technicalKey),
       expectedType: cleanText(data?.expectedType),
       allowedValues: data?.allowedValues?.length ? data.allowedValues : null,
+      expression: cleanText(data?.expression),
       notes: cleanText(data?.notes),
       outputs: outgoingEdges,
       inputSource: data?.inputProvider ? {
@@ -163,6 +166,7 @@ export function exportAsJSON(
         business: cleanText(data.consequence.business),
         technical: cleanText(data.consequence.technical),
         reference: cleanText(data.consequence.reference),
+        expression: cleanText(data.consequence.expression),
       }) as ExportConsequence;
     }
 
