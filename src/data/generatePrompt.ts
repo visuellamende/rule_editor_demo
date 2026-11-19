@@ -16,7 +16,14 @@ REGELN FÜR DIE MODELLIERUNG:
 6. Wenn ein Input bei mehreren Conditions gebraucht wird, erstelle EINEN Input-Knoten. Alle weiteren Vorkommen als input-ref Knoten (mit label, displayId und refNodeId) im nodes-Array.
 7. Alle Positionen auf { "x": 0, "y": 0 } setzen — das Auto-Layout berechnet die Positionen beim Import.
 8. displayIds fortlaufend vergeben, beginnend bei 1.
-9. Gib NUR das JSON aus, keinen erklärenden Text davor oder danach.
+9. Gib jeder Kante ausser der einzigen Ausgangskante eines Knotens ein label UND ein value. Das value ist der maschinenlesbare Vergleichswert ("true", "false", "GUEST"); ohne es ist die Verzweigung nicht auswertbar.
+10. Verzweigt eine Bedingung über einen Aufzählungstyp, setze expectedType auf "enum" und führe in allowedValues ALLE zulässigen Werte auf. Für jeden davon muss es genau einen Ausgang geben. Erfinde keine Werte und lasse keine weg: Was du hier nicht nennst, fällt später still durchs Raster.
+11. Muss ein Wert berechnet werden, bevor weitergeprüft wird (eine Quote, ein Betrag, eine Frist), nimm dafür einen Action-Knoten mit technicalKey, expectedType und einem expression. Actions verzweigen nicht und haben genau einen Ausgang.
+12. Rechnet ein Endpunkt etwas aus, schreibe die Rechnung als consequence.expression. Die Prosa dazu gehört in consequence.technical, nicht statt dessen.
+13. Ausdrücke sind FEEL: Arithmetik, Vergleiche, and/or/not, if-then-else, Bereiche wie x in [a..b], und die Funktionen abs, ceiling, floor, round, min, max, sum, count, contains, starts with, string length, upper, lower. Keine Datums- oder Zeitarithmetik. Die Namen darin sind technicalKeys aus dem Modell.
+14. Beruht eine Regel auf einer Norm oder einem Standard, lege eine knowledgeSource an. referenz ist das Zitat; uri, fassung und eid nur, wenn du sie SICHER weisst — erfinde keine Verweise.
+15. Der Graph darf keine Zyklen enthalten.
+16. Gib NUR das JSON aus, keinen erklärenden Text davor oder danach.
 
 FACHKONZEPT:
 

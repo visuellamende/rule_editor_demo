@@ -51,10 +51,17 @@ Jeder Knoten hat folgende Pflichtfelder:
 { "nodeType": "condition", "label": "Ist der Nutzer Teil der Organisation?" }
 \`\`\`
 
-**action** — Führt eine Aktion aus.
+**action** — Erzeugt genau einen Wert und verzweigt nicht. Genau ein Ausgang.
 \`\`\`json
-{ "nodeType": "action", "label": "Benachrichtigung an Admin senden" }
+{
+  "nodeType": "action",
+  "label": "Angemessene Minderungsquote bestimmen",
+  "technicalKey": "quote",
+  "expectedType": "number",
+  "expression": "max(0, min(100, bewerteteQuote))"
+}
 \`\`\`
+Das Ergebnis liegt unter \`technicalKey\` und steht allen späteren Ausdrücken zur Verfügung.
 
 **consequence** — Endpunkt eines Pfades.
 \`\`\`json
@@ -64,6 +71,7 @@ Jeder Knoten hat folgende Pflichtfelder:
   "consequence": {
     "business": "Der Nutzer hat keinen Zugriff auf den Space.",
     "technical": "HTTP 403 Forbidden (optional)",
+    "expression": "FEEL-Ausdruck, was der Endpunkt rechnet (optional)",
     "reference": "space_service.py: _has_access() (optional)"
   }
 }
@@ -94,6 +102,10 @@ Implementiere die Logik einmal und referenziere sie — es ist DASSELBE Objekt.
   "label": "Nutzerrolle",
   "technicalKey": "memberRole (optional)",
   "expectedType": "enum (optional)",
+  "allowedValues": [
+    { "value": "GUEST", "label": "Gast" },
+    { "value": "MEMBER", "label": "Mitglied" }
+  ],
   "inputProvider": "system | manuell | komposition (optional)",
   "inputProviderSubtype": "stammdaten (optional)",
   "inputVerfuegbarkeit": "vorhanden | laufzeit (optional)",
@@ -168,8 +180,8 @@ Die Datenquelle ist DIESELBE — nicht eine zweite Instanz.
 
 ## Positionierung
 
-- Entscheidungsbaum: horizontal von links nach rechts
-- Input-Knoten: oberhalb des Baums, vertikal verbunden
+- Entscheidungsgraph: horizontal von links nach rechts
+- Input-Knoten: oberhalb des Graphen, vertikal verbunden
 - Positionen werden beim Import automatisch per Auto-Layout berechnet — es reicht \`{ "x": 0, "y": 0 }\` zu setzen
 
 ## IDs
