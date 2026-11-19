@@ -291,6 +291,80 @@ const cases: Case[] = [
     ],
     edges: [edge(1, 2)],
   },
+  {
+    name: 'IN-10: Aufzählungstyp ohne Wertebereich',
+    expect: ['IN-10'],
+    forbid: ['EDGE-08', 'EDGE-09'],
+    nodes: [
+      node(1, 'decision', 'Start'),
+      node(2, 'condition', 'Welcher Fall?', { technicalKey: 'k', expectedType: 'enum' }),
+      end(3),
+      end(4, 'Folge B.'),
+    ],
+    edges: [edge(1, 2), edge(2, 3, 'A', 'a'), edge(2, 4, 'B', 'b')],
+  },
+  {
+    name: 'IN-11: Wert im Wertebereich doppelt',
+    expect: ['IN-11'],
+    nodes: [
+      node(1, 'decision', 'Start'),
+      node(2, 'condition', 'Welcher Fall?', {
+        technicalKey: 'k',
+        expectedType: 'enum',
+        allowedValues: [{ value: 'a' }, { value: 'a' }],
+      }),
+      end(3),
+    ],
+    edges: [edge(1, 2), edge(2, 3)],
+  },
+  {
+    name: 'EDGE-08: zulässiger Wert ohne Verzweigung',
+    expect: ['EDGE-08'],
+    nodes: [
+      node(1, 'decision', 'Start'),
+      node(2, 'condition', 'Welcher Fall?', {
+        technicalKey: 'k',
+        expectedType: 'enum',
+        allowedValues: [{ value: 'a' }, { value: 'b' }, { value: 'c' }],
+      }),
+      end(3),
+      end(4, 'Folge B.'),
+    ],
+    edges: [edge(1, 2), edge(2, 3, 'A', 'a'), edge(2, 4, 'B', 'b')],
+  },
+  {
+    name: 'EDGE-09: Verzweigung über einen unbekannten Wert',
+    expect: ['EDGE-09'],
+    nodes: [
+      node(1, 'decision', 'Start'),
+      node(2, 'condition', 'Welcher Fall?', {
+        technicalKey: 'k',
+        expectedType: 'enum',
+        allowedValues: [{ value: 'a' }, { value: 'b' }],
+      }),
+      end(3),
+      end(4, 'Folge B.'),
+    ],
+    edges: [edge(1, 2), edge(2, 3, 'A', 'a'), edge(2, 4, 'Z', 'z')],
+  },
+  {
+    name: 'Wertebereich am Input wird von der Bedingung geerbt',
+    expect: [],
+    forbid: ['IN-10', 'EDGE-08', 'EDGE-09'],
+    nodes: [
+      node(1, 'decision', 'Start'),
+      node(2, 'condition', 'Welcher Fall?', { technicalKey: 'k', expectedType: 'enum' }),
+      end(3),
+      end(4, 'Folge B.'),
+      node(5, 'input', 'K', {
+        technicalKey: 'k',
+        expectedType: 'enum',
+        allowedValues: [{ value: 'a' }, { value: 'b' }],
+        inputProvider: 'system',
+      }),
+    ],
+    edges: [edge(1, 2), edge(2, 3, 'A', 'a'), edge(2, 4, 'B', 'b'), edge(5, 2)],
+  },
   // --- Austauschdokument, Gruppe FMT ---
   {
     name: 'FMT-02: leerer Name',

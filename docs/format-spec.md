@@ -1,6 +1,6 @@
 # Decision Map Format — Spezifikation
 
-**Version:** 0.2 (Entwurf)
+**Version:** 0.3 (Entwurf)
 **Stand:** 19.11.2026
 
 Dieses Dokument beschreibt das **Decision Map Format** normativ, das
@@ -140,6 +140,7 @@ erkennbar macht.
   "label": "Welche Art von Mangel liegt vor?",
   "technicalKey": "mangelart",
   "expectedType": "enum",
+  "allowedValues": [{ "value": "sachmangel", "label": "Sachmangel" }],
   "notes": null,
   "knowledgeSources": [],
   "outputs": []
@@ -209,6 +210,8 @@ die *Bestimmung* eines Wertes von der *Verzweigung* anhand eines Wertes.
 | EDGE-05 | Ist `expectedType` des Quellknotens `boolean`, MÜSSEN die Ausgänge sowohl einen positiven als auch einen negativen Zweig abdecken. | Warnung |
 | EDGE-06 | Ein Knoten mit genau einem Ausgang KANN `label` und `value` auslassen. | — |
 | EDGE-07 | Zwei Ausgänge eines Knotens DÜRFEN auf dasselbe Ziel verweisen. | — |
+| EDGE-08 | Verzweigt ein Knoten über einen geschlossenen Wertebereich (Abschnitt 7.1), MUSS jeder zulässige Wert durch einen Ausgang abgedeckt sein. | Warnung |
+| EDGE-09 | Ein `value` DARF NICHT außerhalb des geschlossenen Wertebereichs liegen. | Fehler |
 
 Zu EDGE-05: Als positiv gelten `ja`, `yes`, `wahr`, `true`; als negativ `nein`,
 `no`, `falsch`, `false`, jeweils ohne Beachtung der Groß- und Kleinschreibung.
@@ -286,10 +289,43 @@ unabhängig davon, ob sie schemakonform ist.
 | IN-07 | Ist `kannScheitern` gleich `true`, SOLLTE die Decision Map einen Pfad enthalten, der das Scheitern behandelt. | Hinweis |
 | IN-08 | `technicalKey` SOLLTE dokumentweit eindeutig sein. | Warnung |
 | IN-09 | Der `technicalKey` eines `condition`-Knotens SOLLTE dem `technicalKey` eines Inputs entsprechen, der auf ihn verweist. | Warnung |
+| IN-10 | Ein Knoten mit `expectedType: "enum"` SOLLTE einen geschlossenen Wertebereich kennen, eigenen oder geerbten. | Warnung |
+| IN-11 | Die Werte in `allowedValues` MÜSSEN nicht leer und untereinander eindeutig sein. | Fehler |
 
 Zu IN-07: Das Feld `kannScheitern` ist nur dann mehr als Dokumentation, wenn
 der Fehlerfall einen Weg im Graphen hat. Ein Format, das die Möglichkeit des
 Scheiterns verzeichnet, ohne sie auszuwerten, gewinnt nichts.
+
+### 7.1 Geschlossene Wertebereiche
+
+Ein Knoten mit `expectedType: "enum"` führt den vollständigen Wertebereich mit:
+
+```json
+"allowedValues": [
+  { "value": "sachmangel", "label": "Sachmangel (Abs. 1)" },
+  { "value": "rechtsmangel", "label": "Rechtsmangel (Abs. 3)" },
+  { "value": "kein_mangel", "label": "Kein Mangel" }
+]
+```
+
+`value` ist der maschinenlesbare Wert und MUSS mit dem `value` des zugehörigen
+Ausgangs übereinstimmen. `label` ist die Anzeige und hat keine Bedeutung für die
+Auswertung.
+
+**Vererbung.** Der Bereich darf am `input` oder am verzweigenden `condition`
+stehen. Der eigene Bereich hat Vorrang. Fehlt er, gilt der Bereich des Inputs,
+dessen `technicalKey` zum Knoten passt; trägt keiner der beteiligten Knoten
+einen Schlüssel, gilt der Bereich des einzigen versorgenden Inputs. Sonst ist
+kein Bereich bekannt.
+
+**Warum das zählt.** Ohne diesen Bereich kann keine Prüfung feststellen, ob eine
+Verzweigung vollständig ist. Kommt später ein Wert hinzu, fällt er still durchs
+Raster: Die Decision Map bleibt formal gültig und wird für diesen Fall
+ergebnislos. Das ist der häufigste stille Fehler dieses Formats, und die Regeln
+EDGE-08 und EDGE-09 sind die einzige Stelle, an der er auffällt.
+
+Ein fehlender Bereich ist nicht dasselbe wie ein leerer. `allowedValues` ganz
+weglassen heißt „offener Wertebereich"; dann greifen EDGE-08 und EDGE-09 nicht.
 
 ---
 
@@ -450,9 +486,9 @@ Jeder Befund trägt die Regel-ID aus diesem Dokument, auch im Export
 | FMT | 01–09 | 10 (wird gemeldet, aber unbekannte Felder bleiben beim Import nicht erhalten) |
 | NODE | 03–10 | 01, 02 (Feldtypen am Dokument) |
 | REF | 01–04; 05 im Konverter | — |
-| EDGE | 01–05 | — (06, 07 sind Erlaubnisse) |
+| EDGE | 01–05, 08, 09 | — (06, 07 sind Erlaubnisse) |
 | CONS | 02, 05, 06, 07; 01 über 02 mitgeprüft | 03, 04 (bewusst keine Hinweise, zu viel Rauschen) |
-| IN | 01–09 | — |
+| IN | 01–11 | — |
 | KS | 01–03 | 04–10 (hängen an den Feldern aus Abschnitt 11) |
 | TC | 02–05 | 01 (gehört ans Dokument), 06 (braucht Auswertung) |
 
@@ -465,7 +501,7 @@ Stelle: **TC-06** verlangt, dass eine Implementierung den Graphen mit gegebenen
 Eingaben durchläuft. Solange das fehlt, sind Testfälle dokumentiert, aber nicht
 nachgerechnet.
 
-Geprüft wird die Prüfung selbst mit `npm run check-rules`: 33 Fälle — Decision
+Geprüft wird die Prüfung selbst mit `npm run check-rules`: 38 Fälle — Decision
 Maps mit je einem gezielten Verstoß, eine fehlerfreie Map als Gegenprobe und ein
 als Rücksprung gekennzeichneter Zyklus, der keinen Befund auslösen darf.
 
@@ -483,25 +519,7 @@ weil sie `action`-Knoten enthält, für die DMN keine Entsprechung kennt.
 Die folgenden Punkte sind beschlossen, aber in dieser Version noch nicht Teil
 des Formats. Sie stehen hier, damit Implementierungen sie einplanen können.
 
-### 11.1 Geschlossene Wertebereiche (`allowedValues`)
-
-`input`-Knoten mit `expectedType: "enum"` sollen den vollständigen
-Wertebereich mitführen:
-
-```json
-"allowedValues": [
-  { "value": "sachmangel", "label": "Sachmangel" },
-  { "value": "rechtsmangel", "label": "Rechtsmangel" },
-  { "value": "kein_mangel", "label": "Kein Mangel" }
-]
-```
-
-Damit wird EDGE-05 von `boolean` auf `enum` erweiterbar: Eine Bedingung, die
-nicht alle zulässigen Werte abdeckt, ist ein Befund. Ohne dieses Feld fällt
-ein hinzukommender Wert still durchs Raster — der häufigste stille Fehler
-dieses Formats.
-
-### 11.2 Auswertbare Ausdrücke (FEEL)
+### 11.1 Auswertbare Ausdrücke (FEEL)
 
 `consequence.technical` enthält Prosa. Geplant ist ein zusätzliches Feld mit
 einem Ausdruck in **FEEL** (Friendly Enough Expression Language, Teil von
@@ -522,7 +540,7 @@ Sprachumfang zugelassen ist, ob Ausdrücke validiert oder nur transportiert
 werden, und wie das Verhältnis zu den im DMN-Export aus Kantenwerten
 erzeugten Ausdrücken aussieht.
 
-### 11.3 Testfallnachrechnung
+### 11.2 Testfallnachrechnung
 
 TC-06 setzt voraus, dass eine Implementierung den Graphen mit gegebenen
 Eingaben durchlaufen kann. Das ist zugleich die Grundlage dafür, Decision Maps
@@ -535,5 +553,6 @@ Abschnitt 1.3.
 
 | Version | Datum | Änderung |
 |---|---|---|
+| 0.3 | 19.11.2026 | Geschlossene Wertebereiche sind normativ (Abschnitt 7.1, Regeln IN-10, IN-11, EDGE-08, EDGE-09) und umgesetzt. Sie standen vorher als geplante Erweiterung in Abschnitt 11. |
 | 0.2 | 19.11.2026 | Abschnitt 10.2 auf den tatsächlichen Umsetzungsstand gebracht. Befunde tragen jetzt die Regel-ID, auch im Export. Keine Änderung an den Regeln selbst. |
 | 0.1 | 19.11.2026 | Erstfassung. Regeln aus dem bestehenden Verhalten des Editors abgeleitet und ergänzt; Abschnitt 8 (Normbezug) und Abschnitt 11 (geplante Erweiterungen) neu. |

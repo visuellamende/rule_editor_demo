@@ -11,6 +11,7 @@ Knoten (nodes):
 Eingaben (inputData):
 - Definiert alle Datenwerte, die in die Entscheidung einfließen.
 - technicalKey und expectedType definieren den Datentyp.
+- allowedValues nennt bei expectedType "enum" den vollständigen Wertebereich. Ist es vorhanden, sind das ALLE möglichen Werte: tritt ein anderer auf, ist das Modell unvollständig und du MELDEST die Lücke.
 
 Verbindungen (outputs):
 - label: Menschenlesbare Beschriftung des Ausgangs.
@@ -59,6 +60,7 @@ OPTIONALE FELDER:
 Nicht alle Felder sind immer vorhanden. Fehlende Felder bedeuten "vom Autor nicht angegeben":
 - Wenn technicalKey fehlt: nutze das Label als Orientierung für den Variablennamen.
 - Wenn expectedType fehlt: leite den Typ aus dem Kontext ab (Ja/Nein → boolean, Zahlenwerte → number).
+- Wenn allowedValues fehlt: der Wertebereich ist offen. Schließe NICHT aus den vorhandenen Ausgängen, dass es keine weiteren Werte gibt.
 - Wenn output.value fehlt: nutze das Label als Vergleichswert.
 - Wenn inputSource in inputData fehlt: behandle den Wert als verfügbar (kein Fehlerpfad nötig).
 - Wenn knowledgeSources fehlt: keine besondere Verbindlichkeit.

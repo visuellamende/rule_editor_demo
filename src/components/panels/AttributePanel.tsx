@@ -8,6 +8,8 @@ import type { RuleNodeData, RuleNodeType, ConsequenceData } from '../../types/no
 import { useReactFlow, type Node } from '@xyflow/react';
 import { KnowledgeSourceEditor } from './KnowledgeSourceEditor';
 import { ExampleEditor } from './ExampleEditor';
+import { AllowedValuesEditor } from './AllowedValuesEditor';
+import { resolveAllowedValues } from '../../utils/allowedValues';
 import './AttributePanel.css';
 
 export function AttributePanel() {
@@ -44,6 +46,20 @@ export function AttributePanel() {
     selectedNode ? validationWarnings.filter((w) => w.nodeId === selectedNode.id) : [], 
   [validationWarnings, selectedNode?.id]);
 
+  // Werte, über die tatsächlich verzweigt wird. Bei einem Input sind das die
+  // Kanten der Bedingung, die er versorgt, nicht seine eigene.
+  const usedBranchValues = useMemo(() => {
+    if (!selectedNode || !nodeData) return [];
+    const branchSourceIds =
+      nodeData.nodeType === 'input'
+        ? edges.filter((e) => e.source === selectedNode.id).map((e) => e.target)
+        : [selectedNode.id];
+    return edges
+      .filter((e) => branchSourceIds.includes(e.source))
+      .map((e) => (e.data as { value?: string } | undefined)?.value)
+      .filter((v): v is string => !!v);
+  }, [selectedNode, nodeData, edges]);
+
   const hasOpenMap = filePath !== null;
 
   if (!hasOpenMap) {
@@ -71,7 +87,9 @@ export function AttributePanel() {
             sourceNodeId={selectedEdge.source}
             currentEdgeId={selectedEdge.id}
             edges={edges}
+            allowedValues={resolveAllowedValues(selectedEdge.source, nodes, edges) ?? undefined}
             onSelect={(label) => updateEdgeData(selectedEdge.id, { label })}
+            onSelectValue={(label, value) => updateEdgeData(selectedEdge.id, { label, value })}
           />
           <div className="attribute-panel__field">
             <label className="attribute-panel__label">{t('edge.label')}</label>
@@ -396,6 +414,19 @@ export function AttributePanel() {
                 placeholder={t('panel.expectedType.placeholder')}
               />
             </div>
+
+            {nodeData.expectedType === 'enum' && (
+              <div className="attribute-panel__field">
+                <label className="attribute-panel__label">{t('panel.allowedValues')}</label>
+                <AllowedValuesEditor
+                  values={nodeData.allowedValues ?? []}
+                  usedValues={usedBranchValues}
+                  onChange={(values) =>
+                    updateNodeData(selectedNode.id, { allowedValues: values.length > 0 ? values : undefined })
+                  }
+                />
+              </div>
+            )}
           </>
         )}
 

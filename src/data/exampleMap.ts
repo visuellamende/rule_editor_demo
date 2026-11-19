@@ -192,6 +192,10 @@ export const exampleMap: DecisionMapFile = {
         displayId: 14,
         technicalKey: 'memberRole',
         expectedType: 'enum',
+        allowedValues: [
+          { value: 'GUEST', label: 'Gast' },
+          { value: 'MEMBER', label: 'Mitglied' },
+        ],
         notes: null,
         inputProvider: 'system',
         inputProviderSubtype: 'stammdaten',

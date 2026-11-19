@@ -17,6 +17,12 @@ export interface KnowledgeSource {
   beschreibung: string | null;      // Kurzbeschreibung
 }
 
+/** Ein zulaessiger Wert eines geschlossenen Wertebereichs (Regelgruppe IN/EDGE). */
+export interface AllowedValue {
+  value: string;                     // Maschinenlesbarer Wert, muss eindeutig sein
+  label?: string;                    // Optionale Beschriftung fuer die Anzeige
+}
+
 export interface GoldenExample {
   id: string;                          // crypto.randomUUID().slice(0, 8)
   name: string;                        // Kurzbeschreibung, z.B. "Gast ohne Mitgliedschaft"
@@ -34,6 +40,7 @@ export interface RuleNodeData {
   tags?: string[];
   technicalKey?: string;
   expectedType?: string;
+  allowedValues?: AllowedValue[];   // Nur bei expectedType "enum": geschlossener Wertebereich
   refNodeId?: number;       // NEU: ID des referenzierten Consequence-Knotens
   knowledgeSources?: KnowledgeSource[];   // NEU
   examples?: GoldenExample[];          // NEU — nur bei consequence-Knoten

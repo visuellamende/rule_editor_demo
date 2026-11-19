@@ -1,5 +1,6 @@
 import type { Node, Edge } from '@xyflow/react';
 import type { RuleNodeData } from '../types/nodes';
+import { resolveAllowedValues } from './allowedValues';
 
 /**
  * Pruefung einer Decision Map gegen die Regeln aus docs/format-spec.md.
@@ -40,6 +41,8 @@ export type ValidationWarningType =
   | 'invalid_edge_target'         // EDGE-01
   | 'missing_edge_value'          // EDGE-03
   | 'duplicate_edge_value'        // EDGE-04
+  | 'uncovered_values'            // EDGE-08
+  | 'unknown_edge_value'          // EDGE-09
   // --- Knoten und Graph ---
   | 'consequence_has_outputs'     // NODE-05
   | 'missing_technical_key'       // NODE-07, IN-01
@@ -62,6 +65,8 @@ export type ValidationWarningType =
   | 'unhandled_failure'           // IN-07
   | 'duplicate_technical_key'     // IN-08
   | 'key_mismatch'                // IN-09
+  | 'missing_allowed_values'      // IN-10
+  | 'invalid_allowed_values'      // IN-11
   // --- Testfaelle ---
   | 'invalid_test_consequence'    // TC-01
   | 'invalid_test_value'          // TC-03
@@ -287,6 +292,81 @@ export function validateDecisionMap(nodes: Node[], edges: Edge[]): ValidationWar
         }
         if (hasNo && !hasYes) {
           push(node, 'EDGE-05', 'incomplete_outputs', `Knoten #${id} hat einen negativen Ausgang aber keinen positiven.`, 'warning');
+        }
+      }
+    }
+
+    // --- IN-10 / IN-11: geschlossene Wertebereiche ---
+    if (data.nodeType === 'input' || data.nodeType === 'condition') {
+      if (data.expectedType === 'enum' && !data.allowedValues?.length) {
+        // Am Knoten selbst fehlt der Bereich. Bei einer Bedingung genuegt es,
+        // wenn ein versorgender Input ihn mitbringt.
+        const inherited = data.nodeType === 'condition' ? resolveAllowedValues(node.id, nodes, edges) : null;
+        if (!inherited) {
+          push(
+            node,
+            'IN-10',
+            'missing_allowed_values',
+            `Knoten #${id} verzweigt über einen Aufzählungstyp, nennt die zulässigen Werte aber nicht.`,
+            'warning'
+          );
+        }
+      }
+    }
+
+    if (data.allowedValues?.length) {
+      const problems: string[] = [];
+      const seenValues = new Set<string>();
+      for (const av of data.allowedValues) {
+        if (!av.value || av.value.trim() === '') {
+          problems.push('ein Wert ist leer');
+          continue;
+        }
+        if (seenValues.has(av.value)) problems.push(`"${av.value}" ist doppelt`);
+        seenValues.add(av.value);
+      }
+      if (problems.length > 0) {
+        push(
+          node,
+          'IN-11',
+          'invalid_allowed_values',
+          `Wertebereich an Knoten #${id}: ${[...new Set(problems)].join(', ')}.`,
+          'error'
+        );
+      }
+    }
+
+    // --- EDGE-08 / EDGE-09: Abdeckung des Wertebereichs ---
+    if (outEdges.length > 0 && (data.nodeType === 'condition' || data.nodeType === 'decision')) {
+      const allowed = resolveAllowedValues(node.id, nodes, edges);
+      if (allowed && allowed.length > 0) {
+        const allowedSet = new Set(allowed.map((a) => a.value));
+        const used = new Set(
+          outEdges
+            .map((e) => (e.data as { value?: string } | undefined)?.value)
+            .filter((v): v is string => !!v)
+        );
+
+        const uncovered = [...allowedSet].filter((v) => !used.has(v));
+        if (uncovered.length > 0) {
+          push(
+            node,
+            'EDGE-08',
+            'uncovered_values',
+            `Knoten #${id} deckt die zulässigen Werte ${uncovered.map((v) => `"${v}"`).join(', ')} nicht ab.`,
+            'warning'
+          );
+        }
+
+        const unknownValues = [...used].filter((v) => !allowedSet.has(v));
+        if (unknownValues.length > 0) {
+          push(
+            node,
+            'EDGE-09',
+            'unknown_edge_value',
+            `Knoten #${id} verzweigt über ${unknownValues.map((v) => `"${v}"`).join(', ')}, was nicht im Wertebereich steht.`,
+            'error'
+          );
         }
       }
     }

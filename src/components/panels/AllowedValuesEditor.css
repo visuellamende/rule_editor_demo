@@ -1,0 +1,87 @@
+.av-editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.av-editor__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.av-editor__status {
+  flex: 0 0 auto;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--color-border-subtle);
+}
+
+.av-editor__status--covered {
+  background-color: #10b981;
+}
+
+.av-editor__status--problem {
+  background-color: #ef4444;
+}
+
+.av-editor__input {
+  flex: 1 1 90px;
+  min-width: 90px;
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-input, var(--color-bg-elevated));
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-sm);
+}
+
+.av-editor__input--value {
+  font-family: var(--font-family-mono, monospace);
+}
+
+.av-editor__input:focus {
+  outline: none;
+  border-color: var(--color-accent, #3b82f6);
+}
+
+.av-editor__remove {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  line-height: 1;
+  color: var(--color-text-secondary);
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.av-editor__remove:hover {
+  color: #ef4444;
+  background-color: var(--color-bg-elevated);
+}
+
+.av-editor__add {
+  align-self: flex-start;
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  background: none;
+  border: 1px dashed var(--color-border-subtle);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.av-editor__add:hover {
+  color: var(--color-text-primary);
+  border-color: var(--color-text-secondary);
+}
+
+.av-editor__hint {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}

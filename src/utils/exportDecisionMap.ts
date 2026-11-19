@@ -11,6 +11,7 @@ interface ExportNode {
   label?: string | null;
   technicalKey?: string | null;
   expectedType?: string | null;
+  allowedValues?: Array<{ value: string; label?: string }> | null;
   notes?: string | null;
   consequence?: ExportConsequence | null;
   outputs?: ExportEdge[];
@@ -139,6 +140,7 @@ export function exportAsJSON(
       label: cleanText(data?.label) ?? '',
       technicalKey: cleanText(data?.technicalKey),
       expectedType: cleanText(data?.expectedType),
+      allowedValues: data?.allowedValues?.length ? data.allowedValues : null,
       notes: cleanText(data?.notes),
       outputs: outgoingEdges,
       inputSource: data?.inputProvider ? {

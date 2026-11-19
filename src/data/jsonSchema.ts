@@ -124,6 +124,7 @@ Die Datenquelle ist DIESELBE — nicht eine zweite Instanz.
 {
   "technicalKey": "string (optional, z.B. 'memberRole')",
   "expectedType": "string (optional, z.B. 'boolean', 'enum', 'number')",
+  "allowedValues": "Array<{ value, label? }> (optional, nur bei expectedType 'enum': der vollständige Wertebereich)",
   "notes": "string (optional, Notizen)",
   "knowledgeSources": [
     {

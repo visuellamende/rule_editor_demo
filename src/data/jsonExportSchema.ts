@@ -57,6 +57,7 @@ Im Export-Format werden Knoten flach ohne React-Flow-Hülle exportiert. Ausgehen
 - \`label\`: string | null — Fachliche Beschreibung des Knotens.
 - \`technicalKey\`: string | null — Optionaler technischer Schlüssel (z. B. Variablenname).
 - \`expectedType\`: string | null — Optionaler Datentyp (z. B. \`"boolean"\`, \`"enum"\`, \`"number"\`).
+- \`allowedValues\`: Array<{ value: string, label?: string }> | null — Nur bei \`expectedType: "enum"\`: der vollständige Wertebereich. Steht der Bereich am Input, gilt er auch für die Bedingung, die er versorgt. Jeder Wert muss durch genau einen Ausgang abgedeckt sein.
 - \`notes\`: string | null — Notizen oder Kommentare.
 - \`consequence\`: Object | null — Nur bei \`consequence\`-Knoten (siehe unten).
 - \`outputs\`: Array<ExportEdge> — Ausgehende Verbindungen (siehe unten). Bei \`consequence-ref\` entfällt \`outputs\` (Endpunkt).
@@ -159,6 +160,7 @@ Im Export-Format werden Knoten flach ohne React-Flow-Hülle exportiert. Ausgehen
       "label": "Nutzer in Organisation",
       "technicalKey": "inOrg",
       "expectedType": "boolean",
+      "allowedValues": null,
       "notes": null,
       "outputs": [
         {
