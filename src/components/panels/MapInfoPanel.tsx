@@ -2,8 +2,8 @@ import { useState, useMemo, useEffect } from 'react';
 import { useCanvasStore } from '../../store/useCanvasStore';
 import { useI18n } from '../../i18n';
 import { CustomSelect } from '../primitives/CustomSelect';
-import type { RulemapCategory } from '../../types/nodes';
-import { exportAsJSON, exportAsMarkdown } from '../../utils/exportRulemap';
+import type { DecisionMapCategory } from '../../types/nodes';
+import { exportAsJSON, exportAsMarkdown } from '../../utils/exportDecisionMap';
 import { downloadFile } from '../../services/browserStorage';
 import { useReactFlow } from '@xyflow/react';
 import { exportCanvasAsSvg, exportCanvasAsPng } from '../../utils/exportSvg';
@@ -13,7 +13,7 @@ import { validateDmn, computeContentSignature, type DmnFinding } from '../../uti
 import { exportDmn } from '../../utils/exportDmn';
 import './MapInfoPanel.css';
 
-const categoryValues: RulemapCategory[] = [
+const categoryValues: DecisionMapCategory[] = [
   'validation',
   'permission',
   'state',
@@ -76,13 +76,13 @@ export function MapInfoPanel() {
   const handleExportJSON = () => {
     const { mapMeta, nodes, edges } = useCanvasStore.getState();
     const content = exportAsJSON(mapMeta, nodes, edges);
-    downloadFile(content, `${mapMeta.name || 'rulemap'}-export.json`, 'application/json');
+    downloadFile(content, `${mapMeta.name || 'decision map'}-export.json`, 'application/json');
   };
 
   const handleExportMarkdown = () => {
     const { mapMeta, nodes, edges } = useCanvasStore.getState();
     const content = exportAsMarkdown(mapMeta, nodes, edges);
-    downloadFile(content, `${mapMeta.name || 'rulemap'}.md`, 'text/markdown');
+    downloadFile(content, `${mapMeta.name || 'decision map'}.md`, 'text/markdown');
   };
 
   const handleCopyJSON = async () => {
@@ -129,7 +129,7 @@ export function MapInfoPanel() {
 
     const exportResult = exportDmn(mapMeta, nodes, edges, t);
     if (exportResult.success && exportResult.xml) {
-      const fileName = `${mapMeta.name || 'rulemap'}.dmn`;
+      const fileName = `${mapMeta.name || 'decision map'}.dmn`;
       downloadFile(exportResult.xml, fileName, 'application/xml');
       setDmnStatus({
         success: true,
@@ -206,7 +206,7 @@ export function MapInfoPanel() {
         <CustomSelect
           options={categoryOptions}
           value={mapMeta.category ?? ''}
-          onChange={(value) => updateMapMeta({ category: (value || null) as RulemapCategory | null })}
+          onChange={(value) => updateMapMeta({ category: (value || null) as DecisionMapCategory | null })}
         />
       </div>
 

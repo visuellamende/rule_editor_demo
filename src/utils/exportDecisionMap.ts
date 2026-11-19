@@ -1,7 +1,7 @@
 import type { Node, Edge } from '@xyflow/react';
 import type { RuleNodeData, KnowledgeSource } from '../types/nodes';
-import type { RulemapMeta } from '../types/rulemap';
-import { validateRulemap } from './validateRulemap';
+import type { DecisionMapMeta } from '../types/decisionMap';
+import { validateDecisionMap } from './validateDecisionMap';
 
 // --- Strukturiertes JSON für KI-Agenten ---
 
@@ -47,7 +47,7 @@ interface ExportTestCase {
   notes?: string;
 }
 
-interface ExportRulemap {
+interface ExportDecisionMap {
   name: string;
   description: string;
   category: string | null;
@@ -92,11 +92,11 @@ const exportKnowledgeSources = (sources?: KnowledgeSource[]): KnowledgeSource[] 
 };
 
 export function exportAsJSON(
-  meta: RulemapMeta,
+  meta: DecisionMapMeta,
   nodes: Node[],
   edges: Edge[],
 ): string {
-  const warnings = validateRulemap(nodes, edges);
+  const warnings = validateDecisionMap(nodes, edges);
   const exportNodes: ExportNode[] = nodes.map((node) => {
     const data = node.data as unknown as RuleNodeData;
 
@@ -200,7 +200,7 @@ export function exportAsJSON(
     }
   }
 
-  const result: ExportRulemap = {
+  const result: ExportDecisionMap = {
     name: meta.name,
     description: meta.description,
     category: meta.category,
@@ -224,7 +224,7 @@ export function exportAsJSON(
 // --- Markdown für Tickets, Prompts, Dokumentation ---
 
 export function exportAsMarkdown(
-  meta: RulemapMeta,
+  meta: DecisionMapMeta,
   nodes: Node[],
   edges: Edge[],
 ): string {

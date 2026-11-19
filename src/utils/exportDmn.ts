@@ -1,8 +1,8 @@
 import type { Node, Edge } from '@xyflow/react';
-import type { RulemapMeta } from '../types/rulemap';
+import type { DecisionMapMeta } from '../types/decisionMap';
 import {
-  RuleMap,
-  validateRuleMap,
+  DecisionMap,
+  validateDecisionMapForDmn,
   collectPaths,
   buildDmnTable,
   feelEntry,
@@ -144,13 +144,13 @@ function getXmlHelper(): XmlDocHelper {
 }
 
 export function buildDmnXml(
-  rm: RuleMap,
+  rm: DecisionMap,
   decisionId: string,
   columns: DmnColumn[],
   rows: DmnRow[]
 ): string {
   const helper = getXmlHelper();
-  const mapName = rm.meta?.name || 'Rulemap';
+  const mapName = rm.meta?.name || 'Decision Map';
 
   // Root: definitions
   const defs = helper.createElementNS(DMN_NS, 'definitions');
@@ -471,13 +471,13 @@ export interface DmnExportResult {
 }
 
 export function exportDmn(
-  meta: RulemapMeta,
+  meta: DecisionMapMeta,
   nodes: Node[],
   edges: Edge[],
   t?: Translator
 ): DmnExportResult {
-  const rm = new RuleMap(nodes, edges, meta as any);
-  const { findings, decisions } = validateRuleMap(rm, t);
+  const rm = new DecisionMap(nodes, edges, meta as any);
+  const { findings, decisions } = validateDecisionMapForDmn(rm, t);
 
   let columns: DmnColumn[] = [];
   let rows: DmnRow[] = [];

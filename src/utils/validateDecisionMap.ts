@@ -20,7 +20,7 @@ export type ValidationWarningType =
   | 'invalid_example_key'        // Key im Example existiert nicht im Baum
   ;
 
-export function validateRulemap(nodes: Node[], edges: Edge[]): ValidationWarning[] {
+export function validateDecisionMap(nodes: Node[], edges: Edge[]): ValidationWarning[] {
   const warnings: ValidationWarning[] = [];
 
   if (nodes.length === 0) return warnings;

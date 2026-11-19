@@ -1,6 +1,6 @@
-import type { RulemapFile } from '../types/rulemap';
+import type { DecisionMapFile } from '../types/decisionMap';
 
-export const exampleMapEn: RulemapFile = {
+export const exampleMapEn: DecisionMapFile = {
   version: '1.0.0',
   meta: {
     id: 'space-access',

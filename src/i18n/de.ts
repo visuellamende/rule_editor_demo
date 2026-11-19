@@ -40,11 +40,11 @@ export const de = {
 
   // Sidebar — Map Info
   'sidebar.title': 'Projekt',
-  'sidebar.mapInfo': 'Rulemap',
+  'sidebar.mapInfo': 'Decision Map',
   'sidebar.mapName': 'Name',
-  'sidebar.mapName.placeholder': 'Name der Rulemap...',
+  'sidebar.mapName.placeholder': 'Name der Decision Map...',
   'sidebar.mapDescription': 'Beschreibung',
-  'sidebar.mapDescription.placeholder': 'Worum geht es in dieser Rulemap?',
+  'sidebar.mapDescription.placeholder': 'Worum geht es in dieser Decision Map?',
   'sidebar.mapCategory': 'Kategorie',
   'sidebar.mapCategory.none': 'Keine Kategorie',
   'sidebar.mapCreated': 'Erstellt',
@@ -165,26 +165,26 @@ export const de = {
   'settings.help': 'Hilfe & Dokumentation',
 
   // Welcome Screen
-  'welcome.subtitle': 'Wähle einen Ordner, in dem deine Rulemaps gespeichert werden.',
+  'welcome.subtitle': 'Wähle einen Ordner, in dem deine Decision Maps gespeichert werden.',
   'welcome.pickFolder': 'Ordner auswählen',
   'welcome.hint': 'Du kannst den Ordner später in den Einstellungen ändern.',
 
   // Sidebar actions
-  'sidebar.newMap': 'Neue Rulemap',
+  'sidebar.newMap': 'Neue Decision Map',
   'sidebar.newFolder': 'Neuer Ordner',
   'sidebar.delete': 'Löschen',
   'sidebar.deleteConfirm': 'Möchtest du „{name}“ wirklich löschen?',
   'sidebar.rename': 'Umbenennen',
   'import.button': 'JSON importieren',
-  'import.invalidFormat': 'Ungültiges Rulemap-Format. Die Datei muss meta, nodes und edges enthalten.',
+  'import.invalidFormat': 'Ungültiges Decision Map-Format. Die Datei muss meta, nodes und edges enthalten.',
   'import.error': 'Import fehlgeschlagen. Bitte prüfe das Dateiformat.',
 
   // Canvas — Keine Map geöffnet
-  'canvas.noMap': 'Keine Rulemap geöffnet',
-  'canvas.noMapHint': 'Erstelle oder öffne eine Rulemap in der Seitenleiste.',
+  'canvas.noMap': 'Keine Decision Map geöffnet',
+  'canvas.noMapHint': 'Erstelle oder öffne eine Decision Map in der Seitenleiste.',
 
   // Panel — Keine Map geöffnet
-  'panel.noMap': 'Keine Rulemap geöffnet.',
+  'panel.noMap': 'Keine Decision Map geöffnet.',
 
   // Export
   'export.title': 'Export',
@@ -270,7 +270,7 @@ export const de = {
   // Agent
   'header.forAgents': 'Für KI-Agenten',
   'agent.title': 'Für KI-Agenten',
-  'agent.description': 'KI-Agenten können Rulemaps automatisch aus Fachkonzepten erstellen. Kopiere die JSON-Spezifikation oder einen fertigen Prompt, füge dein Fachkonzept ein und lasse den Agenten eine Map generieren. Das Ergebnis importierst du über den Upload-Button in der Sidebar, korrigierst es visuell und exportierst das verbesserte JSON.',
+  'agent.description': 'KI-Agenten können Decision Maps automatisch aus Fachkonzepten erstellen. Kopiere die JSON-Spezifikation oder einen fertigen Prompt, füge dein Fachkonzept ein und lasse den Agenten eine Map generieren. Das Ergebnis importierst du über den Upload-Button in der Sidebar, korrigierst es visuell und exportierst das verbesserte JSON.',
   'agent.schemaImport.title': 'JSON-Schema (Import / Dateiformat)',
   'agent.schemaImport.description': 'Die vollständige Spezifikation des Dateiformats (React-Flow-Struktur) — Knotentypen, Verbindungsregeln und optionale Felder zum Importieren in den Editor.',
   'agent.schemaImport.copy': 'Import-Schema kopieren',
@@ -278,7 +278,7 @@ export const de = {
   'agent.schemaExport.description': 'Die Spezifikation des flachen Ausgabeformats, das der Rule Editor beim Export erzeugt — optimiert für die direkte Weiterverarbeitung durch KI-Agenten.',
   'agent.schemaExport.copy': 'Export-Schema kopieren',
   'agent.generate.title': 'Map generieren lassen',
-  'agent.generate.description': 'Ein Prompt der das Import-Schema enthält und den Agenten anweist, aus einem Fachkonzept eine Rulemap zu erstellen. Füge am Ende dein Fachkonzept ein.',
+  'agent.generate.description': 'Ein Prompt der das Import-Schema enthält und den Agenten anweist, aus einem Fachkonzept eine Decision Map zu erstellen. Füge am Ende dein Fachkonzept ein.',
   'agent.generate.copy': 'Prompt kopieren',
 
   // Golden Examples

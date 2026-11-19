@@ -1,17 +1,17 @@
 import { create } from 'zustand';
 import { temporal } from 'zundo';
 import type { Node, Edge } from '@xyflow/react';
-import type { RulemapMeta, RulemapFile } from '../types/rulemap';
+import type { DecisionMapMeta, DecisionMapFile } from '../types/decisionMap';
 import { getAutoLayout } from '../utils/autoLayout';
 
-import { validateRulemap, type ValidationWarning } from '../utils/validateRulemap';
+import { validateDecisionMap, type ValidationWarning } from '../utils/validateDecisionMap';
 
 interface CanvasStore {
   nodes: Node[];
   edges: Edge[];
   selectedNodeId: string | null;
   selectedEdgeId: string | null;
-  mapMeta: RulemapMeta;
+  mapMeta: DecisionMapMeta;
   filePath: string | null;
   isDirty: boolean;
   nextDisplayId: number;
@@ -24,13 +24,13 @@ interface CanvasStore {
 
   updateNodeData: (nodeId: string, data: Partial<Record<string, unknown>>) => void;
   updateEdgeData: (edgeId: string, data: Partial<Record<string, unknown>>) => void;
-  updateMapMeta: (updates: Partial<RulemapMeta>) => void;
+  updateMapMeta: (updates: Partial<DecisionMapMeta>) => void;
 
   setFilePath: (path: string | null) => void;
   markDirty: () => void;
   markClean: () => void;
-  loadFromFile: (data: RulemapFile, filePath: string) => void;
-  toFileData: () => RulemapFile;
+  loadFromFile: (data: DecisionMapFile, filePath: string) => void;
+  toFileData: () => DecisionMapFile;
   addNodeWithLayout: (newNode: Node, newEdge: Edge) => void;
   applyAutoLayout: () => void;
   getNextDisplayId: () => number;
@@ -252,7 +252,7 @@ export const useCanvasStore = create<CanvasStore>()(
 
       refreshValidation: () =>
         set((state) => ({
-          validationWarnings: validateRulemap(state.nodes, state.edges),
+          validationWarnings: validateDecisionMap(state.nodes, state.edges),
         })),
     }),
     {

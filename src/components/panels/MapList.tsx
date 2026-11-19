@@ -2,8 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useI18n } from '../../i18n';
 import { useCanvasStore } from '../../store/useCanvasStore';
 import { getMapList, readMap, writeMap, createNewMap, deleteMap } from '../../services/browserStorage';
-import type { RulemapFile } from '../../types/rulemap';
-import { isExportFormat, convertExportToRulemap } from '../../utils/convertExportToRulemap';
+import type { DecisionMapFile } from '../../types/decisionMap';
+import { isExportFormat, convertExportToDecisionMap } from '../../utils/convertExportToDecisionMap';
 import './MapList.css';
 
 interface MapEntry {
@@ -34,13 +34,13 @@ export function MapList() {
     try {
       const text = await file.text();
       const rawData = JSON.parse(text);
-      let data: RulemapFile;
+      let data: DecisionMapFile;
 
       // Dateiformat (React-Flow) oder flaches Export-Format erkennen & konvertieren
       if (rawData && rawData.meta && rawData.nodes && rawData.edges) {
-        data = rawData as RulemapFile;
+        data = rawData as DecisionMapFile;
       } else if (isExportFormat(rawData)) {
-        data = convertExportToRulemap(rawData);
+        data = convertExportToDecisionMap(rawData);
       } else {
         alert(t('import.invalidFormat'));
         return;

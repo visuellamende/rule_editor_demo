@@ -42,11 +42,11 @@ export const en: Record<TranslationKey, string> = {
 
   // Sidebar — Map Info
   'sidebar.title': 'Project',
-  'sidebar.mapInfo': 'Rulemap',
+  'sidebar.mapInfo': 'Decision Map',
   'sidebar.mapName': 'Name',
-  'sidebar.mapName.placeholder': 'Name of the rulemap...',
+  'sidebar.mapName.placeholder': 'Name of the decision map...',
   'sidebar.mapDescription': 'Description',
-  'sidebar.mapDescription.placeholder': 'What is this rulemap about?',
+  'sidebar.mapDescription.placeholder': 'What is this decision map about?',
   'sidebar.mapCategory': 'Category',
   'sidebar.mapCategory.none': 'No category',
   'sidebar.mapCreated': 'Created',
@@ -167,26 +167,26 @@ export const en: Record<TranslationKey, string> = {
   'settings.help': 'Help & Documentation',
 
   // Welcome Screen
-  'welcome.subtitle': 'Choose a folder where your rulemaps will be stored.',
+  'welcome.subtitle': 'Choose a folder where your decision maps will be stored.',
   'welcome.pickFolder': 'Choose folder',
   'welcome.hint': 'You can change the folder later in settings.',
 
   // Sidebar actions
-  'sidebar.newMap': 'New rulemap',
+  'sidebar.newMap': 'New decision map',
   'sidebar.newFolder': 'New folder',
   'sidebar.delete': 'Delete',
   'sidebar.deleteConfirm': 'Are you sure you want to delete "{name}"?',
   'sidebar.rename': 'Rename',
   'import.button': 'Import JSON',
-  'import.invalidFormat': 'Invalid rulemap format. The file must contain meta, nodes and edges.',
+  'import.invalidFormat': 'Invalid decision map format. The file must contain meta, nodes and edges.',
   'import.error': 'Import failed. Please check the file format.',
 
   // Canvas — No Map open
-  'canvas.noMap': 'No rulemap open',
-  'canvas.noMapHint': 'Create or open a rulemap from the sidebar.',
+  'canvas.noMap': 'No decision map open',
+  'canvas.noMapHint': 'Create or open a decision map from the sidebar.',
 
   // Panel — No Map open
-  'panel.noMap': 'No rulemap open.',
+  'panel.noMap': 'No decision map open.',
 
   // Export
   'export.title': 'Export',
@@ -272,7 +272,7 @@ export const en: Record<TranslationKey, string> = {
   // Agent
   'header.forAgents': 'For AI Agents',
   'agent.title': 'For AI Agents',
-  'agent.description': 'AI agents can automatically create rulemaps from business concepts. Copy the JSON specification or a ready-made prompt, add your business concept and let the agent generate a map. Import the result via the upload button in the sidebar, review it visually and export the improved JSON.',
+  'agent.description': 'AI agents can automatically create decision maps from business concepts. Copy the JSON specification or a ready-made prompt, add your business concept and let the agent generate a map. Import the result via the upload button in the sidebar, review it visually and export the improved JSON.',
   'agent.schemaImport.title': 'JSON Schema (Import / File Format)',
   'agent.schemaImport.description': 'The complete specification of the file format (React Flow structure) — node types, connection rules and optional fields for importing into the editor.',
   'agent.schemaImport.copy': 'Copy Import Schema',
@@ -280,7 +280,7 @@ export const en: Record<TranslationKey, string> = {
   'agent.schemaExport.description': 'The specification of the flat output format generated when exporting from Rule Editor — optimized for direct AI agent consumption.',
   'agent.schemaExport.copy': 'Copy Export Schema',
   'agent.generate.title': 'Generate Map',
-  'agent.generate.description': 'A prompt containing the import schema that instructs an agent to create a rulemap from a business concept. Add your business concept at the end.',
+  'agent.generate.description': 'A prompt containing the import schema that instructs an agent to create a decision map from a business concept. Add your business concept at the end.',
   'agent.generate.copy': 'Copy Prompt',
 
   // Golden Examples

@@ -1,6 +1,6 @@
 export const JSON_SCHEMA_SPEC = `# Rule Editor — JSON-Spezifikation (Import / Dateiformat)
 
-Dieses Dokument beschreibt das Import-/Dateiformat (React-Flow-Struktur) des Rule Editors. Nutze es, um Rulemaps programmatisch zu erstellen oder von KI-Agenten generieren zu lassen.
+Dieses Dokument beschreibt das Import-/Dateiformat (React-Flow-Struktur) des Rule Editors. Nutze es, um Decision Maps programmatisch zu erstellen oder von KI-Agenten generieren zu lassen.
 
 Hinweis: Der JSON-Export der Anwendung nutzt ein anderes, flaches Format für die Weiterverarbeitung durch KI-Agenten.
 

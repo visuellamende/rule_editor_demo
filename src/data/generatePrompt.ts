@@ -2,7 +2,7 @@ import { JSON_SCHEMA_SPEC } from './jsonSchema';
 
 export const GENERATE_MAP_PROMPT = `Du bist ein Business Analyst der Entscheidungslogik modelliert.
 
-Deine Aufgabe: Analysiere das folgende Fachkonzept und erstelle daraus eine Rulemap im JSON-Format des Rule Editors.
+Deine Aufgabe: Analysiere das folgende Fachkonzept und erstelle daraus eine Decision Map im JSON-Format des Rule Editors.
 
 ${JSON_SCHEMA_SPEC}
 

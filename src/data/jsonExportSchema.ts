@@ -19,8 +19,8 @@ Dieses Dokument beschreibt das flache, agentenorientierte JSON-Format, das der R
 
 ### Wurzelfelder
 
-- \`name\`: string — Name der Rulemap.
-- \`description\`: string — Beschreibung der Rulemap.
+- \`name\`: string — Name der Decision Map.
+- \`description\`: string — Beschreibung der Decision Map.
 - \`category\`: string | null — Kategorie (\`validation\`, \`permission\`, \`state\`, \`business-logic\`, \`error-handling\`).
 - \`entryNodeId\`: number | null — ID (\`displayId\`) des Einstiegsknotens. Der Einstiegsknoten ist ein regulärer Logikknoten im Baumbereich (nie ein Input).
 - \`validationWarnings\`: Array<{ nodeId: number, type: string, message: string, severity: "error" | "warning" }> | null — Aktuelle Validierungswarnungen oder \`null\`.
