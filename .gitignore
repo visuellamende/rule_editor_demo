@@ -22,3 +22,12 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Dieses Repository ist oeffentlich. Nicht fuer die Veroeffentlichung
+# bestimmtes Material gehoert in ein Verzeichnis ausserhalb des Repos.
+# Die folgenden Muster sind nur ein Schutznetz, falls doch etwas im
+# Arbeitsverzeichnis landet.
+/intern/
+docs/intern/
+*-intern.*
+*.intern.*
