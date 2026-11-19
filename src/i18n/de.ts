@@ -40,11 +40,11 @@ export const de = {
 
   // Sidebar — Map Info
   'sidebar.title': 'Projekt',
-  'sidebar.mapInfo': 'Rulemap',
+  'sidebar.mapInfo': 'Decision Map',
   'sidebar.mapName': 'Name',
-  'sidebar.mapName.placeholder': 'Name der Rulemap...',
+  'sidebar.mapName.placeholder': 'Name der Decision Map...',
   'sidebar.mapDescription': 'Beschreibung',
-  'sidebar.mapDescription.placeholder': 'Worum geht es in dieser Rulemap?',
+  'sidebar.mapDescription.placeholder': 'Worum geht es in dieser Decision Map?',
   'sidebar.mapCategory': 'Kategorie',
   'sidebar.mapCategory.none': 'Keine Kategorie',
   'sidebar.mapCreated': 'Erstellt',
@@ -82,6 +82,24 @@ export const de = {
   'panel.technicalKey.placeholder': 'z.B. isUserInOrganization',
   'panel.expectedType': 'Erwarteter Typ (optional)',
   'panel.expectedType.placeholder': 'z.B. boolean, string, enum',
+  'panel.allowedValues': 'Zulässige Werte',
+  'allowedValues.add': '+ Wert',
+  'allowedValues.remove': 'Wert entfernen',
+  'allowedValues.value.placeholder': 'Wert',
+  'allowedValues.label.placeholder': 'Beschriftung (optional)',
+  'allowedValues.covered': 'Dieser Wert hat eine Verzweigung.',
+  'allowedValues.uncovered': 'Für diesen Wert gibt es keine Verzweigung.',
+  'allowedValues.duplicate': 'Dieser Wert kommt mehrfach vor.',
+  'allowedValues.coverage': 'Werte abgedeckt',
+  'panel.expression': 'Ausdruck',
+  'panel.expression.placeholder': 'z.B. grundmiete * (1 - quote / 100)',
+  'panel.expression.hint': 'FEEL-Ausdruck. Ohne ihn bleibt der Wert dieser Action bei der Auswertung offen.',
+  'panel.consequence.expression': 'Ausdruck',
+  'panel.consequence.expression.placeholder': 'z.B. round(grundmiete * (1 - quote / 100), 2)',
+  'panel.consequence.expression.hint': 'FEEL-Ausdruck. Was dieser Endpunkt rechnet — auswertbar, anders als die Beschreibung darüber.',
+  'expression.ok': 'Ausdruck ist lesbar.',
+  'example.pass': 'Testfall erreicht diesen Endpunkt',
+  'example.fail': 'Testfall erreicht diesen Endpunkt nicht',
   'panel.inputSource': 'Datenquelle',
   'panel.inputSource.provider': 'Provider',
   'panel.inputSource.provider.none': 'Nicht angegeben',
@@ -130,6 +148,14 @@ export const de = {
   'ks.eigner.placeholder': 'z.B. Recht/Compliance, Product/Pricing',
   'ks.beschreibung': 'Beschreibung',
   'ks.beschreibung.placeholder': 'Kurzbeschreibung der Quelle',
+  'ks.uri': 'Auflösbarer Verweis',
+  'ks.uri.placeholder': 'https://… (bei Gesetzen bevorzugt ein ELI)',
+  'ks.uri.hint': 'Deutsches Bundesrecht: eli/bund/{blatt}/{jahr}/{nummer}/{stand}/{version}/deu über rechtsinformationen.bund.de. Nicht erfasste Gesetze vorerst über gesetze-im-internet.de.',
+  'ks.uri.badge': 'Link',
+  'ks.eid': 'Element in der Quelle',
+  'ks.eid.placeholder': 'z.B. art-z1_abs-z2',
+  'ks.fassung': 'Fassung',
+  'ks.abgerufen': 'Zuletzt abgerufen',
   'ks.add': 'Quelle hinzufügen',
   'ks.done': 'Fertig',
   'ks.remove': 'Entfernen',
@@ -165,26 +191,27 @@ export const de = {
   'settings.help': 'Hilfe & Dokumentation',
 
   // Welcome Screen
-  'welcome.subtitle': 'Wähle einen Ordner, in dem deine Rulemaps gespeichert werden.',
+  'welcome.subtitle': 'Wähle einen Ordner, in dem deine Decision Maps gespeichert werden.',
   'welcome.pickFolder': 'Ordner auswählen',
   'welcome.hint': 'Du kannst den Ordner später in den Einstellungen ändern.',
 
   // Sidebar actions
-  'sidebar.newMap': 'Neue Rulemap',
+  'sidebar.newMap': 'Neue Decision Map',
   'sidebar.newFolder': 'Neuer Ordner',
   'sidebar.delete': 'Löschen',
   'sidebar.deleteConfirm': 'Möchtest du „{name}“ wirklich löschen?',
   'sidebar.rename': 'Umbenennen',
   'import.button': 'JSON importieren',
-  'import.invalidFormat': 'Ungültiges Rulemap-Format. Die Datei muss meta, nodes und edges enthalten.',
+  'import.invalidFormat': 'Ungültiges Decision Map-Format. Die Datei muss meta, nodes und edges enthalten.',
   'import.error': 'Import fehlgeschlagen. Bitte prüfe das Dateiformat.',
+  'import.structureFindings': 'Das Dokument verstößt gegen Strukturregeln des Formats. Die Map wurde trotzdem importiert und kann im Editor korrigiert werden.',
 
   // Canvas — Keine Map geöffnet
-  'canvas.noMap': 'Keine Rulemap geöffnet',
-  'canvas.noMapHint': 'Erstelle oder öffne eine Rulemap in der Seitenleiste.',
+  'canvas.noMap': 'Keine Decision Map geöffnet',
+  'canvas.noMapHint': 'Erstelle oder öffne eine Decision Map in der Seitenleiste.',
 
   // Panel — Keine Map geöffnet
-  'panel.noMap': 'Keine Rulemap geöffnet.',
+  'panel.noMap': 'Keine Decision Map geöffnet.',
 
   // Export
   'export.title': 'Export',
@@ -264,13 +291,14 @@ export const de = {
   // Validation
   'validation.title': 'Validierung',
   'validation.errors': 'Fehler',
-  'validation.warnings': 'Hinweise',
+  'validation.warnings': 'Warnungen',
+  'validation.hints': 'Hinweise',
   'validation.ok': 'Keine Probleme gefunden',
 
   // Agent
   'header.forAgents': 'Für KI-Agenten',
   'agent.title': 'Für KI-Agenten',
-  'agent.description': 'KI-Agenten können Rulemaps automatisch aus Fachkonzepten erstellen. Kopiere die JSON-Spezifikation oder einen fertigen Prompt, füge dein Fachkonzept ein und lasse den Agenten eine Map generieren. Das Ergebnis importierst du über den Upload-Button in der Sidebar, korrigierst es visuell und exportierst das verbesserte JSON.',
+  'agent.description': 'KI-Agenten können Decision Maps automatisch aus Fachkonzepten erstellen. Kopiere die JSON-Spezifikation oder einen fertigen Prompt, füge dein Fachkonzept ein und lasse den Agenten eine Map generieren. Das Ergebnis importierst du über den Upload-Button in der Sidebar, korrigierst es visuell und exportierst das verbesserte JSON.',
   'agent.schemaImport.title': 'JSON-Schema (Import / Dateiformat)',
   'agent.schemaImport.description': 'Die vollständige Spezifikation des Dateiformats (React-Flow-Struktur) — Knotentypen, Verbindungsregeln und optionale Felder zum Importieren in den Editor.',
   'agent.schemaImport.copy': 'Import-Schema kopieren',
@@ -278,7 +306,7 @@ export const de = {
   'agent.schemaExport.description': 'Die Spezifikation des flachen Ausgabeformats, das der Rule Editor beim Export erzeugt — optimiert für die direkte Weiterverarbeitung durch KI-Agenten.',
   'agent.schemaExport.copy': 'Export-Schema kopieren',
   'agent.generate.title': 'Map generieren lassen',
-  'agent.generate.description': 'Ein Prompt der das Import-Schema enthält und den Agenten anweist, aus einem Fachkonzept eine Rulemap zu erstellen. Füge am Ende dein Fachkonzept ein.',
+  'agent.generate.description': 'Ein Prompt der das Import-Schema enthält und den Agenten anweist, aus einem Fachkonzept eine Decision Map zu erstellen. Füge am Ende dein Fachkonzept ein.',
   'agent.generate.copy': 'Prompt kopieren',
 
   // Golden Examples

@@ -51,6 +51,8 @@ export interface DmnColumn {
 export interface DmnRow {
   cells: Map<string, string | null>;
   output: string;
+  /** FEEL-Ausdruck des Endpunkts, falls er einen hat (zweite Ausgabespalte). */
+  expression?: string | null;
   notes: string[];
   endId: string | number | null;
 }
@@ -65,7 +67,7 @@ export interface DmnPath {
   end: string; // React Flow node ID
 }
 
-export class RuleMap {
+export class DecisionMap {
   meta: Record<string, any>;
   nodes: Map<string, Node>;
   edges: Edge[];
@@ -170,7 +172,7 @@ export function feelString(text: string): string {
   return '"' + text.split('"').join('\\"') + '"';
 }
 
-export function isBranching(rm: RuleMap, nodeId: string): boolean {
+export function isBranching(rm: DecisionMap, nodeId: string): boolean {
   const nodeType = rm.type(nodeId);
   if (nodeType === 'condition') {
     return true;
@@ -206,7 +208,7 @@ function defaultTranslate(key: string, params?: Record<string, string | number>)
   return msg;
 }
 
-export function collectPaths(rm: RuleMap, startNodeId: string, findings: DmnFinding[], t: Translator = defaultTranslate): DmnPath[] {
+export function collectPaths(rm: DecisionMap, startNodeId: string, findings: DmnFinding[], t: Translator = defaultTranslate): DmnPath[] {
   const paths: DmnPath[] = [];
   const cycleReported = new Set<string>();
   const deadEndReported = new Set<string>();
@@ -255,7 +257,7 @@ export function collectPaths(rm: RuleMap, startNodeId: string, findings: DmnFind
   return paths;
 }
 
-export function validateRuleMap(rm: RuleMap, t: Translator = defaultTranslate): { findings: DmnFinding[]; decisions: string[] } {
+export function validateDecisionMapForDmn(rm: DecisionMap, t: Translator = defaultTranslate): { findings: DmnFinding[]; decisions: string[] } {
   const findings: DmnFinding[] = [];
 
   const decisions: string[] = [];
@@ -390,7 +392,7 @@ export function validateRuleMap(rm: RuleMap, t: Translator = defaultTranslate): 
 }
 
 export function buildDmnTable(
-  rm: RuleMap,
+  rm: DecisionMap,
   paths: DmnPath[],
   findings: DmnFinding[],
   t: Translator = defaultTranslate
@@ -486,6 +488,7 @@ export function buildDmnTable(
     rows.push({
       cells,
       output: endLabel,
+      expression: (rm.d(endNode).consequence?.expression || '').trim() || null,
       notes,
       endId: resolvedEnd ? rm.did(resolvedEnd) : null,
     });
@@ -559,8 +562,8 @@ export function validateDmn(
   meta?: Record<string, any>,
   t: Translator = defaultTranslate
 ): DmnFinding[] {
-  const rm = new RuleMap(nodes, edges, meta);
-  const { findings, decisions } = validateRuleMap(rm, t);
+  const rm = new DecisionMap(nodes, edges, meta);
+  const { findings, decisions } = validateDecisionMapForDmn(rm, t);
 
   if (decisions.length === 1) {
     const paths = collectPaths(rm, decisions[0], findings, t);

@@ -1,6 +1,6 @@
-import type { RulemapFile } from '../types/rulemap';
+import type { DecisionMapFile } from '../types/decisionMap';
 
-export const exampleMap: RulemapFile = {
+export const exampleMap: DecisionMapFile = {
   version: '1.0.0',
   meta: {
     id: 'space-zugriff',
@@ -192,6 +192,10 @@ export const exampleMap: RulemapFile = {
         displayId: 14,
         technicalKey: 'memberRole',
         expectedType: 'enum',
+        allowedValues: [
+          { value: 'GUEST', label: 'Gast' },
+          { value: 'MEMBER', label: 'Mitglied' },
+        ],
         notes: null,
         inputProvider: 'system',
         inputProviderSubtype: 'stammdaten',

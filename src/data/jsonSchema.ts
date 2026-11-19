@@ -1,6 +1,6 @@
 export const JSON_SCHEMA_SPEC = `# Rule Editor — JSON-Spezifikation (Import / Dateiformat)
 
-Dieses Dokument beschreibt das Import-/Dateiformat (React-Flow-Struktur) des Rule Editors. Nutze es, um Rulemaps programmatisch zu erstellen oder von KI-Agenten generieren zu lassen.
+Dieses Dokument beschreibt das Import-/Dateiformat (React-Flow-Struktur) des Rule Editors. Nutze es, um Decision Maps programmatisch zu erstellen oder von KI-Agenten generieren zu lassen.
 
 Hinweis: Der JSON-Export der Anwendung nutzt ein anderes, flaches Format für die Weiterverarbeitung durch KI-Agenten.
 
@@ -124,13 +124,19 @@ Die Datenquelle ist DIESELBE — nicht eine zweite Instanz.
 {
   "technicalKey": "string (optional, z.B. 'memberRole')",
   "expectedType": "string (optional, z.B. 'boolean', 'enum', 'number')",
+  "allowedValues": "Array<{ value, label? }> (optional, nur bei expectedType 'enum': der vollständige Wertebereich)",
   "notes": "string (optional, Notizen)",
+  "expression": "string (optional, nur bei action: FEEL-Ausdruck, wie der Wert entsteht)",
   "knowledgeSources": [
     {
       "id": "string",
       "art": "gesetz | norm_standard | interne_richtlinie | vertrag | fachwissen",
       "verbindlichkeit": "verbindlich | empfohlen | optional",
       "referenz": "§28a Abs. 1 JuSchG",
+      "uri": "https://… auflösbarer Verweis (optional, bei Gesetzen bevorzugt ein ELI)",
+      "eid": "Element innerhalb der Quelle, z.B. art-z1_abs-z2 (optional, nur mit uri)",
+      "fassung": "JJJJ-MM-TT, welche Fassung gemeint ist (optional)",
+      "abgerufen": "JJJJ-MM-TT, wann uri zuletzt aufgelöst wurde (optional)",
       "eigner": "Recht/Compliance (optional)",
       "beschreibung": "Kurzbeschreibung (optional)"
     }

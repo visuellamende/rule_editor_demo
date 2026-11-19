@@ -1,6 +1,6 @@
 import { useI18n } from '../../i18n';
 import type { TranslationKey } from '../../i18n/de';
-import type { RuleNodeType } from '../../types/nodes';
+import type { AllowedValue, RuleNodeType } from '../../types/nodes';
 import type { Edge } from '@xyflow/react';
 import './EdgeLabelSuggestions.css';
 
@@ -9,7 +9,11 @@ interface EdgeLabelSuggestionsProps {
   sourceNodeId: string;
   currentEdgeId: string;
   edges: Edge[];
+  /** Geschlossener Wertebereich des Quellknotens, falls einer bekannt ist. */
+  allowedValues?: AllowedValue[];
   onSelect: (label: string) => void;
+  /** Setzt Label und maschinenlesbaren Wert in einem Schritt. */
+  onSelectValue?: (label: string, value: string) => void;
 }
 
 // Gegenstück-Paare
@@ -50,11 +54,26 @@ export function EdgeLabelSuggestions({
   sourceNodeId,
   currentEdgeId,
   edges,
+  allowedValues,
   onSelect,
+  onSelectValue,
 }: EdgeLabelSuggestionsProps) {
   const { t } = useI18n();
   const pairs = suggestions[sourceNodeType];
-  if (!pairs || pairs.length === 0) return null;
+
+  // Werte, die an anderen Kanten des Quellknotens schon belegt sind
+  const siblingValues = new Set(
+    edges
+      .filter((e) => e.source === sourceNodeId && e.id !== currentEdgeId)
+      .map((e) => (e.data as { value?: string } | undefined)?.value)
+      .filter((v): v is string => !!v)
+  );
+
+  // Noch nicht abgedeckte Werte des Wertebereichs. Sie gehen den generischen
+  // Vorschlaegen vor, weil sie aus dem Modell kommen und nicht geraten sind.
+  const openValues = (allowedValues ?? []).filter((av) => av.value && !siblingValues.has(av.value));
+
+  if (openValues.length === 0 && (!pairs || pairs.length === 0)) return null;
 
   // Labels der Geschwister-Edges (andere Edges vom selben Quellknoten)
   const siblingLabels = edges
@@ -69,6 +88,27 @@ export function EdgeLabelSuggestions({
 
   return (
     <div className="edge-label-suggestions">
+      {/* Offene Werte des Wertebereichs: aus dem Modell, nicht geraten */}
+      {openValues.length > 0 && (
+        <div className="edge-label-suggestions__group">
+          {openValues.map((av) => (
+            <button
+              key={av.value}
+              className="edge-label-suggestions__chip edge-label-suggestions__chip--recommended"
+              onClick={() =>
+                onSelectValue
+                  ? onSelectValue(av.label || av.value, av.value)
+                  : onSelect(av.label || av.value)
+              }
+              type="button"
+              title={av.value}
+            >
+              {av.label || av.value}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Smarter Vorschlag zuerst, hervorgehoben */}
       {smartSuggestion && (
         <div className="edge-label-suggestions__group">
@@ -83,7 +123,7 @@ export function EdgeLabelSuggestions({
       )}
 
       {/* Restliche Vorschläge */}
-      {pairs.map((group, i) => (
+      {(pairs ?? []).map((group, i) => (
         <div key={i} className="edge-label-suggestions__group">
           {group.map((key) => {
             const label = t(key);

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useCanvasStore } from '../store/useCanvasStore';
-import { validateRulemap } from '../utils/validateRulemap';
+import { validateDecisionMap } from '../utils/validateDecisionMap';
 
 export function useValidation() {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -23,7 +23,7 @@ export function useValidation() {
       if (timerRef.current) clearTimeout(timerRef.current);
 
       timerRef.current = setTimeout(() => {
-        const warnings = validateRulemap(state.nodes, state.edges);
+        const warnings = validateDecisionMap(state.nodes, state.edges);
         // Direkt setzen, ohne über eine Action zu gehen die den ganzen State updated
         useCanvasStore.setState({ validationWarnings: warnings });
       }, 500);
@@ -31,7 +31,7 @@ export function useValidation() {
 
     // Initiale Validierung
     const initialState = useCanvasStore.getState();
-    const initialWarnings = validateRulemap(initialState.nodes, initialState.edges);
+    const initialWarnings = validateDecisionMap(initialState.nodes, initialState.edges);
     useCanvasStore.setState({ validationWarnings: initialWarnings });
 
     return () => {

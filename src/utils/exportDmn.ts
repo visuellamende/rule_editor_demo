@@ -1,8 +1,8 @@
 import type { Node, Edge } from '@xyflow/react';
-import type { RulemapMeta } from '../types/rulemap';
+import type { DecisionMapMeta } from '../types/decisionMap';
 import {
-  RuleMap,
-  validateRuleMap,
+  DecisionMap,
+  validateDecisionMapForDmn,
   collectPaths,
   buildDmnTable,
   feelEntry,
@@ -144,13 +144,13 @@ function getXmlHelper(): XmlDocHelper {
 }
 
 export function buildDmnXml(
-  rm: RuleMap,
+  rm: DecisionMap,
   decisionId: string,
   columns: DmnColumn[],
   rows: DmnRow[]
 ): string {
   const helper = getXmlHelper();
-  const mapName = rm.meta?.name || 'Rulemap';
+  const mapName = rm.meta?.name || 'Decision Map';
 
   // Root: definitions
   const defs = helper.createElementNS(DMN_NS, 'definitions');
@@ -282,6 +282,19 @@ export function buildDmnXml(
   output.appendChild(ov);
   table.appendChild(output);
 
+  // Zweite Ausgabespalte, sobald irgendein Endpunkt rechnet. Der Inhalt ist
+  // der FEEL-Ausdruck selbst, nicht seine Beschreibung — eine Maschine kann
+  // ihn auswerten.
+  const hasExpressions = rows.some((r) => !!r.expression);
+  if (hasExpressions) {
+    const calcOutput = helper.createElementNS(DMN_NS, 'output');
+    calcOutput.setAttribute('id', 'Output_2');
+    calcOutput.setAttribute('name', 'berechnung');
+    calcOutput.setAttribute('label', 'Berechnung');
+    calcOutput.setAttribute('typeRef', 'Any');
+    table.appendChild(calcOutput);
+  }
+
   const annotation = helper.createElementNS(DMN_NS, 'annotation');
   annotation.setAttribute('name', 'Hinweise');
   table.appendChild(annotation);
@@ -307,6 +320,15 @@ export function buildDmnXml(
     outText.textContent = feelString(row.output);
     outEntry.appendChild(outText);
     rule.appendChild(outEntry);
+
+    if (hasExpressions) {
+      const calcEntry = helper.createElementNS(DMN_NS, 'outputEntry');
+      calcEntry.setAttribute('id', `OutputEntry_${rI}_2`);
+      const calcText = helper.createElementNS(DMN_NS, 'text');
+      calcText.textContent = row.expression || 'null';
+      calcEntry.appendChild(calcText);
+      rule.appendChild(calcEntry);
+    }
 
     const annEntry = helper.createElementNS(DMN_NS, 'annotationEntry');
     const annText = helper.createElementNS(DMN_NS, 'text');
@@ -356,6 +378,9 @@ export function buildDmnXml(
     const el = helper.createElementNS(DMN_NS, 'knowledgeSource');
     el.setAttribute('id', ksIds[key]);
     el.setAttribute('name', ks.referenz || ks.art || 'Quelle');
+    if (ks.uri) {
+      el.setAttribute('locationURI', String(ks.uri));
+    }
 
     if (desc.length > 0) {
       const dEl = helper.createElementNS(DMN_NS, 'description');
@@ -471,13 +496,13 @@ export interface DmnExportResult {
 }
 
 export function exportDmn(
-  meta: RulemapMeta,
+  meta: DecisionMapMeta,
   nodes: Node[],
   edges: Edge[],
   t?: Translator
 ): DmnExportResult {
-  const rm = new RuleMap(nodes, edges, meta as any);
-  const { findings, decisions } = validateRuleMap(rm, t);
+  const rm = new DecisionMap(nodes, edges, meta as any);
+  const { findings, decisions } = validateDecisionMapForDmn(rm, t);
 
   let columns: DmnColumn[] = [];
   let rows: DmnRow[] = [];

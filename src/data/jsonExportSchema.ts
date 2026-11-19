@@ -19,11 +19,11 @@ Dieses Dokument beschreibt das flache, agentenorientierte JSON-Format, das der R
 
 ### Wurzelfelder
 
-- \`name\`: string — Name der Rulemap.
-- \`description\`: string — Beschreibung der Rulemap.
+- \`name\`: string — Name der Decision Map.
+- \`description\`: string — Beschreibung der Decision Map.
 - \`category\`: string | null — Kategorie (\`validation\`, \`permission\`, \`state\`, \`business-logic\`, \`error-handling\`).
 - \`entryNodeId\`: number | null — ID (\`displayId\`) des Einstiegsknotens. Der Einstiegsknoten ist ein regulärer Logikknoten im Baumbereich (nie ein Input).
-- \`validationWarnings\`: Array<{ nodeId: number, type: string, message: string, severity: "error" | "warning" }> | null — Aktuelle Validierungswarnungen oder \`null\`.
+- \`validationWarnings\`: Array<{ nodeId: number, ruleId: string, type: string, message: string, severity: "error" | "warning" | "hint" }> | null — Aktuelle Validierungsbefunde oder \`null\`. \`ruleId\` ist die stabile Regel-ID aus der Formatspezifikation (z. B. \`CONS-07\`), \`nodeId\` ist \`0\` bei dokumentweiten Befunden.
 - \`testCases\`: Array<TestCase> (optional) — Fachliche Golden Examples aus den Consequence-Knoten.
 - \`inputData\`: Array<ExportNode> — Alle Input-Knoten (\`type: "input"\` oder \`type: "input-ref"\`). Input-Knoten können nie Einstiegsknoten sein.
 - \`nodes\`: Array<ExportNode> — Alle Entscheidungs- und Logikknoten (\`decision\`, \`condition\`, \`action\`, \`consequence\`, \`consequence-ref\`).
@@ -57,12 +57,14 @@ Im Export-Format werden Knoten flach ohne React-Flow-Hülle exportiert. Ausgehen
 - \`label\`: string | null — Fachliche Beschreibung des Knotens.
 - \`technicalKey\`: string | null — Optionaler technischer Schlüssel (z. B. Variablenname).
 - \`expectedType\`: string | null — Optionaler Datentyp (z. B. \`"boolean"\`, \`"enum"\`, \`"number"\`).
+- \`allowedValues\`: Array<{ value: string, label?: string }> | null — Nur bei \`expectedType: "enum"\`: der vollständige Wertebereich. Steht der Bereich am Input, gilt er auch für die Bedingung, die er versorgt. Jeder Wert muss durch genau einen Ausgang abgedeckt sein.
 - \`notes\`: string | null — Notizen oder Kommentare.
+- \`expression\`: string | null — Nur bei \`action\`-Knoten: wie der Wert entsteht, als FEEL-Ausdruck (z. B. \`max(0, min(100, bewerteteQuote))\`). Die Namen darin sind \`technicalKey\`s der Map.
 - \`consequence\`: Object | null — Nur bei \`consequence\`-Knoten (siehe unten).
 - \`outputs\`: Array<ExportEdge> — Ausgehende Verbindungen (siehe unten). Bei \`consequence-ref\` entfällt \`outputs\` (Endpunkt).
 - \`refId\`: number (optional) — Nur bei \`consequence-ref\` und \`input-ref\`: ID des referenzierten Originalknotens.
 - \`inputSource\`: Object | null — Nur bei Knoten mit Datenquelle (siehe unten).
-- \`knowledgeSources\`: Array<KnowledgeSource> | null — Fachliche Quellen/Regelautoritäten.
+- \`knowledgeSources\`: Array<KnowledgeSource> | null — Fachliche Quellen/Regelautoritäten. Jede Quelle: \`art\`, \`verbindlichkeit\`, \`referenz\` (menschenlesbares Zitat) und optional \`uri\` (auflösbarer Verweis, bei Gesetzen bevorzugt ein ELI), \`eid\` (Element innerhalb der Quelle), \`fassung\` und \`abgerufen\` (jeweils JJJJ-MM-TT).
 
 ---
 
@@ -89,8 +91,12 @@ Im Export-Format werden Knoten flach ohne React-Flow-Hülle exportiert. Ausgehen
 "consequence": {
   "business": "Nutzer hat keinen Zugriff auf den Space.",
   "technical": "HTTP 403 Forbidden",
+  "expression": "0",
   "reference": "space_service.py: _has_access()"
 }
+
+\`expression\` ist optional und enthält als FEEL-Ausdruck, was der Endpunkt rechnet.
+\`technical\` bleibt die Beschreibung für Menschen; beide stehen nebeneinander.
 \`\`\`
 
 ### inputSource (Verschachteltes Datenquellen-Objekt)
@@ -159,6 +165,7 @@ Im Export-Format werden Knoten flach ohne React-Flow-Hülle exportiert. Ausgehen
       "label": "Nutzer in Organisation",
       "technicalKey": "inOrg",
       "expectedType": "boolean",
+      "allowedValues": null,
       "notes": null,
       "outputs": [
         {

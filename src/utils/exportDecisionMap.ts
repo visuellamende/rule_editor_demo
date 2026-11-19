@@ -1,7 +1,7 @@
 import type { Node, Edge } from '@xyflow/react';
 import type { RuleNodeData, KnowledgeSource } from '../types/nodes';
-import type { RulemapMeta } from '../types/rulemap';
-import { validateRulemap } from './validateRulemap';
+import type { DecisionMapMeta } from '../types/decisionMap';
+import { validateDecisionMap } from './validateDecisionMap';
 
 // --- Strukturiertes JSON für KI-Agenten ---
 
@@ -11,6 +11,8 @@ interface ExportNode {
   label?: string | null;
   technicalKey?: string | null;
   expectedType?: string | null;
+  allowedValues?: Array<{ value: string; label?: string }> | null;
+  expression?: string | null;
   notes?: string | null;
   consequence?: ExportConsequence | null;
   outputs?: ExportEdge[];
@@ -30,6 +32,7 @@ interface ExportConsequence {
   business?: string | null;
   technical?: string | null;
   reference?: string | null;
+  expression?: string | null;
 }
 
 interface ExportEdge {
@@ -47,13 +50,14 @@ interface ExportTestCase {
   notes?: string;
 }
 
-interface ExportRulemap {
+interface ExportDecisionMap {
   name: string;
   description: string;
   category: string | null;
   entryNodeId: number | null;
   validationWarnings: Array<{
     nodeId: number;
+    ruleId: string;
     type: string;
     message: string;
     severity: string;
@@ -86,17 +90,21 @@ const exportKnowledgeSources = (sources?: KnowledgeSource[]): KnowledgeSource[] 
     art: s.art,
     verbindlichkeit: s.verbindlichkeit,
     referenz: cleanText(s.referenz) ?? '',
+    uri: cleanText(s.uri),
+    eid: cleanText(s.eid),
+    fassung: cleanText(s.fassung),
+    abgerufen: cleanText(s.abgerufen),
     eigner: cleanText(s.eigner),
     beschreibung: cleanText(s.beschreibung),
   }));
 };
 
 export function exportAsJSON(
-  meta: RulemapMeta,
+  meta: DecisionMapMeta,
   nodes: Node[],
   edges: Edge[],
 ): string {
-  const warnings = validateRulemap(nodes, edges);
+  const warnings = validateDecisionMap(nodes, edges);
   const exportNodes: ExportNode[] = nodes.map((node) => {
     const data = node.data as unknown as RuleNodeData;
 
@@ -138,6 +146,8 @@ export function exportAsJSON(
       label: cleanText(data?.label) ?? '',
       technicalKey: cleanText(data?.technicalKey),
       expectedType: cleanText(data?.expectedType),
+      allowedValues: data?.allowedValues?.length ? data.allowedValues : null,
+      expression: cleanText(data?.expression),
       notes: cleanText(data?.notes),
       outputs: outgoingEdges,
       inputSource: data?.inputProvider ? {
@@ -156,6 +166,7 @@ export function exportAsJSON(
         business: cleanText(data.consequence.business),
         technical: cleanText(data.consequence.technical),
         reference: cleanText(data.consequence.reference),
+        expression: cleanText(data.consequence.expression),
       }) as ExportConsequence;
     }
 
@@ -200,7 +211,7 @@ export function exportAsJSON(
     }
   }
 
-  const result: ExportRulemap = {
+  const result: ExportDecisionMap = {
     name: meta.name,
     description: meta.description,
     category: meta.category,
@@ -208,6 +219,7 @@ export function exportAsJSON(
     validationWarnings: warnings.length > 0
       ? warnings.map((w) => ({
           nodeId: w.displayId,
+          ruleId: w.ruleId,
           type: w.type,
           message: w.message,
           severity: w.severity,
@@ -224,7 +236,7 @@ export function exportAsJSON(
 // --- Markdown für Tickets, Prompts, Dokumentation ---
 
 export function exportAsMarkdown(
-  meta: RulemapMeta,
+  meta: DecisionMapMeta,
   nodes: Node[],
   edges: Edge[],
 ): string {

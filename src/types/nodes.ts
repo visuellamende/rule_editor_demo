@@ -1,4 +1,4 @@
-export type RulemapCategory = 'validation' | 'permission' | 'state' | 'business-logic' | 'error-handling';
+export type DecisionMapCategory = 'validation' | 'permission' | 'state' | 'business-logic' | 'error-handling';
 
 export type RuleNodeType = 'decision' | 'consequence' | 'condition' | 'action' | 'consequence-ref' | 'input' | 'input-ref';
 
@@ -6,15 +6,26 @@ export interface ConsequenceData {
   business: string;
   technical?: string;
   reference?: string;
+  expression?: string;               // Was der Endpunkt rechnet, als FEEL-Ausdruck
 }
 
 export interface KnowledgeSource {
   id: string;                        // Eindeutige ID (crypto.randomUUID().slice(0, 8))
   art: 'gesetz' | 'norm_standard' | 'interne_richtlinie' | 'vertrag' | 'fachwissen';
   verbindlichkeit: 'verbindlich' | 'empfohlen' | 'optional';
-  referenz: string;                  // Auflösbarer Verweis (§, Dokument-ID, Link)
+  referenz: string;                  // Menschenlesbares Zitat, z. B. "§ 536 Abs. 1a BGB"
+  uri?: string | null;               // Auflösbarer Verweis, bevorzugt ein ELI
+  eid?: string | null;               // Element innerhalb der Quelle, z. B. "art-z1_abs-z2"
+  fassung?: string | null;           // Welche Fassung gemeint ist, ISO 8601
+  abgerufen?: string | null;         // Wann uri zuletzt aufgelöst wurde, ISO 8601
   eigner: string | null;            // Zuständige Stelle
   beschreibung: string | null;      // Kurzbeschreibung
+}
+
+/** Ein zulaessiger Wert eines geschlossenen Wertebereichs (Regelgruppe IN/EDGE). */
+export interface AllowedValue {
+  value: string;                     // Maschinenlesbarer Wert, muss eindeutig sein
+  label?: string;                    // Optionale Beschriftung fuer die Anzeige
 }
 
 export interface GoldenExample {
@@ -34,6 +45,8 @@ export interface RuleNodeData {
   tags?: string[];
   technicalKey?: string;
   expectedType?: string;
+  allowedValues?: AllowedValue[];   // Nur bei expectedType "enum": geschlossener Wertebereich
+  expression?: string;              // Nur bei action-Knoten: wie der Wert entsteht, als FEEL-Ausdruck
   refNodeId?: number;       // NEU: ID des referenzierten Consequence-Knotens
   knowledgeSources?: KnowledgeSource[];   // NEU
   examples?: GoldenExample[];          // NEU — nur bei consequence-Knoten

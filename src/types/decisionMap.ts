@@ -1,18 +1,18 @@
 import type { Node, Edge } from '@xyflow/react';
-import type { RulemapCategory } from './nodes';
+import type { DecisionMapCategory } from './nodes';
 
-export interface RulemapMeta {
+export interface DecisionMapMeta {
   id: string;
   name: string;
   description: string;
-  category: RulemapCategory | null;
+  category: DecisionMapCategory | null;
   created: string;
   modified: string;
 }
 
-export interface RulemapFile {
+export interface DecisionMapFile {
   version: string;
-  meta: RulemapMeta;
+  meta: DecisionMapMeta;
   nodes: Node[];
   edges: Edge[];
 }

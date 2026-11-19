@@ -1,12 +1,12 @@
-import { exportAsJSON } from '../src/utils/exportRulemap';
-import { isExportFormat, convertExportToRulemap } from '../src/utils/convertExportToRulemap';
-import type { RulemapFile } from '../src/types/rulemap';
+import { exportAsJSON } from '../src/utils/exportDecisionMap';
+import { isExportFormat, convertExportToDecisionMap } from '../src/utils/convertExportToDecisionMap';
+import type { DecisionMapFile } from '../src/types/decisionMap';
 import type { RuleNodeData } from '../src/types/nodes';
 
 console.log('--- Start Roundtrip Smoke Test ---');
 
 // Testmap mit allen Knotentypen: Input, Input-Ref, Decision, Condition, Consequence, Consequence-Ref
-const testMap: RulemapFile = {
+const testMap: DecisionMapFile = {
   version: '1.0.0',
   meta: {
     id: 'test-map-full',
@@ -146,13 +146,13 @@ if (outputs[0].targetNodeId !== 3) {
 }
 console.log('✓ Defekt 2 Pass: input-ref has outgoing outputs edge connecting to condition (#3).');
 
-// 2. Re-import via convertExportToRulemap
+// 2. Re-import via convertExportToDecisionMap
 const isExport = isExportFormat(exportData);
 if (!isExport) {
   throw new Error('TEST FAILED: isExportFormat returned false for exportAsJSON output!');
 }
 
-const reimportedMap = convertExportToRulemap(exportData);
+const reimportedMap = convertExportToDecisionMap(exportData);
 
 // Check node and edge counts
 if (reimportedMap.nodes.length !== testMap.nodes.length) {

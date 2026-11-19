@@ -189,3 +189,19 @@
   border-color: var(--color-primary);
   color: var(--color-primary);
 }
+
+.example-editor__status {
+  flex: 0 0 auto;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--color-border-subtle);
+}
+
+.example-editor__status--pass {
+  background-color: #10b981;
+}
+
+.example-editor__status--fail {
+  background-color: #ef4444;
+}

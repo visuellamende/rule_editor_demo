@@ -7,9 +7,11 @@ interface ExampleEditorProps {
   examples: GoldenExample[];
   onChange: (examples: GoldenExample[]) => void;
   availableInputKeys: string[];    // technicalKeys aus verbundenen Input-Knoten und Conditions
+  /** Ergebnis der Nachrechnung je Testfall-ID (TC-06). */
+  evaluations?: Record<string, { ok: boolean; detail: string }>;
 }
 
-export function ExampleEditor({ examples, onChange, availableInputKeys }: ExampleEditorProps) {
+export function ExampleEditor({ examples, onChange, availableInputKeys, evaluations }: ExampleEditorProps) {
   const { t } = useI18n();
   const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -160,6 +162,17 @@ export function ExampleEditor({ examples, onChange, availableInputKeys }: Exampl
               className="example-editor__compact"
               onClick={() => setEditingId(example.id)}
             >
+              {evaluations?.[example.id] && (
+                <span
+                  className={
+                    'example-editor__status' +
+                    (evaluations[example.id].ok
+                      ? ' example-editor__status--pass'
+                      : ' example-editor__status--fail')
+                  }
+                  title={evaluations[example.id].detail}
+                />
+              )}
               <span className="example-editor__compact-name">
                 {example.name || t('example.unnamed')}
               </span>

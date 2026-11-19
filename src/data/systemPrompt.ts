@@ -5,12 +5,14 @@ AUFBAU DES MODELLS:
 Knoten (nodes):
 - type "entry": Der Startknoten der Entscheidung. Beginne hier.
 - type "condition": Prüft einen Wert. Hat einen technicalKey (Variablenname) und expectedType (Datentyp).
+- type "action": Erzeugt einen Wert, verzweigt nicht. expression sagt als FEEL-Ausdruck, wie er entsteht; das Ergebnis liegt unter technicalKey und steht späteren Ausdrücken zur Verfügung.
 - type "action": Führt eine Aktion aus bevor die nächste Prüfung folgt.
 - type "consequence": Endpunkt eines Pfades. Enthält die fachliche Konsequenz (business), den technischen Hinweis (technical) und eine Code-Referenz (reference).
 
 Eingaben (inputData):
 - Definiert alle Datenwerte, die in die Entscheidung einfließen.
 - technicalKey und expectedType definieren den Datentyp.
+- allowedValues nennt bei expectedType "enum" den vollständigen Wertebereich. Ist es vorhanden, sind das ALLE möglichen Werte: tritt ein anderer auf, ist das Modell unvollständig und du MELDEST die Lücke.
 
 Verbindungen (outputs):
 - label: Menschenlesbare Beschriftung des Ausgangs.
@@ -28,7 +30,10 @@ Regelautorität (knowledgeSources):
 - verbindlichkeit "verbindlich": Semantik NICHT verändern. Jede Regel muss exakt umgesetzt werden.
 - verbindlichkeit "empfohlen": Alternativen sind zulässig, als änderbar markieren.
 - verbindlichkeit "optional": Darf hinterfragt und optimiert werden.
-- referenz: Auflösbarer Verweis auf die fachliche Grundlage (Paragraph, Dokument-ID, Link).
+- referenz: Das menschenlesbare Zitat der fachlichen Grundlage (Paragraph, Dokument-ID).
+- uri: Der auflösbare Verweis darauf, bei Gesetzen bevorzugt ein ELI. Erfinde ihn NICHT — fehlt er, sage das.
+- fassung: Welcher Stand gemeint ist (JJJJ-MM-TT). Ohne Fassung ist der Verweis nicht eindeutig; bei Gesetzen ist das relevant, weil sich der Wortlaut ändert.
+- eid: Das Element innerhalb der Quelle, etwa ein Absatz. Nur zusammen mit uri sinnvoll.
 
 Referenz-Knoten (consequence-ref, input-ref):
 - Ein Knoten mit type "consequence-ref" oder "input-ref" ist KEIN eigenständiger Knoten. Er ist ein Verweis auf einen anderen Knoten (angegeben durch refId).
@@ -36,6 +41,10 @@ Referenz-Knoten (consequence-ref, input-ref):
 - Konsequenz für die Implementierung: die referenzierte Logik wird EINMAL implementiert (als Funktion, Methode oder Handler). Jede Stelle die über einen Ref darauf zeigt, ruft diese eine Implementierung auf. Kein duplizierter Code.
 - Beispiel: Knoten #3 ist eine Consequence "Zugriff verweigert". Knoten #10 ist ein consequence-ref mit refId: 3. Im Code gibt es EINE Funktion deny_access(). Beide Pfade rufen deny_access() auf.
 - Dasselbe gilt für input-ref: der Ref verweist auf einen Input-Knoten. Die Datenquelle ist DIESELBE — nicht eine zweite Instanz mit gleichen Eigenschaften.
+
+Ausdrücke (expression):
+- Stehen an action-Knoten und in consequence. Sie sind FEEL und auswertbar — anders als consequence.technical, das Prosa ist.
+- Fehlt ein expression an einer action, ist ihr Wert bei der Auswertung offen. Rechne ihn NICHT selbst aus und tue nicht so, als sei er bekannt.
 
 Validierungswarnungen (validationWarnings):
 - Falls vorhanden: das Modell hat bekannte Lücken. Melde sie explizit, fülle sie NICHT durch Raten.
@@ -59,6 +68,7 @@ OPTIONALE FELDER:
 Nicht alle Felder sind immer vorhanden. Fehlende Felder bedeuten "vom Autor nicht angegeben":
 - Wenn technicalKey fehlt: nutze das Label als Orientierung für den Variablennamen.
 - Wenn expectedType fehlt: leite den Typ aus dem Kontext ab (Ja/Nein → boolean, Zahlenwerte → number).
+- Wenn allowedValues fehlt: der Wertebereich ist offen. Schließe NICHT aus den vorhandenen Ausgängen, dass es keine weiteren Werte gibt.
 - Wenn output.value fehlt: nutze das Label als Vergleichswert.
 - Wenn inputSource in inputData fehlt: behandle den Wert als verfügbar (kein Fehlerpfad nötig).
 - Wenn knowledgeSources fehlt: keine besondere Verbindlichkeit.

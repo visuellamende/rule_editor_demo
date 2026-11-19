@@ -1,4 +1,4 @@
-import type { RulemapFile } from '../types/rulemap';
+import type { DecisionMapFile } from '../types/decisionMap';
 
 const STORAGE_PREFIX = 'ruleeditor_';
 const MAP_LIST_KEY = `${STORAGE_PREFIX}maps`;
@@ -16,12 +16,12 @@ function saveMapList(list: string[]): void {
 
 // --- Einzelne Map lesen/schreiben ---
 
-export function readMap(id: string): RulemapFile | null {
+export function readMap(id: string): DecisionMapFile | null {
   const raw = localStorage.getItem(`${STORAGE_PREFIX}map_${id}`);
   return raw ? JSON.parse(raw) : null;
 }
 
-export function writeMap(id: string, data: RulemapFile): void {
+export function writeMap(id: string, data: DecisionMapFile): void {
   localStorage.setItem(`${STORAGE_PREFIX}map_${id}`, JSON.stringify(data));
 
   // Zur Map-Liste hinzufügen wenn noch nicht vorhanden
@@ -40,11 +40,11 @@ export function deleteMap(id: string): void {
 
 // --- Neue Map erstellen ---
 
-export function createNewMap(name?: string): { id: string; data: RulemapFile } {
+export function createNewMap(name?: string): { id: string; data: DecisionMapFile } {
   const id = crypto.randomUUID().slice(0, 8);
   const mapName = name ?? 'Neue Map';
 
-  const data: RulemapFile = {
+  const data: DecisionMapFile = {
     version: '1.0.0',
     meta: {
       id,

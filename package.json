@@ -8,7 +8,9 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "check-roundtrip": "npx tsx scripts/roundtrip-check.ts",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "check-rules": "npx tsx scripts/rules-check.ts",
+    "check-feel": "npx tsx scripts/feel-check.ts"
   },
   "dependencies": {
     "@dagrejs/dagre": "^3.0.0",

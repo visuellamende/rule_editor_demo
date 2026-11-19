@@ -2,8 +2,8 @@ import { useState, useMemo, useEffect } from 'react';
 import { useCanvasStore } from '../../store/useCanvasStore';
 import { useI18n } from '../../i18n';
 import { CustomSelect } from '../primitives/CustomSelect';
-import type { RulemapCategory } from '../../types/nodes';
-import { exportAsJSON, exportAsMarkdown } from '../../utils/exportRulemap';
+import type { DecisionMapCategory } from '../../types/nodes';
+import { exportAsJSON, exportAsMarkdown } from '../../utils/exportDecisionMap';
 import { downloadFile } from '../../services/browserStorage';
 import { useReactFlow } from '@xyflow/react';
 import { exportCanvasAsSvg, exportCanvasAsPng } from '../../utils/exportSvg';
@@ -13,7 +13,7 @@ import { validateDmn, computeContentSignature, type DmnFinding } from '../../uti
 import { exportDmn } from '../../utils/exportDmn';
 import './MapInfoPanel.css';
 
-const categoryValues: RulemapCategory[] = [
+const categoryValues: DecisionMapCategory[] = [
   'validation',
   'permission',
   'state',
@@ -36,6 +36,10 @@ export function MapInfoPanel() {
   const warnings = useCanvasStore((state) => state.validationWarnings);
   const errorCount = warnings.filter((w) => w.severity === 'error').length;
   const warningCount = warnings.filter((w) => w.severity === 'warning').length;
+  const hintCount = warnings.filter((w) => w.severity === 'hint').length;
+  // Dokumentweite Befunde (displayId 0) haengen an keinem Knoten und haetten
+  // sonst keinen Ort, an dem sie sichtbar werden.
+  const documentFindings = warnings.filter((w) => w.displayId === 0);
   const reactFlowInstance = useReactFlow();
   const [copiedTemplate, setCopiedTemplate] = useState<string | null>(null);
   const [dmnStatus, setDmnStatus] = useState<DmnStatusState | null>(null);
@@ -76,13 +80,13 @@ export function MapInfoPanel() {
   const handleExportJSON = () => {
     const { mapMeta, nodes, edges } = useCanvasStore.getState();
     const content = exportAsJSON(mapMeta, nodes, edges);
-    downloadFile(content, `${mapMeta.name || 'rulemap'}-export.json`, 'application/json');
+    downloadFile(content, `${mapMeta.name || 'decision map'}-export.json`, 'application/json');
   };
 
   const handleExportMarkdown = () => {
     const { mapMeta, nodes, edges } = useCanvasStore.getState();
     const content = exportAsMarkdown(mapMeta, nodes, edges);
-    downloadFile(content, `${mapMeta.name || 'rulemap'}.md`, 'text/markdown');
+    downloadFile(content, `${mapMeta.name || 'decision map'}.md`, 'text/markdown');
   };
 
   const handleCopyJSON = async () => {
@@ -129,7 +133,7 @@ export function MapInfoPanel() {
 
     const exportResult = exportDmn(mapMeta, nodes, edges, t);
     if (exportResult.success && exportResult.xml) {
-      const fileName = `${mapMeta.name || 'rulemap'}.dmn`;
+      const fileName = `${mapMeta.name || 'decision map'}.dmn`;
       downloadFile(exportResult.xml, fileName, 'application/xml');
       setDmnStatus({
         success: true,
@@ -206,7 +210,7 @@ export function MapInfoPanel() {
         <CustomSelect
           options={categoryOptions}
           value={mapMeta.category ?? ''}
-          onChange={(value) => updateMapMeta({ category: (value || null) as RulemapCategory | null })}
+          onChange={(value) => updateMapMeta({ category: (value || null) as DecisionMapCategory | null })}
         />
       </div>
 
@@ -229,6 +233,20 @@ export function MapInfoPanel() {
             <span className="map-info-panel__validation-warnings">
               {warningCount} {t('validation.warnings')}
             </span>
+          )}
+          {hintCount > 0 && (
+            <span className="map-info-panel__validation-hints">
+              {hintCount} {t('validation.hints')}
+            </span>
+          )}
+          {documentFindings.length > 0 && (
+            <ul className="map-info-panel__validation-list">
+              {documentFindings.map((w, i) => (
+                <li key={`${w.ruleId}-${i}`} className="map-info-panel__validation-item">
+                  <span className="map-info-panel__validation-rule">{w.ruleId}</span> {w.message}
+                </li>
+              ))}
+            </ul>
           )}
         </div>
       ) : nodes.length > 0 ? (

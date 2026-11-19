@@ -8,6 +8,10 @@ import type { RuleNodeData, RuleNodeType, ConsequenceData } from '../../types/no
 import { useReactFlow, type Node } from '@xyflow/react';
 import { KnowledgeSourceEditor } from './KnowledgeSourceEditor';
 import { ExampleEditor } from './ExampleEditor';
+import { AllowedValuesEditor } from './AllowedValuesEditor';
+import { resolveAllowedValues } from '../../utils/allowedValues';
+import { evaluateDecisionMap, describeResult } from '../../utils/evaluateDecisionMap';
+import { parseFeel, collectCallProblems } from '../../utils/feel';
 import './AttributePanel.css';
 
 export function AttributePanel() {
@@ -44,6 +48,51 @@ export function AttributePanel() {
     selectedNode ? validationWarnings.filter((w) => w.nodeId === selectedNode.id) : [], 
   [validationWarnings, selectedNode?.id]);
 
+  // Werte, über die tatsächlich verzweigt wird. Bei einem Input sind das die
+  // Kanten der Bedingung, die er versorgt, nicht seine eigene.
+  const usedBranchValues = useMemo(() => {
+    if (!selectedNode || !nodeData) return [];
+    const branchSourceIds =
+      nodeData.nodeType === 'input'
+        ? edges.filter((e) => e.source === selectedNode.id).map((e) => e.target)
+        : [selectedNode.id];
+    return edges
+      .filter((e) => branchSourceIds.includes(e.source))
+      .map((e) => (e.data as { value?: string } | undefined)?.value)
+      .filter((v): v is string => !!v);
+  }, [selectedNode, nodeData, edges]);
+
+  // TC-06: Jeder Testfall wird durch den Graphen geschickt und mit dem
+  // Endpunkt verglichen, an dem er haengt.
+  const exampleEvaluations = useMemo(() => {
+    if (!selectedNode || !nodeData || nodeData.nodeType !== 'consequence') return undefined;
+    const out: Record<string, { ok: boolean; detail: string }> = {};
+    for (const example of nodeData.examples ?? []) {
+      const result = evaluateDecisionMap(nodes, edges, example.inputs ?? {});
+      const ok = result.status === 'consequence' && result.consequenceId === nodeData.displayId;
+      out[example.id] = {
+        ok,
+        detail: ok
+          ? `${t('example.pass')} (${result.path.join(' → ')})`
+          : `${t('example.fail')}: ${describeResult(result)}`,
+      };
+    }
+    return out;
+  }, [selectedNode, nodeData, nodes, edges, t]);
+
+  // Sofortrueckmeldung zum Ausdruck: lesbar oder nicht, und warum nicht.
+  const expressionHint = (source: string | undefined): { ok: boolean; text: string } | null => {
+    const src = source?.trim();
+    if (!src) return null;
+    const parsed = parseFeel(src);
+    if (!parsed.ok || !parsed.node) {
+      return { ok: false, text: `${parsed.error?.message ?? 'Syntaxfehler'} (Zeichen ${(parsed.error?.position ?? 0) + 1})` };
+    }
+    const problems = collectCallProblems(parsed.node);
+    if (problems.length > 0) return { ok: false, text: problems.join(', ') };
+    return { ok: true, text: t('expression.ok') };
+  };
+
   const hasOpenMap = filePath !== null;
 
   if (!hasOpenMap) {
@@ -71,7 +120,9 @@ export function AttributePanel() {
             sourceNodeId={selectedEdge.source}
             currentEdgeId={selectedEdge.id}
             edges={edges}
+            allowedValues={resolveAllowedValues(selectedEdge.source, nodes, edges) ?? undefined}
             onSelect={(label) => updateEdgeData(selectedEdge.id, { label })}
+            onSelectValue={(label, value) => updateEdgeData(selectedEdge.id, { label, value })}
           />
           <div className="attribute-panel__field">
             <label className="attribute-panel__label">{t('edge.label')}</label>
@@ -373,8 +424,12 @@ export function AttributePanel() {
           />
         </div>
 
-        {/* Technical Key & Expected Type for Condition, Decision, and Input nodes */}
-        {(nodeData.nodeType === 'condition' || nodeData.nodeType === 'decision' || nodeData.nodeType === 'input') && (
+        {/* Technischer Schlüssel und Datentyp. Auch bei action-Knoten: NODE-09
+            verlangt beides, damit der erzeugte Wert benannt und typisiert ist. */}
+        {(nodeData.nodeType === 'condition' ||
+          nodeData.nodeType === 'decision' ||
+          nodeData.nodeType === 'input' ||
+          nodeData.nodeType === 'action') && (
           <>
             <div className="attribute-panel__field">
               <label className="attribute-panel__label">{t('panel.technicalKey')}</label>
@@ -396,6 +451,43 @@ export function AttributePanel() {
                 placeholder={t('panel.expectedType.placeholder')}
               />
             </div>
+
+            {nodeData.nodeType === 'action' && (
+              <div className="attribute-panel__field">
+                <label className="attribute-panel__label">{t('panel.expression')}</label>
+                <textarea
+                  className="attribute-panel__textarea attribute-panel__textarea--mono"
+                  value={nodeData.expression ?? ''}
+                  onChange={(e) => updateNodeData(selectedNode.id, { expression: e.target.value || undefined })}
+                  placeholder={t('panel.expression.placeholder')}
+                  rows={2}
+                  spellCheck={false}
+                />
+                {(() => {
+                  const hint = expressionHint(nodeData.expression);
+                  return hint ? (
+                    <p className={'attribute-panel__expression-hint' + (hint.ok ? '' : ' attribute-panel__expression-hint--error')}>
+                      {hint.text}
+                    </p>
+                  ) : (
+                    <p className="attribute-panel__expression-hint">{t('panel.expression.hint')}</p>
+                  );
+                })()}
+              </div>
+            )}
+
+            {nodeData.expectedType === 'enum' && (
+              <div className="attribute-panel__field">
+                <label className="attribute-panel__label">{t('panel.allowedValues')}</label>
+                <AllowedValuesEditor
+                  values={nodeData.allowedValues ?? []}
+                  usedValues={usedBranchValues}
+                  onChange={(values) =>
+                    updateNodeData(selectedNode.id, { allowedValues: values.length > 0 ? values : undefined })
+                  }
+                />
+              </div>
+            )}
           </>
         )}
 
@@ -606,6 +698,30 @@ export function AttributePanel() {
 
             <div className="attribute-panel__field">
               <label className="attribute-panel__label">
+                {t('panel.consequence.expression')}
+              </label>
+              <textarea
+                className="attribute-panel__textarea attribute-panel__textarea--mono"
+                value={nodeData.consequence?.expression ?? ''}
+                onChange={(e) => handleConsequenceChange('expression', e.target.value)}
+                placeholder={t('panel.consequence.expression.placeholder')}
+                rows={2}
+                spellCheck={false}
+              />
+              {(() => {
+                const hint = expressionHint(nodeData.consequence?.expression);
+                return hint ? (
+                  <p className={'attribute-panel__expression-hint' + (hint.ok ? '' : ' attribute-panel__expression-hint--error')}>
+                    {hint.text}
+                  </p>
+                ) : (
+                  <p className="attribute-panel__expression-hint">{t('panel.consequence.expression.hint')}</p>
+                );
+              })()}
+            </div>
+
+            <div className="attribute-panel__field">
+              <label className="attribute-panel__label">
                 {t('panel.consequence.reference')}
               </label>
               <input
@@ -643,6 +759,7 @@ export function AttributePanel() {
                 examples={nodeData.examples ?? []}
                 onChange={(examples) => updateNodeData(selectedNode.id, { examples })}
                 availableInputKeys={getAvailableInputKeys(nodes)}
+                evaluations={exampleEvaluations}
               />
             )}
           </div>

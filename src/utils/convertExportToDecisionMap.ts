@@ -1,6 +1,6 @@
 import type { Node, Edge } from '@xyflow/react';
-import type { RulemapFile, RulemapMeta } from '../types/rulemap';
-import type { RuleNodeData, RuleNodeType, RulemapCategory, GoldenExample, KnowledgeSource, ConsequenceData } from '../types/nodes';
+import type { DecisionMapFile, DecisionMapMeta } from '../types/decisionMap';
+import type { RuleNodeData, RuleNodeType, DecisionMapCategory, GoldenExample, KnowledgeSource, ConsequenceData, AllowedValue } from '../types/nodes';
 
 const VALID_NODE_TYPES: RuleNodeType[] = [
   'decision',
@@ -24,6 +24,8 @@ interface RawExportNode {
   label?: string | null;
   technicalKey?: string | null;
   expectedType?: string | null;
+  allowedValues?: AllowedValue[] | null;
+  expression?: string | null;
   notes?: string | null;
   consequence?: ConsequenceData | null;
   refId?: number;
@@ -45,7 +47,7 @@ export interface RawExportData {
   id?: string;
   name?: string;
   description?: string;
-  category?: RulemapCategory | null;
+  category?: DecisionMapCategory | null;
   entryNodeId?: number | null;
   inputData?: RawExportNode[];
   nodes?: RawExportNode[];
@@ -73,8 +75,8 @@ export function isExportFormat(data: unknown): data is RawExportData {
   return hasNoEdges && hasNodesOrInputs && (hasEntryId || hasOutputs);
 }
 
-export function convertExportToRulemap(exportData: RawExportData): RulemapFile {
-  const meta: RulemapMeta = {
+export function convertExportToDecisionMap(exportData: RawExportData): DecisionMapFile {
+  const meta: DecisionMapMeta = {
     id: exportData.id || crypto.randomUUID().slice(0, 8),
     name: exportData.name || 'Importierte Map',
     description: exportData.description || '',
@@ -109,6 +111,10 @@ export function convertExportToRulemap(exportData: RawExportData): RulemapFile {
       nodeType,
       ...(rawNode.technicalKey ? { technicalKey: rawNode.technicalKey } : {}),
       ...(rawNode.expectedType ? { expectedType: rawNode.expectedType } : {}),
+      ...(Array.isArray(rawNode.allowedValues) && rawNode.allowedValues.length > 0
+        ? { allowedValues: rawNode.allowedValues }
+        : {}),
+      ...(rawNode.expression ? { expression: rawNode.expression } : {}),
       ...(rawNode.notes ? { notes: rawNode.notes } : {}),
       ...(rawNode.consequence ? { consequence: rawNode.consequence } : {}),
       ...(rawNode.knowledgeSources ? { knowledgeSources: rawNode.knowledgeSources } : {}),

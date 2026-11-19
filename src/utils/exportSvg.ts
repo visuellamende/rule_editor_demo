@@ -108,7 +108,7 @@ export async function exportCanvasAsSvg(
 
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${mapName || 'rulemap'}.svg`;
+    a.download = `${mapName || 'decision map'}.svg`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -146,7 +146,7 @@ export async function exportCanvasAsPng(
 
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${mapName || 'rulemap'}.png`;
+    a.download = `${mapName || 'decision map'}.png`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
