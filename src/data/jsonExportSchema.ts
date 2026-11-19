@@ -23,7 +23,7 @@ Dieses Dokument beschreibt das flache, agentenorientierte JSON-Format, das der R
 - \`description\`: string — Beschreibung der Decision Map.
 - \`category\`: string | null — Kategorie (\`validation\`, \`permission\`, \`state\`, \`business-logic\`, \`error-handling\`).
 - \`entryNodeId\`: number | null — ID (\`displayId\`) des Einstiegsknotens. Der Einstiegsknoten ist ein regulärer Logikknoten im Baumbereich (nie ein Input).
-- \`validationWarnings\`: Array<{ nodeId: number, type: string, message: string, severity: "error" | "warning" }> | null — Aktuelle Validierungswarnungen oder \`null\`.
+- \`validationWarnings\`: Array<{ nodeId: number, ruleId: string, type: string, message: string, severity: "error" | "warning" | "hint" }> | null — Aktuelle Validierungsbefunde oder \`null\`. \`ruleId\` ist die stabile Regel-ID aus der Formatspezifikation (z. B. \`CONS-07\`), \`nodeId\` ist \`0\` bei dokumentweiten Befunden.
 - \`testCases\`: Array<TestCase> (optional) — Fachliche Golden Examples aus den Consequence-Knoten.
 - \`inputData\`: Array<ExportNode> — Alle Input-Knoten (\`type: "input"\` oder \`type: "input-ref"\`). Input-Knoten können nie Einstiegsknoten sein.
 - \`nodes\`: Array<ExportNode> — Alle Entscheidungs- und Logikknoten (\`decision\`, \`condition\`, \`action\`, \`consequence\`, \`consequence-ref\`).

@@ -36,6 +36,10 @@ export function MapInfoPanel() {
   const warnings = useCanvasStore((state) => state.validationWarnings);
   const errorCount = warnings.filter((w) => w.severity === 'error').length;
   const warningCount = warnings.filter((w) => w.severity === 'warning').length;
+  const hintCount = warnings.filter((w) => w.severity === 'hint').length;
+  // Dokumentweite Befunde (displayId 0) haengen an keinem Knoten und haetten
+  // sonst keinen Ort, an dem sie sichtbar werden.
+  const documentFindings = warnings.filter((w) => w.displayId === 0);
   const reactFlowInstance = useReactFlow();
   const [copiedTemplate, setCopiedTemplate] = useState<string | null>(null);
   const [dmnStatus, setDmnStatus] = useState<DmnStatusState | null>(null);
@@ -229,6 +233,20 @@ export function MapInfoPanel() {
             <span className="map-info-panel__validation-warnings">
               {warningCount} {t('validation.warnings')}
             </span>
+          )}
+          {hintCount > 0 && (
+            <span className="map-info-panel__validation-hints">
+              {hintCount} {t('validation.hints')}
+            </span>
+          )}
+          {documentFindings.length > 0 && (
+            <ul className="map-info-panel__validation-list">
+              {documentFindings.map((w, i) => (
+                <li key={`${w.ruleId}-${i}`} className="map-info-panel__validation-item">
+                  <span className="map-info-panel__validation-rule">{w.ruleId}</span> {w.message}
+                </li>
+              ))}
+            </ul>
           )}
         </div>
       ) : nodes.length > 0 ? (

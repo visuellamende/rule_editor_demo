@@ -1,6 +1,6 @@
 # Decision Map Format — Spezifikation
 
-**Version:** 0.1 (Entwurf)
+**Version:** 0.2 (Entwurf)
 **Stand:** 19.11.2026
 
 Dieses Dokument beschreibt das **Decision Map Format** normativ, das
@@ -429,28 +429,45 @@ Eine Implementierung ist **strukturkonform**, wenn sie alle Fehlerregeln der
 Ebene `struktur` erkennt; **graphkonform**, wenn zusätzlich alle Fehlerregeln
 der Ebene `graph`.
 
-### 10.2 Stand der Umsetzung im Editor
+### 10.2 Stand der Umsetzung
 
-Der Editor prüft zum Stand dieser Version acht Befunde. Die Zuordnung zu den
-Regeln dieses Dokuments:
+Die Prüfung ist auf zwei Stellen verteilt:
 
-| Befund im Editor | Regel | Stufe |
+- `src/utils/validateDecisionMap.ts` prüft die Regeln, die am Graphen hängen.
+  Der Editor ruft sie bei jeder Änderung auf; die Befunde erscheinen am Knoten
+  und in der Seitenleiste.
+- `src/utils/validateExportDocument.ts` prüft die Regelgruppe FMT. Diese
+  Regeln lassen sich nur am Austauschdokument prüfen, weil im internen Modell
+  `inputData` und `nodes` ein Array sind und `entryNodeId` aus dem Graphen
+  folgt. Der Aufruf erfolgt beim Import.
+
+Jeder Befund trägt die Regel-ID aus diesem Dokument, auch im Export
+(`validationWarnings[].ruleId`). Dokumentweite Befunde ohne Knotenbezug tragen
+`nodeId: 0`.
+
+| Gruppe | Umgesetzt | Offen |
 |---|---|---|
-| `missing_label` | NODE-03 | Warnung |
-| `dead_end` | NODE-04 | Fehler |
-| `unreachable_node` | NODE-06 | Fehler |
-| `incomplete_outputs` | EDGE-05 | Warnung |
-| `missing_edge_label` | EDGE-02 | Warnung |
-| `empty_consequence` | CONS-01, CONS-02 | Warnung |
-| `orphan_ref` | REF-02 | Fehler |
-| `invalid_example_key` | TC-02 | Warnung |
+| FMT | 01–09 | 10 (wird gemeldet, aber unbekannte Felder bleiben beim Import nicht erhalten) |
+| NODE | 03–10 | 01, 02 (Feldtypen am Dokument) |
+| REF | 01–04; 05 im Konverter | — |
+| EDGE | 01–05 | — (06, 07 sind Erlaubnisse) |
+| CONS | 02, 05, 06, 07; 01 über 02 mitgeprüft | 03, 04 (bewusst keine Hinweise, zu viel Rauschen) |
+| IN | 01–09 | — |
+| KS | 01–03 | 04–10 (hängen an den Feldern aus Abschnitt 11) |
+| TC | 02–05 | 01 (gehört ans Dokument), 06 (braucht Auswertung) |
 
-Alle übrigen Regeln sind spezifiziert und noch nicht implementiert. Besonders
-zu beachten: **CONS-07** (Endpunktgarantie), **EDGE-03** (`value` an
-Mehrfachverzweigungen), **NODE-10** (Zyklenfreiheit), **TC-06**
-(Testfallnachrechnung) und der gesamte Abschnitt 8 sind noch offen. Eine
-Decision Map ohne Warnungen im Editor ist daher noch nicht graphkonform im Sinne
-dieses Dokuments.
+Damit ist der Editor **strukturkonform** für die Regeln, die am Graphen prüfbar
+sind, und **graphkonform**: NODE-10 (Zyklenfreiheit) und CONS-07
+(Endpunktgarantie) werden geprüft.
+
+Nicht konform im Sinne von Abschnitt 1.3 ist das Format weiterhin an einer
+Stelle: **TC-06** verlangt, dass eine Implementierung den Graphen mit gegebenen
+Eingaben durchläuft. Solange das fehlt, sind Testfälle dokumentiert, aber nicht
+nachgerechnet.
+
+Geprüft wird die Prüfung selbst mit `npm run check-rules`: 33 Fälle — Decision
+Maps mit je einem gezielten Verstoß, eine fehlerfreie Map als Gegenprobe und ein
+als Rücksprung gekennzeichneter Zyklus, der keinen Befund auslösen darf.
 
 ### 10.3 Abgrenzung zur DMN-Prüfung
 
@@ -518,4 +535,5 @@ Abschnitt 1.3.
 
 | Version | Datum | Änderung |
 |---|---|---|
+| 0.2 | 19.11.2026 | Abschnitt 10.2 auf den tatsächlichen Umsetzungsstand gebracht. Befunde tragen jetzt die Regel-ID, auch im Export. Keine Änderung an den Regeln selbst. |
 | 0.1 | 19.11.2026 | Erstfassung. Regeln aus dem bestehenden Verhalten des Editors abgeleitet und ergänzt; Abschnitt 8 (Normbezug) und Abschnitt 11 (geplante Erweiterungen) neu. |

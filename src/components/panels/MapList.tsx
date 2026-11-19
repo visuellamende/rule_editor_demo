@@ -4,6 +4,7 @@ import { useCanvasStore } from '../../store/useCanvasStore';
 import { getMapList, readMap, writeMap, createNewMap, deleteMap } from '../../services/browserStorage';
 import type { DecisionMapFile } from '../../types/decisionMap';
 import { isExportFormat, convertExportToDecisionMap } from '../../utils/convertExportToDecisionMap';
+import { validateExportDocument } from '../../utils/validateExportDocument';
 import './MapList.css';
 
 interface MapEntry {
@@ -40,6 +41,17 @@ export function MapList() {
       if (rawData && rawData.meta && rawData.nodes && rawData.edges) {
         data = rawData as DecisionMapFile;
       } else if (isExportFormat(rawData)) {
+        // Strukturregeln der Gruppe FMT pruefen. Befunde blockieren den Import
+        // nicht — die Map soll im Editor korrigierbar sein —, aber der Nutzer
+        // erfaehrt davon.
+        const findings = validateExportDocument(rawData);
+        const errors = findings.filter((f) => f.severity === 'error');
+        if (errors.length > 0) {
+          console.warn('[Import] Strukturbefunde:', findings);
+          const shown = errors.slice(0, 5).map((f) => `${f.ruleId}: ${f.message}`).join('\n');
+          const more = errors.length > 5 ? `\n… ${errors.length - 5} weitere` : '';
+          alert(`${t('import.structureFindings')}\n\n${shown}${more}`);
+        }
         data = convertExportToDecisionMap(rawData);
       } else {
         alert(t('import.invalidFormat'));

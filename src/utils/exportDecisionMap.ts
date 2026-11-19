@@ -54,6 +54,7 @@ interface ExportDecisionMap {
   entryNodeId: number | null;
   validationWarnings: Array<{
     nodeId: number;
+    ruleId: string;
     type: string;
     message: string;
     severity: string;
@@ -208,6 +209,7 @@ export function exportAsJSON(
     validationWarnings: warnings.length > 0
       ? warnings.map((w) => ({
           nodeId: w.displayId,
+          ruleId: w.ruleId,
           type: w.type,
           message: w.message,
           severity: w.severity,

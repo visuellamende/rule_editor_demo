@@ -180,6 +180,7 @@ export const en: Record<TranslationKey, string> = {
   'import.button': 'Import JSON',
   'import.invalidFormat': 'Invalid decision map format. The file must contain meta, nodes and edges.',
   'import.error': 'Import failed. Please check the file format.',
+  'import.structureFindings': 'The document violates structural rules of the format. It was imported anyway and can be corrected in the editor.',
 
   // Canvas — No Map open
   'canvas.noMap': 'No decision map open',
@@ -267,6 +268,7 @@ export const en: Record<TranslationKey, string> = {
   'validation.title': 'Validation',
   'validation.errors': 'Errors',
   'validation.warnings': 'Warnings',
+  'validation.hints': 'Hints',
   'validation.ok': 'No issues found',
 
   // Agent

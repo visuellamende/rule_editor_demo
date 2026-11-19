@@ -178,6 +178,7 @@ export const de = {
   'import.button': 'JSON importieren',
   'import.invalidFormat': 'Ungültiges Decision Map-Format. Die Datei muss meta, nodes und edges enthalten.',
   'import.error': 'Import fehlgeschlagen. Bitte prüfe das Dateiformat.',
+  'import.structureFindings': 'Das Dokument verstößt gegen Strukturregeln des Formats. Die Map wurde trotzdem importiert und kann im Editor korrigiert werden.',
 
   // Canvas — Keine Map geöffnet
   'canvas.noMap': 'Keine Decision Map geöffnet',
@@ -264,7 +265,8 @@ export const de = {
   // Validation
   'validation.title': 'Validierung',
   'validation.errors': 'Fehler',
-  'validation.warnings': 'Hinweise',
+  'validation.warnings': 'Warnungen',
+  'validation.hints': 'Hinweise',
   'validation.ok': 'Keine Probleme gefunden',
 
   // Agent
