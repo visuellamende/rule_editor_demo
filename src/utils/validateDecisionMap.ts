@@ -1,6 +1,7 @@
 import type { Node, Edge } from '@xyflow/react';
 import type { RuleNodeData } from '../types/nodes';
 import { resolveAllowedValues } from './allowedValues';
+import { evaluateDecisionMap, describeResult } from './evaluateDecisionMap';
 
 /**
  * Pruefung einer Decision Map gegen die Regeln aus docs/format-spec.md.
@@ -72,6 +73,7 @@ export type ValidationWarningType =
   | 'invalid_test_value'          // TC-03
   | 'missing_test_name'           // TC-04
   | 'untested_consequence'        // TC-05
+  | 'test_mismatch'               // TC-06
   // --- Wissensquellen ---
   | 'invalid_knowledge_source'    // KS-01, KS-02, KS-03
   ;
@@ -623,6 +625,27 @@ export function validateDecisionMap(nodes: Node[], edges: Edge[]): ValidationWar
       if (!testedConsequenceIds.has(d.displayId)) {
         push(n, 'TC-05', 'untested_consequence', `Endpunkt #${d.displayId} wird von keinem Testfall erreicht.`, 'hint');
       }
+    }
+  }
+
+  // ------------------------------------------------------ TC-06: Testfall nachrechnen
+
+  for (const n of consequences) {
+    const d = dataOf(n);
+    for (const example of d.examples ?? []) {
+      const result = evaluateDecisionMap(nodes, edges, example.inputs ?? {});
+      if (result.status === 'consequence' && result.consequenceId === d.displayId) continue;
+
+      const name = example.name?.trim() || 'ohne Namen';
+      push(
+        n,
+        'TC-06',
+        'test_mismatch',
+        result.status === 'consequence'
+          ? `Testfall "${name}" erwartet Endpunkt #${d.displayId}, erreicht wird aber Endpunkt #${result.consequenceId}.`
+          : `Testfall "${name}" erreicht keinen Endpunkt: ${describeResult(result)}.`,
+        'error'
+      );
     }
   }
 

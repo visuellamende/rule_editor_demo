@@ -365,6 +365,67 @@ const cases: Case[] = [
     ],
     edges: [edge(1, 2), edge(2, 3, 'A', 'a'), edge(2, 4, 'B', 'b'), edge(5, 2)],
   },
+  {
+    name: 'TC-06: Testfall erreicht einen anderen Endpunkt',
+    expect: ['TC-06'],
+    nodes: [
+      node(1, 'decision', 'Start'),
+      node(2, 'condition', 'Welcher Fall?', { technicalKey: 'k' }),
+      node(3, 'consequence', 'A', {
+        consequence: { business: 'Folge A.' },
+        examples: [{ id: 'x', name: 'Fall B', inputs: { k: 'b' }, expectedResult: 'Folge A.' }],
+      }),
+      end(4, 'Folge B.'),
+    ],
+    edges: [edge(1, 2), edge(2, 3, 'A', 'a'), edge(2, 4, 'B', 'b')],
+  },
+  {
+    name: 'TC-06: Testfall ohne den nötigen Wert',
+    expect: ['TC-06'],
+    nodes: [
+      node(1, 'decision', 'Start'),
+      node(2, 'condition', 'Welcher Fall?', { technicalKey: 'k' }),
+      node(3, 'consequence', 'A', {
+        consequence: { business: 'Folge A.' },
+        examples: [{ id: 'x', name: 'Unvollständig', inputs: {}, expectedResult: 'Folge A.' }],
+      }),
+      end(4, 'Folge B.'),
+    ],
+    edges: [edge(1, 2), edge(2, 3, 'A', 'a'), edge(2, 4, 'B', 'b')],
+  },
+  {
+    name: 'TC-06: passender Testfall erzeugt keinen Befund',
+    expect: [],
+    forbid: ['TC-06'],
+    nodes: [
+      node(1, 'decision', 'Start'),
+      node(2, 'condition', 'Welcher Fall?', { technicalKey: 'k' }),
+      node(3, 'consequence', 'A', {
+        consequence: { business: 'Folge A.' },
+        examples: [{ id: 'x', name: 'Fall A', inputs: { k: 'a' }, expectedResult: 'Folge A.' }],
+      }),
+      node(4, 'consequence', 'B', {
+        consequence: { business: 'Folge B.' },
+        examples: [{ id: 'y', name: 'Fall B', inputs: { k: 'b' }, expectedResult: 'Folge B.' }],
+      }),
+    ],
+    edges: [edge(1, 2), edge(2, 3, 'A', 'a'), edge(2, 4, 'B', 'b')],
+  },
+  {
+    name: 'TC-06: Testfall läuft über eine Referenz auf den Endpunkt',
+    expect: [],
+    forbid: ['TC-06'],
+    nodes: [
+      node(1, 'decision', 'Start'),
+      node(2, 'condition', 'Welcher Fall?', { technicalKey: 'k' }),
+      node(3, 'consequence', 'A', {
+        consequence: { business: 'Folge A.' },
+        examples: [{ id: 'x', name: 'Über die Referenz', inputs: { k: 'b' }, expectedResult: 'Folge A.' }],
+      }),
+      node(4, 'consequence-ref', '', { refNodeId: 3 }),
+    ],
+    edges: [edge(1, 2), edge(2, 3, 'A', 'a'), edge(2, 4, 'B', 'b')],
+  },
   // --- Austauschdokument, Gruppe FMT ---
   {
     name: 'FMT-02: leerer Name',

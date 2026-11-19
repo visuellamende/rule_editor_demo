@@ -91,6 +91,8 @@ export const de = {
   'allowedValues.uncovered': 'Für diesen Wert gibt es keine Verzweigung.',
   'allowedValues.duplicate': 'Dieser Wert kommt mehrfach vor.',
   'allowedValues.coverage': 'Werte abgedeckt',
+  'example.pass': 'Testfall erreicht diesen Endpunkt',
+  'example.fail': 'Testfall erreicht diesen Endpunkt nicht',
   'panel.inputSource': 'Datenquelle',
   'panel.inputSource.provider': 'Provider',
   'panel.inputSource.provider.none': 'Nicht angegeben',

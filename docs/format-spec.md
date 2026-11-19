@@ -1,6 +1,6 @@
 # Decision Map Format — Spezifikation
 
-**Version:** 0.3 (Entwurf)
+**Version:** 0.4 (Entwurf)
 **Stand:** 19.11.2026
 
 Dieses Dokument beschreibt das **Decision Map Format** normativ, das
@@ -58,8 +58,13 @@ Ziel. Konkret bedeutet das in dieser Reihenfolge:
 3. Jede Berechnung in einem Endpunkt ist ein auswertbarer Ausdruck, keine Prosa.
 4. Jeder Verweis nach außen ist auflösbar.
 
-Punkte 2 bis 4 sind zum Stand dieser Version nur teilweise erfüllt; Abschnitt 11
-nennt die geplanten Erweiterungen.
+Punkte 1 und 2 sind erfüllt und werden geprüft. Punkt 3 ist offen
+(Abschnitt 12). Punkt 4 ist angelegt, aber nicht durchgesetzt: Die Felder aus
+Abschnitt 8 existieren, nur ihre Auflösung prüft niemand.
+
+Hinzu kommt, was aus diesen vier Punkten erst einen Nutzen macht: Eine Decision
+Map muss **auswertbar** sein, also mit gegebenen Eingaben zu einem Ergebnis
+führen. Abschnitt 10 beschreibt, wie.
 
 ### 1.4 Zwei Repräsentationen
 
@@ -451,9 +456,74 @@ voraus, dass alle Verzweigungen auf dem Pfad `value`-Angaben tragen (EDGE-03).
 
 ---
 
-## 10. Konformität
+## 10. Auswertung
 
-### 10.1 Prüfebenen
+Eine Decision Map auszuwerten heißt: mit gegebenen Eingaben den Weg vom
+Einstiegsknoten zu einem Endpunkt zu gehen. Die Auswertung rechnet dabei
+nichts — sie folgt Kanten anhand ihrer Werte. Das genügt, weil im
+Entscheidungsgraphen ausschließlich über Kantenwerte verzweigt wird.
+
+### 10.1 Ablauf
+
+An jedem Knoten gilt der Reihe nach:
+
+1. Ist der Knoten ein `consequence`, ist die Auswertung beendet.
+2. Ist er ein `consequence-ref`, gilt sein Ziel als erreichter Endpunkt.
+3. Hat er genau einen Ausgang, wird diesem gefolgt, ohne einen Wert zu lesen.
+4. Hat er mehrere Ausgänge, wird der Wert zu seinem Schlüssel gelesen und der
+   passende Ausgang gewählt.
+
+**Schlüssel.** Maßgeblich ist der `technicalKey` des verzweigenden Knotens.
+Fehlt er, gilt der Schlüssel des einzigen Inputs, der den Knoten versorgt.
+Gibt es weder noch, bricht die Auswertung ab.
+
+**Auswahl des Ausgangs.** Zuerst über `value`, exakt; dann über `value` ohne
+Beachtung der Groß- und Kleinschreibung. Trägt keiner der Ausgänge einen
+`value`, wird ersatzweise das `label` verglichen — eine Rückfalloption für
+Maps, die vor EDGE-03 entstanden sind, kein zulässiger Entwurf.
+
+**`action`-Knoten** werden durchlaufen wie jeder Knoten mit einem Ausgang. Der
+Wert, den sie erzeugen, wird in dieser Version **nicht berechnet**
+(Abschnitt 12). Das Ergebnis MUSS die durchlaufenen `action`-Knoten nennen,
+damit erkennbar bleibt, an welcher Stelle etwas fehlt.
+
+### 10.2 Ergebnis
+
+| Status | Bedeutung |
+|---|---|
+| `consequence` | Ein Endpunkt wurde erreicht. |
+| `no_entry` | Kein Einstiegsknoten gefunden. |
+| `no_key` | Ein verzweigender Knoten hat keinen Schlüssel. |
+| `missing_value` | Für den Schlüssel wurde kein Wert übergeben. |
+| `no_branch` | Kein Ausgang passt zum Wert. |
+| `dead_end` | Ein Knoten ohne Ausgang, der kein Endpunkt ist. |
+| `cycle` | Ein Knoten wurde zweimal betreten. |
+
+Das Ergebnis MUSS außerdem den gegangenen Weg als Folge von Knoten-IDs
+enthalten. Ohne ihn ist ein abweichendes Ergebnis nicht nachvollziehbar.
+
+### 10.3 Regeln
+
+| ID | Regel | Stufe |
+|---|---|---|
+| EVAL-01 | Die Auswertung MUSS am Einstiegsknoten beginnen, nicht an einem Input. | Fehler |
+| EVAL-02 | Ein Knoten mit genau einem Ausgang MUSS diesem folgen, ohne einen Wert zu lesen. | Fehler |
+| EVAL-03 | Bei mehreren Ausgängen MUSS über `value` gewählt werden. Das `label` DARF nur herangezogen werden, wenn kein Ausgang des Knotens einen `value` trägt. | Fehler |
+| EVAL-04 | Ein `consequence-ref` MUSS als sein Ziel gelten. | Fehler |
+| EVAL-05 | Ein Knoten DARF NICHT zweimal betreten werden; die Auswertung bricht mit `cycle` ab. | Fehler |
+| EVAL-06 | Die Auswertung MUSS die Abbruchgründe aus 10.2 unterscheiden. Ein pauschales „kein Ergebnis" genügt nicht. | Fehler |
+| EVAL-07 | Durchlaufene `action`-Knoten MÜSSEN im Ergebnis genannt werden. | Fehler |
+
+Zu EVAL-06: Der Unterschied zwischen „kein Wert übergeben" und „kein Ausgang
+passt" ist der Unterschied zwischen einer unvollständigen Anfrage und einer
+unvollständigen Decision Map. Wer beides zu `undefined` zusammenfasst, nimmt
+dem Ergebnis genau die Information, wegen der man es ausgewertet hat.
+
+---
+
+## 11. Konformität
+
+### 11.1 Prüfebenen
 
 | Ebene | Umfang |
 |---|---|
@@ -465,7 +535,7 @@ Eine Implementierung ist **strukturkonform**, wenn sie alle Fehlerregeln der
 Ebene `struktur` erkennt; **graphkonform**, wenn zusätzlich alle Fehlerregeln
 der Ebene `graph`.
 
-### 10.2 Stand der Umsetzung
+### 11.2 Stand der Umsetzung
 
 Die Prüfung ist auf zwei Stellen verteilt:
 
@@ -489,23 +559,27 @@ Jeder Befund trägt die Regel-ID aus diesem Dokument, auch im Export
 | EDGE | 01–05, 08, 09 | — (06, 07 sind Erlaubnisse) |
 | CONS | 02, 05, 06, 07; 01 über 02 mitgeprüft | 03, 04 (bewusst keine Hinweise, zu viel Rauschen) |
 | IN | 01–11 | — |
-| KS | 01–03 | 04–10 (hängen an den Feldern aus Abschnitt 11) |
-| TC | 02–05 | 01 (gehört ans Dokument), 06 (braucht Auswertung) |
+| KS | 01–03 | 04–10 (hängen an den Feldern aus Abschnitt 12) |
+| EVAL | 01–07 | — |
+| TC | 02–06 | 01 (gehört ans Dokument) |
 
 Damit ist der Editor **strukturkonform** für die Regeln, die am Graphen prüfbar
 sind, und **graphkonform**: NODE-10 (Zyklenfreiheit) und CONS-07
 (Endpunktgarantie) werden geprüft.
 
-Nicht konform im Sinne von Abschnitt 1.3 ist das Format weiterhin an einer
-Stelle: **TC-06** verlangt, dass eine Implementierung den Graphen mit gegebenen
-Eingaben durchläuft. Solange das fehlt, sind Testfälle dokumentiert, aber nicht
-nachgerechnet.
+Testfälle werden nachgerechnet (TC-06): Jeder Testfall wird durch den Graphen
+geschickt und mit dem Endpunkt verglichen, an dem er hängt. Weicht das Ergebnis
+ab, ist das ein Fehler, kein Hinweis.
 
-Geprüft wird die Prüfung selbst mit `npm run check-rules`: 38 Fälle — Decision
+Offen im Sinne von Abschnitt 1.3 bleibt Punkt 3: Was ein `action`-Knoten
+erzeugt und was ein Endpunkt rechnet, steht als Prosa da. Die Auswertung findet
+den Weg, nicht den Betrag.
+
+Geprüft wird die Prüfung selbst mit `npm run check-rules`: 42 Fälle — Decision
 Maps mit je einem gezielten Verstoß, eine fehlerfreie Map als Gegenprobe und ein
 als Rücksprung gekennzeichneter Zyklus, der keinen Befund auslösen darf.
 
-### 10.3 Abgrenzung zur DMN-Prüfung
+### 11.3 Abgrenzung zur DMN-Prüfung
 
 Der DMN-Export führt eine eigene Prüfung durch, die Exportierbarkeit nach DMN
 1.3 feststellt. Ihre Befunde sind **nicht** Teil dieser Spezifikation: Eine
@@ -514,12 +588,12 @@ weil sie `action`-Knoten enthält, für die DMN keine Entsprechung kennt.
 
 ---
 
-## 11. Geplante Erweiterungen
+## 12. Geplante Erweiterungen
 
 Die folgenden Punkte sind beschlossen, aber in dieser Version noch nicht Teil
 des Formats. Sie stehen hier, damit Implementierungen sie einplanen können.
 
-### 11.1 Auswertbare Ausdrücke (FEEL)
+### 12.1 Auswertbare Ausdrücke (FEEL)
 
 `consequence.technical` enthält Prosa. Geplant ist ein zusätzliches Feld mit
 einem Ausdruck in **FEEL** (Friendly Enough Expression Language, Teil von
@@ -540,19 +614,13 @@ Sprachumfang zugelassen ist, ob Ausdrücke validiert oder nur transportiert
 werden, und wie das Verhältnis zu den im DMN-Export aus Kantenwerten
 erzeugten Ausdrücken aussieht.
 
-### 11.2 Testfallnachrechnung
-
-TC-06 setzt voraus, dass eine Implementierung den Graphen mit gegebenen
-Eingaben durchlaufen kann. Das ist zugleich die Grundlage dafür, Decision Maps
-überhaupt auszuführen, und damit die Voraussetzung für das Leitziel aus
-Abschnitt 1.3.
-
 ---
 
-## 12. Änderungshistorie
+## 13. Änderungshistorie
 
 | Version | Datum | Änderung |
 |---|---|---|
-| 0.3 | 19.11.2026 | Geschlossene Wertebereiche sind normativ (Abschnitt 7.1, Regeln IN-10, IN-11, EDGE-08, EDGE-09) und umgesetzt. Sie standen vorher als geplante Erweiterung in Abschnitt 11. |
-| 0.2 | 19.11.2026 | Abschnitt 10.2 auf den tatsächlichen Umsetzungsstand gebracht. Befunde tragen jetzt die Regel-ID, auch im Export. Keine Änderung an den Regeln selbst. |
-| 0.1 | 19.11.2026 | Erstfassung. Regeln aus dem bestehenden Verhalten des Editors abgeleitet und ergänzt; Abschnitt 8 (Normbezug) und Abschnitt 11 (geplante Erweiterungen) neu. |
+| 0.4 | 19.11.2026 | Die Auswertung ist normativ beschrieben (Abschnitt 10, Regeln EVAL-01 bis EVAL-07) und umgesetzt. Testfälle werden damit nachgerechnet (TC-06). Abschnitte ab 10 neu nummeriert. |
+| 0.3 | 19.11.2026 | Geschlossene Wertebereiche sind normativ (Abschnitt 7.1, Regeln IN-10, IN-11, EDGE-08, EDGE-09) und umgesetzt. Sie standen vorher unter den geplanten Erweiterungen. |
+| 0.2 | 19.11.2026 | Den Abschnitt zum Umsetzungsstand auf die Wirklichkeit gebracht. Befunde tragen jetzt die Regel-ID, auch im Export. Keine Änderung an den Regeln selbst. |
+| 0.1 | 19.11.2026 | Erstfassung. Regeln aus dem bestehenden Verhalten des Editors abgeleitet und ergänzt; Normbezug und geplante Erweiterungen neu. |

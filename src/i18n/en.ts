@@ -93,6 +93,8 @@ export const en: Record<TranslationKey, string> = {
   'allowedValues.uncovered': 'No branch covers this value.',
   'allowedValues.duplicate': 'This value appears more than once.',
   'allowedValues.coverage': 'values covered',
+  'example.pass': 'Test case reaches this endpoint',
+  'example.fail': 'Test case does not reach this endpoint',
   'panel.inputSource': 'Data Source',
   'panel.inputSource.provider': 'Provider',
   'panel.inputSource.provider.none': 'Not specified',

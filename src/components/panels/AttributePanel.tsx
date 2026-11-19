@@ -10,6 +10,7 @@ import { KnowledgeSourceEditor } from './KnowledgeSourceEditor';
 import { ExampleEditor } from './ExampleEditor';
 import { AllowedValuesEditor } from './AllowedValuesEditor';
 import { resolveAllowedValues } from '../../utils/allowedValues';
+import { evaluateDecisionMap, describeResult } from '../../utils/evaluateDecisionMap';
 import './AttributePanel.css';
 
 export function AttributePanel() {
@@ -59,6 +60,24 @@ export function AttributePanel() {
       .map((e) => (e.data as { value?: string } | undefined)?.value)
       .filter((v): v is string => !!v);
   }, [selectedNode, nodeData, edges]);
+
+  // TC-06: Jeder Testfall wird durch den Graphen geschickt und mit dem
+  // Endpunkt verglichen, an dem er haengt.
+  const exampleEvaluations = useMemo(() => {
+    if (!selectedNode || !nodeData || nodeData.nodeType !== 'consequence') return undefined;
+    const out: Record<string, { ok: boolean; detail: string }> = {};
+    for (const example of nodeData.examples ?? []) {
+      const result = evaluateDecisionMap(nodes, edges, example.inputs ?? {});
+      const ok = result.status === 'consequence' && result.consequenceId === nodeData.displayId;
+      out[example.id] = {
+        ok,
+        detail: ok
+          ? `${t('example.pass')} (${result.path.join(' → ')})`
+          : `${t('example.fail')}: ${describeResult(result)}`,
+      };
+    }
+    return out;
+  }, [selectedNode, nodeData, nodes, edges, t]);
 
   const hasOpenMap = filePath !== null;
 
@@ -674,6 +693,7 @@ export function AttributePanel() {
                 examples={nodeData.examples ?? []}
                 onChange={(examples) => updateNodeData(selectedNode.id, { examples })}
                 availableInputKeys={getAvailableInputKeys(nodes)}
+                evaluations={exampleEvaluations}
               />
             )}
           </div>
