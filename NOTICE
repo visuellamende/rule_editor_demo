@@ -1,0 +1,14 @@
+Rule Editor und Decision Map Format
+Copyright 2026 Erik Lolies
+
+Entwickelt von Erik Lolies.
+https://github.com/visuellamende/rule_editor_demo
+
+Der Quellcode steht unter der Apache License, Version 2.0 (siehe LICENSE).
+
+Die Spezifikation des Decision Map Formats (docs/format-spec.md) steht unter
+der Creative Commons Namensnennung 4.0 International (CC BY 4.0), siehe
+docs/LICENSE-CC-BY-4.0.txt.
+
+Wer diese Software oder Teile davon weitergibt, muss diesen Hinweis nach
+Abschnitt 4(d) der Apache License mitliefern.
