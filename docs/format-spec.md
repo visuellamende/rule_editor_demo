@@ -1,7 +1,11 @@
 # Decision Map Format — Spezifikation
 
-**Version:** 0.6 (Entwurf)
-**Stand:** 19.11.2026
+**Version:** 0.6 (Entwurf)\
+**Stand:** 19.11.2026\
+**Autor:** Erik Lolies\
+**Lizenz:** [CC BY 4.0](LICENSE-CC-BY-4.0.txt) — Nutzung, Übersetzung und
+Bearbeitung sind frei, auch kommerziell, mit Namensnennung, Verweis auf die
+Quelle und Kennzeichnung von Änderungen.
 
 Dieses Dokument beschreibt das **Decision Map Format** normativ, das
 Austauschformat des Rule Editors. Es richtet sich an Implementierungen, die

@@ -34,3 +34,21 @@ Ein visueller Editor für Entscheidungslogik. Entscheidungsbäume grafisch abbil
 ## Demo
 
 Diese Web-Version speichert Daten im Browser (localStorage). Die vollständige Desktop-Version (macOS) bietet zusätzlich Dateisystem-Integration, Workspace-Verwaltung und native Dialoge.
+
+## Lizenz
+
+Copyright 2026 Erik Lolies.
+
+**Quellcode:** [Apache License 2.0](LICENSE). Die Nutzung ist frei, auch
+kommerziell. Wer die Software oder Teile davon weitergibt, muss die
+Copyright-Hinweise und den Inhalt der Datei [NOTICE](NOTICE) mitliefern.
+
+**Formatspezifikation** ([docs/format-spec.md](docs/format-spec.md)):
+[Creative Commons Namensnennung 4.0 International (CC BY 4.0)](docs/LICENSE-CC-BY-4.0.txt).
+Sie darf genutzt, übersetzt, verändert und weitergegeben werden, auch
+kommerziell, solange der Urheber genannt, auf die Quelle verwiesen und
+kenntlich gemacht wird, ob etwas geändert wurde. Zum Beispiel so:
+
+> „Decision Map Format" von Erik Lolies,
+> https://github.com/visuellamende/rule_editor_demo, lizenziert unter CC BY 4.0.
+
