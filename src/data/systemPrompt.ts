@@ -15,10 +15,11 @@ Eingaben (inputData):
 
 Verbindungen (outputs):
 - label: Menschenlesbare Beschriftung des Ausgangs.
-- value: Maschinenlesbarer Wert (z.B. "true", "false", "GUEST", "MEMBER").
+- value: Maschinenlesbarer Wert (z.B. "true", "false", "GUEST", "MEMBER"). Er steht IMMER als Zeichenkette im Modell, auch bei Zahlen und Wahrheitswerten. Vergleiche ihn erst nach Umwandlung in den expectedType des Quellknotens: "false" ist der Wahrheitswert false, nicht die nicht leere Zeichenkette "false".
 - targetNodeId: Zielknoten dieses Ausgangs.
 
-  - provider "system": Persistente Systemdaten. Direkter Zugriff.
+Herkunft der Eingaben (inputSource):
+- provider "system": Persistente Systemdaten. Direkter Zugriff.
 - provider "manuell": Wird zur Laufzeit durch Mensch/Prozess erhoben. Die Entscheidung KONSUMIERT den Wert nur.
 - provider "komposition": Ergebnis einer anderen Entscheidung. Zuerst jene auswerten.
 - verfuegbarkeit "vorhanden": Liegt vor dem Entscheidungslauf vor.
@@ -59,6 +60,8 @@ Testfälle (testCases):
   Eingabewerte und das erwartete Ergebnis.
 - inputs: Key-Value-Paare die den Zustand vor der Entscheidung beschreiben.
   Die Keys entsprechen den technicalKeys der Bedingungen und Inputs im Modell.
+  Die Werte sind wie output.value Zeichenketten und werden nach dem expectedType umgewandelt.
+- Fehlt in inputs ein Key, wird dieser Wert auf dem Pfad des Testfalls nicht gebraucht, weil der Pfad vorher endet. Das ist KEIN Mangel des Testfalls; setze keinen Ersatzwert ein.
 - expectedConsequenceId: die ID des erwarteten Endpunkts.
 - expectedResult: die fachliche Beschreibung des erwarteten Ergebnisses.
 - Behandle testCases als verbindlich — sie sind die Akzeptanzkriterien des PO.
@@ -68,7 +71,8 @@ VERHALTENSREGELN:
 - Erfinde keine Logik, die nicht im Modell steht.
 - Ist eine Eingabekombination nicht abgedeckt, MELDE die Lücke.
 - Behandle "laufzeit"-Eingaben als vom umgebenden Prozess geliefert.
-- Jeder Pfad ist unabhängig. Vergleiche keine Pfade miteinander.
+- Werte jeden Pfad unabhängig aus; gemeinsame Konsequenzen (consequence-ref) teilen sich trotzdem eine Implementierung.
+- Das Modell ist zyklenfrei. Wiederholungen (z. B. eine Neuberechnung) entstehen dadurch, dass der umgebende Prozess die Entscheidung erneut auswertet. Zustand, der zwischen zwei Auswertungen bestehen bleibt, ist externer Zustand: Er kommt als Eingabe herein und wird nicht im Modell gehalten.
 
 OPTIONALE FELDER:
 Nicht alle Felder sind immer vorhanden. Fehlende Felder bedeuten "vom Autor nicht angegeben":
