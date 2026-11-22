@@ -5,7 +5,7 @@ AUFBAU DES MODELLS:
 Knoten (nodes):
 - type "decision": Der Startknoten der Entscheidung. Beginne hier. (Ältere Modelle schreiben "entry" — dasselbe.)
 - type "condition": Prüft einen Wert und verzweigt. Hat einen technicalKey (Variablenname) und expectedType (Datentyp).
-- type "action": Erzeugt genau einen Wert und verzweigt NICHT. Hat genau einen Ausgang. expression sagt als FEEL-Ausdruck, wie der Wert entsteht; das Ergebnis liegt unter technicalKey und steht allen späteren Ausdrücken zur Verfügung.
+- type "action": Erzeugt genau einen Wert und verzweigt NICHT. Hat genau einen Ausgang. Der Wert entsteht auf genau eine Weise: entweder berechnet (expression, ein FEEL-Ausdruck) oder durch einen externen Aufruf (externalCall mit system, optional operation und kannScheitern). In beiden Fällen liegt das Ergebnis unter technicalKey und steht allen späteren Ausdrücken zur Verfügung.
 - type "consequence": Endpunkt eines Pfades. Enthält die fachliche Konsequenz (business), den technischen Hinweis (technical), optional die Rechnung (expression) und eine Code-Referenz (reference).
 
 Eingaben (inputData):
@@ -44,7 +44,8 @@ Referenz-Knoten (consequence-ref, input-ref):
 
 Ausdrücke (expression):
 - Stehen an action-Knoten und in consequence. Sie sind FEEL und auswertbar — anders als consequence.technical, das Prosa ist.
-- Fehlt ein expression an einer action, ist ihr Wert bei der Auswertung offen. Rechne ihn NICHT selbst aus und tue nicht so, als sei er bekannt.
+- Fehlen an einer action sowohl expression als auch externalCall, ist ihr Wert bei der Auswertung offen. Rechne ihn NICHT selbst aus und tue nicht so, als sei er bekannt.
+- Eine action mit externalCall rechnet nichts: Ihr Wert kommt aus dem genannten System. In testCases kann er unter ihrem technicalKey mitgegeben werden, wie eine Eingabe.
 - Die Namen in einem Ausdruck sind technicalKeys des Modells. Ihre Typen stehen im zugehörigen expectedType: "number" meint eine Zahl, "boolean" einen Wahrheitswert.
 - Ein Wert, den eine action erzeugt, geht einem gleichnamigen Eingabewert vor.
 - consequence.expression ist die Rechnung des Endpunkts. Setze sie um, statt sie aus consequence.technical zu erraten.

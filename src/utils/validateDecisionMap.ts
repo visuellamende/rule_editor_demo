@@ -79,6 +79,11 @@ export type ValidationWarningType =
   | 'invalid_expression'          // EXPR-01, EXPR-03
   | 'unknown_expression_name'     // EXPR-02
   | 'action_without_expression'   // EXPR-04
+  // --- Externe Aufrufe ---
+  | 'call_with_expression'        // CALL-01
+  | 'call_without_system'         // CALL-02
+  | 'unhandled_call_failure'      // CALL-03
+  | 'call_on_non_action'          // CALL-04
   // --- Wissensquellen ---
   | 'invalid_knowledge_source'    // KS-01, KS-02, KS-03
   | 'missing_source_uri'          // KS-04
@@ -170,7 +175,10 @@ export function validateDecisionMap(nodes: Node[], edges: Edge[]): ValidationWar
   const availableKeys = new Set<string>();
   for (const n of nodes) {
     const d = dataOf(n);
-    if ((d.nodeType === 'input' || d.nodeType === 'condition') && d.technicalKey) {
+    // Ein externer Aufruf liefert seinen Wert von aussen; in Testfaellen wird
+    // er wie eine Eingabe mitgegeben. Sein Schluessel ist daher ebenso gueltig.
+    const isExternal = d.nodeType === 'action' && !!d.externalCall;
+    if ((d.nodeType === 'input' || d.nodeType === 'condition' || isExternal) && d.technicalKey) {
       availableKeys.add(d.technicalKey);
     }
   }
@@ -561,14 +569,55 @@ export function validateDecisionMap(nodes: Node[], edges: Edge[]): ValidationWar
       }
     }
 
-    if (data.nodeType === 'action' && !data.expression?.trim()) {
+    if (data.nodeType === 'action' && !data.expression?.trim() && !data.externalCall) {
       push(
         node,
         'EXPR-04',
         'action_without_expression',
-        `Action #${id} sagt nicht, wie ihr Wert entsteht. Die Auswertung kann ihn nicht berechnen.`,
+        `Action #${id} sagt nicht, wie ihr Wert entsteht — weder als Ausdruck noch als externer Aufruf.`,
         'hint'
       );
+    }
+
+    // --- CALL-01 bis CALL-04: externe Aufrufe ---
+    if (data.externalCall) {
+      if (data.nodeType !== 'action') {
+        push(
+          node,
+          'CALL-04',
+          'call_on_non_action',
+          `Knoten #${id} ist kein action-Knoten, trägt aber einen externen Aufruf.`,
+          'error'
+        );
+      } else {
+        if (data.expression?.trim()) {
+          push(
+            node,
+            'CALL-01',
+            'call_with_expression',
+            `Action #${id} hat einen Ausdruck und einen externen Aufruf. Der Wert entsteht auf genau eine Weise.`,
+            'error'
+          );
+        }
+        if (!data.externalCall.system?.trim()) {
+          push(
+            node,
+            'CALL-02',
+            'call_without_system',
+            `Action #${id} ruft ein externes System auf, nennt aber nicht, welches.`,
+            'error'
+          );
+        }
+        if (data.externalCall.kannScheitern === true) {
+          push(
+            node,
+            'CALL-03',
+            'unhandled_call_failure',
+            `Der Aufruf an Action #${id} kann scheitern. Prüfe, ob die Map einen Pfad für den Fehlerfall hat.`,
+            'hint'
+          );
+        }
+      }
     }
 
     // --- KS-01 bis KS-10: Wissensquellen und Normverweise ---

@@ -1,6 +1,6 @@
 import type { Node, Edge } from '@xyflow/react';
 import type { DecisionMapFile, DecisionMapMeta } from '../types/decisionMap';
-import type { RuleNodeData, RuleNodeType, DecisionMapCategory, GoldenExample, KnowledgeSource, ConsequenceData, AllowedValue } from '../types/nodes';
+import type { RuleNodeData, RuleNodeType, DecisionMapCategory, GoldenExample, KnowledgeSource, ConsequenceData, AllowedValue, ExternalCall } from '../types/nodes';
 
 const VALID_NODE_TYPES: RuleNodeType[] = [
   'decision',
@@ -26,6 +26,7 @@ interface RawExportNode {
   expectedType?: string | null;
   allowedValues?: AllowedValue[] | null;
   expression?: string | null;
+  externalCall?: ExternalCall | null;
   notes?: string | null;
   consequence?: ConsequenceData | null;
   refId?: number;
@@ -115,6 +116,9 @@ export function convertExportToDecisionMap(exportData: RawExportData): DecisionM
         ? { allowedValues: rawNode.allowedValues }
         : {}),
       ...(rawNode.expression ? { expression: rawNode.expression } : {}),
+      ...(rawNode.externalCall && typeof rawNode.externalCall === 'object'
+        ? { externalCall: rawNode.externalCall }
+        : {}),
       ...(rawNode.notes ? { notes: rawNode.notes } : {}),
       ...(rawNode.consequence ? { consequence: rawNode.consequence } : {}),
       ...(rawNode.knowledgeSources ? { knowledgeSources: rawNode.knowledgeSources } : {}),

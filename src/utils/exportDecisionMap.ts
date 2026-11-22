@@ -13,6 +13,7 @@ interface ExportNode {
   expectedType?: string | null;
   allowedValues?: Array<{ value: string; label?: string }> | null;
   expression?: string | null;
+  externalCall?: { system: string; operation?: string; kannScheitern?: boolean } | null;
   notes?: string | null;
   consequence?: ExportConsequence | null;
   outputs?: ExportEdge[];
@@ -148,6 +149,15 @@ export function exportAsJSON(
       expectedType: cleanText(data?.expectedType),
       allowedValues: data?.allowedValues?.length ? data.allowedValues : null,
       expression: cleanText(data?.expression),
+      // Auch mit leerem system exportieren: Die Markierung "externer Aufruf"
+      // ist die wichtigere Information, CALL-02 meldet die Luecke.
+      externalCall: data?.nodeType === 'action' && data.externalCall
+        ? {
+            system: (data.externalCall.system ?? '').trim(),
+            ...(data.externalCall.operation?.trim() ? { operation: data.externalCall.operation.trim() } : {}),
+            kannScheitern: data.externalCall.kannScheitern ?? false,
+          }
+        : null,
       notes: cleanText(data?.notes),
       outputs: outgoingEdges,
       inputSource: data?.inputProvider ? {

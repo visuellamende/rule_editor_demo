@@ -60,6 +60,7 @@ Im Export-Format werden Knoten flach ohne React-Flow-Hülle exportiert. Ausgehen
 - \`allowedValues\`: Array<{ value: string, label?: string }> | null — Nur bei \`expectedType: "enum"\`: der vollständige Wertebereich. Steht der Bereich am Input, gilt er auch für die Bedingung, die er versorgt. Jeder Wert muss durch genau einen Ausgang abgedeckt sein.
 - \`notes\`: string | null — Notizen oder Kommentare.
 - \`expression\`: string | null — Nur bei \`action\`-Knoten: wie der Wert entsteht, als FEEL-Ausdruck (z. B. \`max(0, min(100, bewerteteQuote))\`). Die Namen darin sind \`technicalKey\`s der Map.
+- \`externalCall\`: { system: string, operation?: string, kannScheitern: boolean } | null — Nur bei \`action\`-Knoten statt \`expression\`: der Wert kommt aus einem externen Aufruf (API, Konverter, Speicher). Nie zusammen mit \`expression\`.
 - \`consequence\`: Object | null — Nur bei \`consequence\`-Knoten (siehe unten).
 - \`outputs\`: Array<ExportEdge> — Ausgehende Verbindungen (siehe unten). Bei \`consequence-ref\` entfällt \`outputs\` (Endpunkt).
 - \`refId\`: number (optional) — Nur bei \`consequence-ref\` und \`input-ref\`: ID des referenzierten Originalknotens.

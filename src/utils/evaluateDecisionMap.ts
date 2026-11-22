@@ -198,7 +198,18 @@ export function evaluateDecisionMap(
     }
 
     // --- action: Wert berechnen, wenn ein Ausdruck da ist ---
-    if (data.nodeType === 'action') {
+    // Ein externer Aufruf rechnet nicht: Sein Wert kommt von aussen. Wird er
+    // unter dem technicalKey mitgegeben (in Testfaellen die Rolle eines
+    // Test-Doubles), steht er wie ein berechneter Wert zur Verfuegung;
+    // sonst bleibt er offen.
+    if (data.nodeType === 'action' && data.externalCall) {
+      const supplied = data.technicalKey ? context[data.technicalKey] : undefined;
+      if (data.technicalKey && supplied !== undefined) {
+        computed[data.technicalKey] = supplied;
+      } else {
+        uncomputedActions.push(data.displayId);
+      }
+    } else if (data.nodeType === 'action') {
       const expression = data.expression?.trim();
       if (expression && data.technicalKey) {
         const r = evaluateFeel(expression, { ...context, ...computed });

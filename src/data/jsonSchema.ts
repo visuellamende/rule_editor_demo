@@ -63,6 +63,18 @@ Jeder Knoten hat folgende Pflichtfelder:
 \`\`\`
 Das Ergebnis liegt unter \`technicalKey\` und steht allen späteren Ausdrücken zur Verfügung.
 
+Kommt der Wert nicht aus einer Rechnung, sondern aus einem anderen System, steht statt \`expression\` ein \`externalCall\`:
+\`\`\`json
+{
+  "nodeType": "action",
+  "label": "Bonabschluss melden",
+  "technicalKey": "genutztePromotionIds",
+  "expectedType": "list",
+  "externalCall": { "system": "Kassen-API", "operation": "POST /v1/einkauf/abschluss", "kannScheitern": true }
+}
+\`\`\`
+Eine action hat entweder \`expression\` oder \`externalCall\`, nie beides.
+
 **consequence** — Endpunkt eines Pfades.
 \`\`\`json
 {

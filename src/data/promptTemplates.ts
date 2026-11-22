@@ -46,7 +46,9 @@ FEHLENDE EINGABEN:
 - Fehlt ein Wert, der auf dem Pfad nicht gelesen wird, ist das kein Fehler. Setze keine Ersatzwerte und brich nicht vorab ab, nur weil das input-Objekt unvollständig ist.
 
 SEITENEFFEKTE:
-- Eine action ohne expression, die einen externen Aufruf darstellt (API, Konverter, Speichern oder Verwerfen von Daten, Meldung an ein Fremdsystem — erkennbar an Label und notes), wird eine Methode im deps-Interface, benannt nach ihrem technicalKey. Sie bekommt die bis dahin bekannten Werte, die sie fachlich braucht, und ihr Rückgabewert liegt danach unter dem technicalKey. Kein TODO im Funktionsrumpf.
+- Eine action mit externalCall ist ein externer Aufruf (API, Konverter, Speichern oder Verwerfen von Daten, Meldung an ein Fremdsystem). Sie wird eine Methode im deps-Interface, benannt nach ihrem technicalKey; externalCall.system und externalCall.operation gehören in deren Doku-Kommentar. Sie bekommt die bis dahin bekannten Werte, die sie fachlich braucht, und ihr Rückgabewert liegt danach unter dem technicalKey. Kein TODO im Funktionsrumpf.
+- Ist externalCall.kannScheitern = true, darf die deps-Methode fehlschlagen; die Behandlung folgt dem Fehlerpfad des Modells. Gibt es keinen, ist das eine Lücke für Teil 3, keine erfundene Fallback-Logik.
+- Ältere Modelle kennen externalCall noch nicht. Hat eine action dort weder expression noch externalCall, aber Label oder notes beschreiben eindeutig einen externen Aufruf, behandle sie genauso und nenne das in Teil 3 als Annahme.
 - Nur wenn der Wert einer action weder berechenbar noch ein externer Aufruf ist, setze an der Stelle ein TODO. Rechne ihn NICHT selbst aus.
 - Inputs mit inputSource.kannScheitern = true: die Fehlerbehandlung folgt dem Fehlerpfad des Modells. Erfinde keine zusätzliche Wiederhol- oder Fallback-Logik.
 - Inputs mit provider "manuell" oder verfuegbarkeit "laufzeit" liefert der Aufrufer im input-Objekt; dokumentiere das am Typ.
@@ -61,7 +63,7 @@ KOMMENTARE UND QUELLEN:
 TESTS:
 - Für JEDEN testCase genau einen Unit-Test mit dem Framework, das in {ZIELSPRACHE} üblich ist (bei TypeScript: Vitest). Der Testname enthält testCase.name.
 - Die inputs des testCase werden mit derselben Umwandlungsfunktion in den expectedType gebracht. Fehlende Keys bleiben weg.
-- Geprüft wird consequenceId === expectedConsequenceId. deps werden durch einfache Test-Doubles ersetzt.
+- Geprüft wird consequenceId === expectedConsequenceId. deps werden durch einfache Test-Doubles ersetzt. Enthält testCase.inputs einen Wert unter dem technicalKey einer action mit externalCall, liefert das Test-Double genau diesen Wert.
 - Ist ein zulässiger Wert (allowedValues) durch keinen testCase abgedeckt, ergänze einen Test und markiere ihn als ergänzt, nicht als testCase des PO. Für bekannte Lücken prüft der Test, dass ModelGapError geworfen wird.
 
 AUSGABEFORMAT (genau drei Teile, in dieser Reihenfolge, kein weiterer Text):

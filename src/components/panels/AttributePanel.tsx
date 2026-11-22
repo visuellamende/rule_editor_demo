@@ -453,27 +453,93 @@ export function AttributePanel() {
             </div>
 
             {nodeData.nodeType === 'action' && (
-              <div className="attribute-panel__field">
-                <label className="attribute-panel__label">{t('panel.expression')}</label>
-                <textarea
-                  className="attribute-panel__textarea attribute-panel__textarea--mono"
-                  value={nodeData.expression ?? ''}
-                  onChange={(e) => updateNodeData(selectedNode.id, { expression: e.target.value || undefined })}
-                  placeholder={t('panel.expression.placeholder')}
-                  rows={2}
-                  spellCheck={false}
-                />
-                {(() => {
-                  const hint = expressionHint(nodeData.expression);
-                  return hint ? (
-                    <p className={'attribute-panel__expression-hint' + (hint.ok ? '' : ' attribute-panel__expression-hint--error')}>
-                      {hint.text}
-                    </p>
-                  ) : (
-                    <p className="attribute-panel__expression-hint">{t('panel.expression.hint')}</p>
-                  );
-                })()}
-              </div>
+              <>
+                {/* Woher kommt der Wert: Rechnung oder externer Aufruf */}
+                <div className="attribute-panel__field attribute-panel__field--row">
+                  <label className="attribute-panel__label">{t('panel.externalCall')}</label>
+                  <input
+                    type="checkbox"
+                    className="attribute-panel__checkbox"
+                    checked={!!nodeData.externalCall}
+                    onChange={(e) =>
+                      updateNodeData(selectedNode.id, {
+                        externalCall: e.target.checked ? { system: '', kannScheitern: false } : undefined,
+                        // Ein externer Aufruf rechnet nicht (CALL-01): Ausdruck verwerfen.
+                        ...(e.target.checked ? { expression: undefined } : {}),
+                      })
+                    }
+                  />
+                </div>
+
+                {nodeData.externalCall ? (
+                  <>
+                    <div className="attribute-panel__field">
+                      <label className="attribute-panel__label">{t('panel.externalCall.system')}</label>
+                      <input
+                        className="attribute-panel__input"
+                        type="text"
+                        value={nodeData.externalCall.system ?? ''}
+                        onChange={(e) =>
+                          updateNodeData(selectedNode.id, {
+                            externalCall: { ...nodeData.externalCall!, system: e.target.value },
+                          })
+                        }
+                        placeholder={t('panel.externalCall.system.placeholder')}
+                      />
+                    </div>
+                    <div className="attribute-panel__field">
+                      <label className="attribute-panel__label">{t('panel.externalCall.operation')}</label>
+                      <input
+                        className="attribute-panel__input attribute-panel__textarea--mono"
+                        type="text"
+                        value={nodeData.externalCall.operation ?? ''}
+                        onChange={(e) =>
+                          updateNodeData(selectedNode.id, {
+                            externalCall: { ...nodeData.externalCall!, operation: e.target.value || undefined },
+                          })
+                        }
+                        placeholder={t('panel.externalCall.operation.placeholder')}
+                      />
+                    </div>
+                    <div className="attribute-panel__field attribute-panel__field--row">
+                      <label className="attribute-panel__label">{t('panel.externalCall.kannScheitern')}</label>
+                      <input
+                        type="checkbox"
+                        className="attribute-panel__checkbox"
+                        checked={nodeData.externalCall.kannScheitern ?? false}
+                        onChange={(e) =>
+                          updateNodeData(selectedNode.id, {
+                            externalCall: { ...nodeData.externalCall!, kannScheitern: e.target.checked },
+                          })
+                        }
+                      />
+                    </div>
+                    <p className="attribute-panel__expression-hint">{t('panel.externalCall.hint')}</p>
+                  </>
+                ) : (
+                  <div className="attribute-panel__field">
+                    <label className="attribute-panel__label">{t('panel.expression')}</label>
+                    <textarea
+                      className="attribute-panel__textarea attribute-panel__textarea--mono"
+                      value={nodeData.expression ?? ''}
+                      onChange={(e) => updateNodeData(selectedNode.id, { expression: e.target.value || undefined })}
+                      placeholder={t('panel.expression.placeholder')}
+                      rows={2}
+                      spellCheck={false}
+                    />
+                    {(() => {
+                      const hint = expressionHint(nodeData.expression);
+                      return hint ? (
+                        <p className={'attribute-panel__expression-hint' + (hint.ok ? '' : ' attribute-panel__expression-hint--error')}>
+                          {hint.text}
+                        </p>
+                      ) : (
+                        <p className="attribute-panel__expression-hint">{t('panel.expression.hint')}</p>
+                      );
+                    })()}
+                  </div>
+                )}
+              </>
             )}
 
             {nodeData.expectedType === 'enum' && (
