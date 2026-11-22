@@ -6,6 +6,8 @@ export interface PromptTemplate {
   descriptionKey: TranslationKey;   // i18n-Key für die Beschreibung
   icon: string;                     // SVG-Path oder Emoji
   template: string;                 // Der Aufgabentext (englisch, sprachunabhängig für den Agenten)
+  summary?: string;                 // Kurzfassung des Auftrags, steht ganz oben im fertigen Prompt
+  variables?: Record<string, string>; // Platzhalter {NAME} im Text und ihre Vorgabewerte
 }
 
 export const PROMPT_TEMPLATES: PromptTemplate[] = [
@@ -14,24 +16,60 @@ export const PROMPT_TEMPLATES: PromptTemplate[] = [
     labelKey: 'template.implementation',
     descriptionKey: 'template.implementation.desc',
     icon: 'code',
+    variables: { ZIELSPRACHE: 'TypeScript' },
+    summary: `AUFTRAG IN KÜRZE: Setze das unten stehende Entscheidungsmodell als eine zustandslose, testbare Funktion in {ZIELSPRACHE} um, schreibe für jeden testCase einen Unit-Test und liste alle offenen Punkte auf. Das Modell ist die einzige Wahrheit; die Details stehen in der AUFGABE am Ende.`,
     template: `AUFGABE: Implementierung
 
-Generiere eine Funktion, die die Entscheidungslogik aus dem folgenden Modell implementiert.
+Zielsprache: {ZIELSPRACHE}
+(Soll es eine andere Sprache sein, ersetze sie hier. Schnittstelle und Regeln gelten sinngemäß, mit den Konventionen der Sprache.)
 
-Anforderungen:
-- Traversiere die Decision Map vom Einstiegsknoten aus.
-- Nutze die technicalKeys als Variablennamen und expectedTypes als Datentypen.
-- Nutze die output.values für Vergleiche (nicht die Labels).
-- Wenn ein Knoten allowedValues hat: implementiere die Verzweigung erschöpfend über genau diese Werte und behandle einen unbekannten Wert als Fehler, nicht als stillen Durchfall.
-- Knoten vom type "action" erzeugen einen Wert und verzweigen nicht. Setze ihr expression als Berechnung um und lege das Ergebnis unter ihrem technicalKey ab; spätere Ausdrücke greifen darauf zu.
-- Wenn eine consequence ein expression hat: implementiere diese Rechnung. consequence.technical ist die Beschreibung dazu, nicht die Spezifikation.
-- Die Ausdrücke sind FEEL. Übersetze sie in die Zielsprache, erfinde sie nicht um.
-- Implementiere referenzierte Consequences (type: "consequence-ref") als gemeinsame Funktion (nur einmal implementiert, an allen Stellen referenziert).
-- Wenn inputSource.kannScheitern = true: implementiere Fehlerbehandlung.
-- Wenn inputSource.provider = "manuell": dokumentiere dass der Wert extern geliefert wird.
-- Respektiere die Verbindlichkeit der Knowledge Sources. Wenn eine Quelle eine uri hat, setze sie als Kommentar an die betroffene Stelle — mitsamt fassung, falls angegeben.
-- Melde Validierungsbefunde als TODO-Kommentare im Code, jeweils mit ihrer ruleId.
-- Fehlt ein expression an einer action: markiere die Stelle als TODO. Rechne den Wert NICHT selbst aus.`,
+SCHNITTSTELLE (fest vorgegeben):
+- Eine Funktion evaluate(input, deps) für die Entscheidung des Modells. Name nach dem Modellnamen, z. B. evaluatePromotions.
+- input: ein Objekt, dessen Schlüssel die technicalKeys der Inputs und Bedingungen sind. Jeder Wert hat den Typ seines expectedType; bei "enum" ist der Typ die Vereinigung der allowedValues. Alle Felder sind optional (siehe Fehlende Eingaben).
+- deps: Objekt mit injizierten Schnittstellen für Seiteneffekte (siehe Seiteneffekte). Hat das Modell keine, entfällt der Parameter.
+- Rückgabe: { consequenceId, path, openPoints }
+  - consequenceId: id des erreichten consequence-Knotens. Endet der Pfad in einem consequence-ref, ist es dessen refId.
+  - path: ids aller betretenen Knoten in Reihenfolge, vom Einstiegsknoten bis zum Endpunkt einschließlich (bei einem consequence-ref dessen eigene id). Input-Knoten gehören nicht dazu.
+  - openPoints: Befunde mit severity "warning" oder "error" aus validationWarnings, die einen Knoten auf diesem Pfad betreffen, als Text "ruleId #nodeId: Meldung". Leer, wenn keiner betroffen ist.
+
+AUSWERTUNG:
+- Traversiere vom Einstiegsknoten aus. Nutze die technicalKeys als Variablennamen und expectedTypes als Datentypen.
+- Verzweige über output.value, nicht über die Labels. Wandle value vorher in den expectedType des Knotens um ("true"/"false" → Wahrheitswert, Zahlen → Zahl, enum und string bleiben Zeichenketten). Nutze dafür EINE Hilfsfunktion, die auch die Tests verwenden.
+- Wenn ein Knoten allowedValues hat (eigene oder die des versorgenden Inputs): verzweige erschöpfend über genau diese Werte. Ein unbekannter Wert ist ein Fehler, kein stiller Durchfall.
+- Trifft die Auswertung auf einen Wert, für den der Knoten keinen Ausgang hat (bekannte Lücke im Modell), wirf einen eigenen Fehlertyp (z. B. ModelGapError) mit Knoten-id, technicalKey, Wert und, falls vorhanden, der ruleId des Befunds. Erfinde keinen Ausgang.
+- Knoten vom type "action" erzeugen einen Wert und verzweigen nicht. Ein expression setzt du als Berechnung um und legst das Ergebnis unter dem technicalKey ab; spätere Ausdrücke greifen darauf zu. Die Ausdrücke sind FEEL: übersetze sie, erfinde sie nicht um.
+- Hat eine consequence ein expression, implementiere diese Rechnung. consequence.technical beschreibt sie nur.
+- consequence-ref: Jeder Endpunkt wird EINMAL implementiert; alle Refs rufen diese eine Implementierung auf.
+
+FEHLENDE EINGABEN:
+- Ein Eingabewert wird erst gelesen, wenn die Auswertung einen Knoten erreicht, der ihn braucht. Fehlt er dann, wirf einen eigenen Fehlertyp (z. B. MissingInputError) mit dem technicalKey.
+- Fehlt ein Wert, der auf dem Pfad nicht gelesen wird, ist das kein Fehler. Setze keine Ersatzwerte und brich nicht vorab ab, nur weil das input-Objekt unvollständig ist.
+
+SEITENEFFEKTE:
+- Eine action mit externalCall ist ein externer Aufruf (API, Konverter, Speichern oder Verwerfen von Daten, Meldung an ein Fremdsystem). Sie wird eine Methode im deps-Interface, benannt nach ihrem technicalKey; externalCall.system und externalCall.operation gehören in deren Doku-Kommentar. Sie bekommt die bis dahin bekannten Werte, die sie fachlich braucht, und ihr Rückgabewert liegt danach unter dem technicalKey. Kein TODO im Funktionsrumpf.
+- Ist externalCall.kannScheitern = true, darf die deps-Methode fehlschlagen; die Behandlung folgt dem Fehlerpfad des Modells. Gibt es keinen, ist das eine Lücke für Teil 3, keine erfundene Fallback-Logik.
+- Ältere Modelle kennen externalCall noch nicht. Hat eine action dort weder expression noch externalCall, aber Label oder notes beschreiben eindeutig einen externen Aufruf, behandle sie genauso und nenne das in Teil 3 als Annahme.
+- Nur wenn der Wert einer action weder berechenbar noch ein externer Aufruf ist, setze an der Stelle ein TODO. Rechne ihn NICHT selbst aus.
+- Inputs mit inputSource.kannScheitern = true: die Fehlerbehandlung folgt dem Fehlerpfad des Modells. Erfinde keine zusätzliche Wiederhol- oder Fallback-Logik.
+- Inputs mit provider "manuell" oder verfuegbarkeit "laufzeit" liefert der Aufrufer im input-Objekt; dokumentiere das am Typ.
+
+WIEDERHOLTER AUFRUF:
+- Die Funktion wird pro Auswertung einmal aufgerufen und hält keinen Zustand zwischen Aufrufen. Schleifen im Ablauf (z. B. Neuberechnung) entstehen durch erneuten Aufruf. Externer Zustand kommt über input herein; Änderungen daran laufen über deps.
+
+KOMMENTARE UND QUELLEN:
+- Befunde aus validationWarnings mit severity "warning" oder "error" setzt du als TODO-Kommentar mit ihrer ruleId an den betroffenen Knoten. Befunde mit severity "hint" kommen NICHT in den Code; sie stehen gesammelt in Teil 3.
+- Respektiere die Verbindlichkeit der Knowledge Sources: "verbindlich" exakt umsetzen und mit referenz kommentieren, "empfohlen" als änderbar kommentieren. Hat eine Quelle eine uri, setze sie in den Kommentar, mitsamt fassung, falls angegeben.
+
+TESTS:
+- Für JEDEN testCase genau einen Unit-Test mit dem Framework, das in {ZIELSPRACHE} üblich ist (bei TypeScript: Vitest). Der Testname enthält testCase.name.
+- Die inputs des testCase werden mit derselben Umwandlungsfunktion in den expectedType gebracht. Fehlende Keys bleiben weg.
+- Geprüft wird consequenceId === expectedConsequenceId. deps werden durch einfache Test-Doubles ersetzt. Enthält testCase.inputs einen Wert unter dem technicalKey einer action mit externalCall, liefert das Test-Double genau diesen Wert.
+- Ist ein zulässiger Wert (allowedValues) durch keinen testCase abgedeckt, ergänze einen Test und markiere ihn als ergänzt, nicht als testCase des PO. Für bekannte Lücken prüft der Test, dass ModelGapError geworfen wird.
+
+AUSGABEFORMAT (genau drei Teile, in dieser Reihenfolge, kein weiterer Text):
+1. Code: ein Codeblock in {ZIELSPRACHE} mit Typen, deps-Interface, Hilfsfunktion zur Typumwandlung, Fehlertypen und der Funktion.
+2. Unit-Tests: ein Codeblock mit den Tests aus den testCases und den ergänzten Tests.
+3. Offene Punkte: eine Liste mit (a) Befunden "warning"/"error" mit ruleId und Knoten, (b) den Hinweisen ("hint") gesammelt, (c) Annahmen, die du treffen musstest, (d) Fragen an den Fachbereich.`,
   },
   {
     id: 'tests',

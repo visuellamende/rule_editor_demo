@@ -28,6 +28,16 @@ export interface AllowedValue {
   label?: string;                    // Optionale Beschriftung fuer die Anzeige
 }
 
+/**
+ * Externer Aufruf eines action-Knotens: Der Wert kommt nicht aus einer
+ * Rechnung, sondern aus einem anderen System (API, Konverter, Speicher).
+ */
+export interface ExternalCall {
+  system: string;                    // Welches System oder welcher Dienst, z. B. "RP-API"
+  operation?: string;                // Optional: was genau aufgerufen wird, z. B. "POST /v1/einkauf/abschluss"
+  kannScheitern?: boolean;           // Kann der Aufruf fehlschlagen?
+}
+
 export interface GoldenExample {
   id: string;                          // crypto.randomUUID().slice(0, 8)
   name: string;                        // Kurzbeschreibung, z.B. "Gast ohne Mitgliedschaft"
@@ -47,6 +57,7 @@ export interface RuleNodeData {
   expectedType?: string;
   allowedValues?: AllowedValue[];   // Nur bei expectedType "enum": geschlossener Wertebereich
   expression?: string;              // Nur bei action-Knoten: wie der Wert entsteht, als FEEL-Ausdruck
+  externalCall?: ExternalCall;      // Nur bei action-Knoten: der Wert kommt aus einem externen Aufruf
   refNodeId?: number;       // NEU: ID des referenzierten Consequence-Knotens
   knowledgeSources?: KnowledgeSource[];   // NEU
   examples?: GoldenExample[];          // NEU — nur bei consequence-Knoten

@@ -662,6 +662,97 @@ const cases: Case[] = [
     ],
     edges: [edge(1, 2), edge(2, 3), edge(4, 2)],
   },
+  {
+    name: 'CALL-01: Ausdruck und externer Aufruf zugleich',
+    expect: ['CALL-01'],
+    nodes: [
+      node(1, 'decision', 'Start'),
+      node(2, 'action', 'Regeln holen', {
+        technicalKey: 'regeln',
+        expectedType: 'list',
+        expression: '1 + 1',
+        externalCall: { system: 'Regel-API' },
+      }),
+      end(3),
+    ],
+    edges: [edge(1, 2), edge(2, 3)],
+  },
+  {
+    name: 'CALL-02: externer Aufruf ohne System',
+    expect: ['CALL-02'],
+    nodes: [
+      node(1, 'decision', 'Start'),
+      node(2, 'action', 'Regeln holen', {
+        technicalKey: 'regeln',
+        expectedType: 'list',
+        externalCall: { system: '  ' },
+      }),
+      end(3),
+    ],
+    edges: [edge(1, 2), edge(2, 3)],
+  },
+  {
+    name: 'CALL-03: externer Aufruf kann scheitern',
+    expect: ['CALL-03'],
+    nodes: [
+      node(1, 'decision', 'Start'),
+      node(2, 'action', 'Regeln holen', {
+        technicalKey: 'regeln',
+        expectedType: 'list',
+        externalCall: { system: 'Regel-API', kannScheitern: true },
+      }),
+      end(3),
+    ],
+    edges: [edge(1, 2), edge(2, 3)],
+  },
+  {
+    name: 'CALL-04: externer Aufruf an einer Bedingung',
+    expect: ['CALL-04'],
+    nodes: [
+      node(1, 'decision', 'Start'),
+      node(2, 'condition', 'Erreichbar?', {
+        technicalKey: 'erreichbar',
+        expectedType: 'boolean',
+        externalCall: { system: 'Regel-API' },
+      }),
+      end(3),
+      end(4, 'Folge B.'),
+    ],
+    edges: [edge(1, 2), edge(2, 3, 'Ja', 'true'), edge(2, 4, 'Nein', 'false')],
+  },
+  {
+    name: 'Externer Aufruf ersetzt den Ausdruck: kein EXPR-04',
+    expect: [],
+    forbid: ['EXPR-04', 'CALL-01', 'CALL-02', 'CALL-03', 'CALL-04'],
+    nodes: [
+      node(1, 'decision', 'Start'),
+      node(2, 'action', 'Regeln holen', {
+        technicalKey: 'regeln',
+        expectedType: 'list',
+        externalCall: { system: 'Regel-API', operation: 'GET /v1/regeln' },
+      }),
+      end(3),
+    ],
+    edges: [edge(1, 2), edge(2, 3)],
+  },
+  {
+    name: 'Testfall liefert den Wert eines externen Aufrufs, ein Ausdruck rechnet damit',
+    expect: [],
+    forbid: ['TC-02', 'TC-06', 'EXPR-02', 'EXPR-04'],
+    nodes: [
+      node(1, 'decision', 'Start'),
+      node(2, 'action', 'Preis abfragen', {
+        technicalKey: 'preis',
+        expectedType: 'number',
+        externalCall: { system: 'Preis-API' },
+      }),
+      node(3, 'consequence', 'Doppelter Preis', {
+        consequence: { business: 'Der doppelte Preis.', expression: 'preis * 2' },
+        examples: [{ id: 'x', name: 'Preis 10', inputs: { preis: '10' }, expectedResult: 'Der doppelte Preis.' }],
+      }),
+    ],
+    edges: [edge(1, 2), edge(2, 3)],
+  },
   // --- Austauschdokument, Gruppe FMT ---
   {
     name: 'FMT-02: leerer Name',

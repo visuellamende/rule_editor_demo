@@ -5,7 +5,7 @@ AUFBAU DES MODELLS:
 Knoten (nodes):
 - type "decision": Der Startknoten der Entscheidung. Beginne hier. (Ältere Modelle schreiben "entry" — dasselbe.)
 - type "condition": Prüft einen Wert und verzweigt. Hat einen technicalKey (Variablenname) und expectedType (Datentyp).
-- type "action": Erzeugt genau einen Wert und verzweigt NICHT. Hat genau einen Ausgang. expression sagt als FEEL-Ausdruck, wie der Wert entsteht; das Ergebnis liegt unter technicalKey und steht allen späteren Ausdrücken zur Verfügung.
+- type "action": Erzeugt genau einen Wert und verzweigt NICHT. Hat genau einen Ausgang. Der Wert entsteht auf genau eine Weise: entweder berechnet (expression, ein FEEL-Ausdruck) oder durch einen externen Aufruf (externalCall mit system, optional operation und kannScheitern). In beiden Fällen liegt das Ergebnis unter technicalKey und steht allen späteren Ausdrücken zur Verfügung.
 - type "consequence": Endpunkt eines Pfades. Enthält die fachliche Konsequenz (business), den technischen Hinweis (technical), optional die Rechnung (expression) und eine Code-Referenz (reference).
 
 Eingaben (inputData):
@@ -15,10 +15,11 @@ Eingaben (inputData):
 
 Verbindungen (outputs):
 - label: Menschenlesbare Beschriftung des Ausgangs.
-- value: Maschinenlesbarer Wert (z.B. "true", "false", "GUEST", "MEMBER").
+- value: Maschinenlesbarer Wert (z.B. "true", "false", "GUEST", "MEMBER"). Er steht IMMER als Zeichenkette im Modell, auch bei Zahlen und Wahrheitswerten. Vergleiche ihn erst nach Umwandlung in den expectedType des Quellknotens: "false" ist der Wahrheitswert false, nicht die nicht leere Zeichenkette "false".
 - targetNodeId: Zielknoten dieses Ausgangs.
 
-  - provider "system": Persistente Systemdaten. Direkter Zugriff.
+Herkunft der Eingaben (inputSource):
+- provider "system": Persistente Systemdaten. Direkter Zugriff.
 - provider "manuell": Wird zur Laufzeit durch Mensch/Prozess erhoben. Die Entscheidung KONSUMIERT den Wert nur.
 - provider "komposition": Ergebnis einer anderen Entscheidung. Zuerst jene auswerten.
 - verfuegbarkeit "vorhanden": Liegt vor dem Entscheidungslauf vor.
@@ -43,7 +44,8 @@ Referenz-Knoten (consequence-ref, input-ref):
 
 Ausdrücke (expression):
 - Stehen an action-Knoten und in consequence. Sie sind FEEL und auswertbar — anders als consequence.technical, das Prosa ist.
-- Fehlt ein expression an einer action, ist ihr Wert bei der Auswertung offen. Rechne ihn NICHT selbst aus und tue nicht so, als sei er bekannt.
+- Fehlen an einer action sowohl expression als auch externalCall, ist ihr Wert bei der Auswertung offen. Rechne ihn NICHT selbst aus und tue nicht so, als sei er bekannt.
+- Eine action mit externalCall rechnet nichts: Ihr Wert kommt aus dem genannten System. In testCases kann er unter ihrem technicalKey mitgegeben werden, wie eine Eingabe.
 - Die Namen in einem Ausdruck sind technicalKeys des Modells. Ihre Typen stehen im zugehörigen expectedType: "number" meint eine Zahl, "boolean" einen Wahrheitswert.
 - Ein Wert, den eine action erzeugt, geht einem gleichnamigen Eingabewert vor.
 - consequence.expression ist die Rechnung des Endpunkts. Setze sie um, statt sie aus consequence.technical zu erraten.
@@ -59,6 +61,8 @@ Testfälle (testCases):
   Eingabewerte und das erwartete Ergebnis.
 - inputs: Key-Value-Paare die den Zustand vor der Entscheidung beschreiben.
   Die Keys entsprechen den technicalKeys der Bedingungen und Inputs im Modell.
+  Die Werte sind wie output.value Zeichenketten und werden nach dem expectedType umgewandelt.
+- Fehlt in inputs ein Key, wird dieser Wert auf dem Pfad des Testfalls nicht gebraucht, weil der Pfad vorher endet. Das ist KEIN Mangel des Testfalls; setze keinen Ersatzwert ein.
 - expectedConsequenceId: die ID des erwarteten Endpunkts.
 - expectedResult: die fachliche Beschreibung des erwarteten Ergebnisses.
 - Behandle testCases als verbindlich — sie sind die Akzeptanzkriterien des PO.
@@ -68,7 +72,8 @@ VERHALTENSREGELN:
 - Erfinde keine Logik, die nicht im Modell steht.
 - Ist eine Eingabekombination nicht abgedeckt, MELDE die Lücke.
 - Behandle "laufzeit"-Eingaben als vom umgebenden Prozess geliefert.
-- Jeder Pfad ist unabhängig. Vergleiche keine Pfade miteinander.
+- Werte jeden Pfad unabhängig aus; gemeinsame Konsequenzen (consequence-ref) teilen sich trotzdem eine Implementierung.
+- Das Modell ist zyklenfrei. Wiederholungen (z. B. eine Neuberechnung) entstehen dadurch, dass der umgebende Prozess die Entscheidung erneut auswertet. Zustand, der zwischen zwei Auswertungen bestehen bleibt, ist externer Zustand: Er kommt als Eingabe herein und wird nicht im Modell gehalten.
 
 OPTIONALE FELDER:
 Nicht alle Felder sind immer vorhanden. Fehlende Felder bedeuten "vom Autor nicht angegeben":

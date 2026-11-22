@@ -1,7 +1,7 @@
 # Decision Map Format — Spezifikation
 
-**Version:** 0.6 (Entwurf)\
-**Stand:** 19.11.2026\
+**Version:** 0.7 (Entwurf)\
+**Stand:** 22.11.2026\
 **Autor:** Erik Lolies\
 **Lizenz:** [CC BY 4.0](LICENSE-CC-BY-4.0.txt) — Nutzung, Übersetzung und
 Bearbeitung sind frei, auch kommerziell, mit Namensnennung, Verweis auf die
@@ -162,7 +162,7 @@ erkennbar macht.
 |---|---|---|
 | `decision` | Einstiegsknoten; formuliert die Frage, die die Decision Map beantwortet. | genau einer |
 | `condition` | Verzweigung anhand eines Wertes. | einer oder mehrere |
-| `action` | Erzeugt einen Wert (siehe `expression`, Abschnitt 10.4); verzweigt nicht. | genau einer |
+| `action` | Erzeugt einen Wert, berechnet (`expression`, Abschnitt 10.4) oder aus einem externen Aufruf (`externalCall`, Abschnitt 4.4); verzweigt nicht. | genau einer |
 | `consequence` | Endpunkt mit benannter Folge. | keine |
 | `consequence-ref` | Verweis auf einen bestehenden Endpunkt. | keine |
 | `input` | Datenfeld mit Herkunftsangabe. | genau einer |
@@ -187,7 +187,9 @@ erkennbar macht.
 
 Zu NODE-08: Der `action`-Knoten ist die Antwort des Formats auf Rechtsfolgen,
 die keine Wahrheitswerte sind — eine Quote, ein Betrag, eine Frist. Er trennt
-die *Bestimmung* eines Wertes von der *Verzweigung* anhand eines Wertes.
+die *Bestimmung* eines Wertes von der *Verzweigung* anhand eines Wertes. Woher
+der Wert kommt, ist dabei zweitrangig: aus einer Rechnung oder aus einem
+anderen System (Abschnitt 4.4).
 
 ### 4.3 Referenzknoten
 
@@ -198,6 +200,60 @@ die *Bestimmung* eines Wertes von der *Verzweigung* anhand eines Wertes.
 | REF-03 | `input-ref` MUSS ein Feld `refId` haben, das auf einen Knoten des Typs `input` verweist. | Fehler |
 | REF-04 | Ein Referenzknoten DARF NICHT auf einen anderen Referenzknoten verweisen. | Fehler |
 | REF-05 | Ein Referenzknoten KANN `label` auslassen; eine lesende Implementierung SOLLTE dann das `label` des Zielknotens verwenden. | Hinweis |
+
+---
+
+### 4.4 Externe Aufrufe
+
+Nicht jeder Wert lässt sich berechnen. Wer echte Abläufe modelliert, trifft
+auf Schritte, deren Ergebnis von einem anderen System kommt: Regeln von einer
+API holen, Daten konvertieren, einen Abschluss melden, etwas speichern oder
+verwerfen. Solche Schritte sind `action`-Knoten mit einem `externalCall`
+statt eines `expression`:
+
+```json
+{
+  "id": 23,
+  "type": "action",
+  "label": "Bonabschluss melden",
+  "technicalKey": "genutztePromotionIds",
+  "expectedType": "list",
+  "externalCall": {
+    "system": "Kassen-API",
+    "operation": "POST /v1/einkauf/abschluss",
+    "kannScheitern": true
+  },
+  "outputs": [{ "targetNodeId": 24 }]
+}
+```
+
+| Feld | Pflicht | Bedeutung |
+|---|---|---|
+| `system` | ja | Welches System oder welcher Dienst den Wert liefert. |
+| `operation` | nein | Was genau aufgerufen wird, etwa ein Endpunkt. |
+| `kannScheitern` | nein | Kann der Aufruf fehlschlagen? Vorgabe `false`. |
+
+Ein externer Aufruf **ist** ein Seiteneffekt, aber er bleibt im Modell
+dennoch ein Wert: Sein Ergebnis liegt unter `technicalKey` und steht späteren
+Ausdrücken zur Verfügung, genau wie ein berechneter Wert. Liefert der Aufruf
+fachlich nichts zurück, ist der Wert eine Bestätigung, etwa ein Wahrheitswert.
+
+Das Format beschreibt den Aufruf, es führt ihn nicht aus. Implementierungen
+SOLLTEN ihn als austauschbare Abhängigkeit umsetzen, damit er sich in Tests
+durch einen festen Wert ersetzen lässt. Die Auswertung (Abschnitt 10) tut
+genau das: Wird unter dem `technicalKey` ein Wert mitgegeben, gilt er als
+Ergebnis des Aufrufs.
+
+| ID | Regel | Stufe |
+|---|---|---|
+| CALL-01 | Ein `action`-Knoten DARF NICHT zugleich `expression` und `externalCall` tragen. Sein Wert entsteht auf genau eine Weise. | Fehler |
+| CALL-02 | `externalCall.system` MUSS eine nicht leere Zeichenkette sein. | Fehler |
+| CALL-03 | Ist `externalCall.kannScheitern` gleich `true`, SOLLTE die Decision Map einen Pfad enthalten, der das Scheitern behandelt. | Hinweis |
+| CALL-04 | `externalCall` DARF NUR an `action`-Knoten stehen. | Fehler |
+
+Zu CALL-01: Wer das Ergebnis eines Aufrufs weiterverarbeiten will, nimmt
+dafür einen zweiten `action`-Knoten mit `expression`. So bleibt erkennbar,
+welcher Teil von außen kommt und welcher gerechnet ist.
 
 ---
 
@@ -451,7 +507,7 @@ umgebenden Infrastruktur, nicht des Austauschformats.
 | ID | Regel | Stufe |
 |---|---|---|
 | TC-01 | `expectedConsequenceId` MUSS auf einen `consequence`-Knoten verweisen. | Fehler |
-| TC-02 | Jeder Schlüssel in `inputs` MUSS dem `technicalKey` eines `input`- oder `condition`-Knotens entsprechen. | Warnung |
+| TC-02 | Jeder Schlüssel in `inputs` MUSS dem `technicalKey` eines `input`- oder `condition`-Knotens oder eines `action`-Knotens mit `externalCall` entsprechen. | Warnung |
 | TC-03 | Jeder Wert in `inputs` MUSS als Zeichenkette angegeben werden. | Fehler |
 | TC-04 | `name` SOLLTE nicht leer sein. | Warnung |
 | TC-05 | Jeder `consequence`-Knoten SOLLTE von mindestens einem Testfall erreicht werden. | Hinweis |
@@ -491,9 +547,12 @@ Maps, die vor EDGE-03 entstanden sind, kein zulässiger Entwurf.
 **`action`-Knoten** werden durchlaufen wie jeder Knoten mit einem Ausgang.
 Trägt der Knoten einen Ausdruck (Abschnitt 10.4), wird dieser ausgewertet und
 das Ergebnis unter seinem `technicalKey` abgelegt; es steht allen späteren
-Ausdrücken zur Verfügung und geht einem gleichnamigen Eingabewert vor. Ohne
-Ausdruck bleibt der Wert offen, und das Ergebnis MUSS den Knoten nennen, damit
-erkennbar bleibt, an welcher Stelle etwas fehlt.
+Ausdrücken zur Verfügung und geht einem gleichnamigen Eingabewert vor. Trägt er
+einen externen Aufruf (Abschnitt 4.4), wird nichts gerechnet: Ist unter seinem
+`technicalKey` ein Wert übergeben, gilt dieser als Ergebnis des Aufrufs. Ohne
+beides, oder ohne übergebenen Wert beim Aufruf, bleibt der Wert offen, und das
+Ergebnis MUSS den Knoten nennen, damit erkennbar bleibt, an welcher Stelle
+etwas fehlt.
 
 ### 10.2 Ergebnis
 
@@ -525,6 +584,7 @@ Ausdrücke, die nicht auswertbar waren.
 | EVAL-06 | Die Auswertung MUSS die Abbruchgründe aus 10.2 unterscheiden. Ein pauschales „kein Ergebnis" genügt nicht. | Fehler |
 | EVAL-07 | Durchlaufene `action`-Knoten ohne Ausdruck MÜSSEN im Ergebnis genannt werden. | Fehler |
 | EVAL-08 | Der Wert eines `action`-Knotens MUSS allen späteren Ausdrücken zur Verfügung stehen und einem gleichnamigen Eingabewert vorgehen. | Fehler |
+| EVAL-09 | Bei einem `action`-Knoten mit `externalCall` MUSS ein unter seinem `technicalKey` übergebener Wert als Ergebnis des Aufrufs gelten. Ausgeführt wird der Aufruf nicht. | Fehler |
 
 Zu EVAL-06: Der Unterschied zwischen „kein Wert übergeben" und „kein Ausgang
 passt" ist der Unterschied zwischen einer unvollständigen Anfrage und einer
@@ -596,7 +656,7 @@ gleichnamigen Eingabewert vor.
 | EXPR-01 | Ein `expression` MUSS in der Teilsprache lesbar sein. | Fehler |
 | EXPR-02 | Jeder Name in einem Ausdruck SOLLTE ein `technicalKey` der Decision Map sein. | Warnung |
 | EXPR-03 | Aufgerufene Funktionen MÜSSEN zur Teilsprache gehören und die richtige Zahl von Argumenten bekommen. | Fehler |
-| EXPR-04 | Ein `action`-Knoten SOLLTE einen Ausdruck haben. Ohne ihn bleibt sein Wert offen. | Hinweis |
+| EXPR-04 | Ein `action`-Knoten SOLLTE einen Ausdruck oder einen externen Aufruf (Abschnitt 4.4) haben. Ohne beides bleibt sein Wert offen. | Hinweis |
 
 Zu EXPR-02: nur eine Warnung, weil ein Ausdruck auf einen Wert zeigen darf,
 den die Map noch nicht führt — beim Entwurf ist das der Normalfall.
@@ -642,7 +702,8 @@ Jeder Befund trägt die Regel-ID aus diesem Dokument, auch im Export
 | CONS | 02, 05, 06, 07; 01 über 02 mitgeprüft | 03, 04, 08 (bewusst keine Hinweise, zu viel Rauschen) |
 | IN | 01–11 | — |
 | KS | 01–10 | — |
-| EVAL | 01–08 | — |
+| EVAL | 01–09 | — |
+| CALL | 01–04 | — |
 | TC | 02–06 | 01 (gehört ans Dokument) |
 | EXPR | 01–04 | — |
 
@@ -664,7 +725,7 @@ Ausdrücke werden beim Tippen geprüft (EXPR-01 bis EXPR-03) und bei der
 Auswertung gerechnet. Die Auswertung findet damit nicht mehr nur den Weg,
 sondern auch den Betrag.
 
-Geprüft wird die Prüfung selbst mit `npm run check-rules`: 58 Fälle — Decision
+Geprüft wird die Prüfung selbst mit `npm run check-rules`: 64 Fälle — Decision
 Maps mit je einem gezielten Verstoß, eine fehlerfreie Map als Gegenprobe und ein
 als Rücksprung gekennzeichneter Zyklus, der keinen Befund auslösen darf.
 Die Teilsprache aus Abschnitt 10.4 prüft `npm run check-feel` mit 42 Fällen:
@@ -706,6 +767,7 @@ Import gemeldet, aber nicht übernommen. Ein Round-Trip verliert sie.
 
 | Version | Datum | Änderung |
 |---|---|---|
+| 0.7 | 22.11.2026 | Externe Aufrufe (Abschnitt 4.4, Regeln CALL-01 bis CALL-04, EVAL-09): Ein `action`-Knoten darf seinen Wert aus einem anderen System beziehen statt ihn zu berechnen. EXPR-04 und TC-02 entsprechend erweitert. |
 | 0.6 | 19.11.2026 | Ausdrücke in einer Teilsprache von FEEL (Abschnitt 10.4, Regeln EXPR-01 bis EXPR-04, CONS-08, EVAL-08), umgesetzt und ausgewertet. Abschnitt 12 nennt jetzt die offenen Punkte statt geplanter Erweiterungen. |
 | 0.5 | 19.11.2026 | Die Felder aus Abschnitt 8 (`uri`, `eid`, `fassung`, `abgerufen`) sind umgesetzt, die Regeln KS-04 bis KS-10 werden geprüft. Keine Änderung an den Regeln selbst. |
 | 0.4 | 19.11.2026 | Die Auswertung ist normativ beschrieben (Abschnitt 10, Regeln EVAL-01 bis EVAL-07) und umgesetzt. Testfälle werden damit nachgerechnet (TC-06). Abschnitte ab 10 neu nummeriert. |
